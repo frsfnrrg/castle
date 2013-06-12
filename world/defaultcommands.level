@@ -1,0 +1,240 @@
+$baselibrary.level
+
+; Okay.... the defcoms should be realtime: with, at init, each object creating a list of commands it lacks: these are to be iterated through after the main call loop: this solution saves memory and allows for a concrete implementation (but with if's)
+
+; These are to be the reference for action names.
+; ex: take, get are _the_ commands to get objects
+; acquire is ... horrible
+
+; & is key
+; # is sub
+; % is main _name_. not always = to (base &)
+; @ is number
+; $ is any other object
+; ! is any one word
+
+(defcom
+    "TAKE %"
+    "GET %"
+    (take & (format "You take the {}." (lowercase (name &))))
+)
+
+(defcom
+    "DROP %"
+    (drop & (format "You drop the {}." (lowercase (name &))))
+)
+
+(defcom
+  "TAKE #"   "GET #"
+  "TAKE 1 #" "GET 1 #"
+  "TAKE A #" "GET A #"
+  (let t (lowercase (name #))
+    (if (vowel-start? t)
+        (take-n & 1 (format "You take an {}." t))
+        (take-n & 1 (format "You take a {}." t)))))
+
+(defcom
+    "TAKE @ %"
+    "GET @ %"
+    (if
+        (group? &)
+        (if (= @ 1)
+            (print "Singular. Plural. Singular. Plural. Get it?")
+            (take-n & @ (format "You take {} {}." @ (lowercase (name &))))
+        )
+        (if (= @ 1)
+            (take & (format "You take the {}." (lowercase (name &))))
+            (print "But there's only one!")
+        )
+    )
+)
+
+
+(defcom
+    "DROP #"
+    "DROP A #"
+    (drop-n & 1 (format "You drop a {}." (lowercase (name #)))))
+
+(defcom
+  "DROP @ %"
+  (if (group? &)
+      (if (= @ 1)
+          (print "Singular. Plural. Singular. Plural. Get it?")
+          (drop-n & @ (format "You drop {} {}." @ (lowercase (name &)))))
+      (if (= @ 1)
+          (drop & (format "You drop the {}." (lowercase (name &))))
+          (print "But there's only one!"))))
+
+(defcom
+  "UNLOCK NORTH DOOR WITH %"
+  "UNLOCK NORTH DOOR USING %"
+  (unlock-door "NORTH" &)
+)
+(defcom
+  "UNLOCK EAST DOOR WITH %"
+  "UNLOCK EAST DOOR USING %"
+  (unlock-door "EAST" &)
+)
+(defcom
+  "UNLOCK SOUTH DOOR WITH %"
+  "UNLOCK SOUTH DOOR USING %"
+  (unlock-door "SOUTH" &)
+)
+(defcom
+  "UNLOCK WEST DOOR WITH %"
+  "UNLOCK WEST DOOR USING %"
+  (unlock-door "WEST" &)
+)
+(defcom
+  "UNLOCK DOOR WITH %"
+  "UNLOCK DOOR USING %"
+;;     (print "Implement this! (be sure to check against two options.")
+  (let n (str= "DOOR LOCKED" (get-door "NORTH"))
+  (let e (str= "DOOR LOCKED" (get-door "EAST"))
+  (let s (str= "DOOR LOCKED" (get-door "SOUTH"))
+  (let w (str= "DOOR LOCKED" (get-door "WEST"))
+    (if (or (and n w) (and n e) (and n s) (and e s) (and w s) (and w e))
+        (print "There are two locked doors. You are racked by indecision: which one first?")
+        n (unlock-door "NORTH" &)
+        e (unlock-door "EAST" &)
+        s (unlock-door "SOUTH" &)
+        w (unlock-door "WEST" &)
+        (print "There are no doors here to unlock."))))))
+)
+
+(defcom
+  "LOCK NORTH DOOR WITH %" "LOCK NORTH DOOR USING %"
+  (lock-door "NORTH" &))
+(defcom
+  "LOCK EAST DOOR WITH %" "UNLOCK EAST DOOR USING %"
+  (lock-door "EAST" &))
+(defcom
+  "LOCK WEST DOOR WITH %" "UNLOCK WEST DOOR USING %"
+  (lock-door "WEST" &))
+(defcom
+  "LOCK EAST SOUTH WITH %" "UNLOCK SOUTH DOOR USING %"
+  (lock-door "SOUTH" &))
+
+
+(defcom
+  "LOCK DOOR WITH %"
+  "LOCK DOOR USING %"
+  ;; make it check for number of doors?
+  (print "Which door do you want to lock?"))
+
+
+
+(defcom
+    "DESCRIBE %"
+    "EXAMINE %"
+    "LOOK AT %"
+    "X %"
+    (print (describe-o &))
+)
+
+(defcom
+    "DESCRIBE #" "DESCRIBE A #" "DESCRIBE 1 #"
+    "EXAMINE #"  "EXAMINE A #"  "EXAMINE 1 #"
+    "LOOK AT #"  "LOOK AT A #"  "LOOK AT 1 #"
+    "X #"        "X A #"        "X 1 #"
+    (print (describe-o (sub &)))
+)
+
+(defcom
+    "COUNT %"
+    (if (group? &)
+        (print-g-count (base &))
+        (print (format "There is only one {}." (lowercase (name &))))
+    )
+)
+
+(func
+  (print-g-count %)
+  (let s (roomtag % "SELF")
+    (let r (roomtag % (get-room))
+      (chain
+        (if (ins s)
+            (print (format "You have {} {}." (get-count s) (lowercase (name s))))
+            (print (nformat "Alas, you have no {}." r)))
+        (if (inr r)
+            (print (format "There are {} {} in the {}." (get-count r) (lowercase (name r)) (lowercase (name-room (get-room))))))))))
+
+;; - -- -- - - -- -- -- - Excuses, excuses, excuses -- - - - - --- -- -- -- - -
+
+(defcom
+  "EAT %" "EAT #" "EAT @ %" "EAT 1 #" "EAT A #"
+  (print "Not everything you see is food."))
+
+(defcom
+  "DRINK #" "DRINK 1 #" "DRINK A #"
+  (print "You can't drink that!."))
+(defcom
+  "DRINK %"
+  (if (group? &)
+      (print "You can't drink those!")
+      (print "Why ever would you want to drink that?")))
+(defcom
+  "DRINK @ %"
+  (if (and (group? &) (> @ 1))
+      (print "Those aren't drinkable.")
+      (print "Numbers exist for a reason. (Your grammer is horrible.)")))
+
+(defcom
+  "DESTROY %" "DESTROY #" "DESTROY @ %" "DESTROY 1 #" "DESTROY A #"
+  "ATTACK %" "ATTACK #" "ATTACK @ %" "ATTACK 1 #" "ATTACK A #"
+  "BURN %" "BURN #" "BURN @ %" "BURN 1 #" "BURN A #"
+  "KILL %" "KILL #" "KILL @ %" "KILL 1 #" "KILL A #"
+  "BREAK %" "BREAK #" "BREAK @ %" "BREAK 1 #" "BREAK A #"
+  "ELIMINATE %" "ELIMINATE #" "ELIMINATE @ %" "ELIMINATE 1 #" "ELIMINATE A #"
+  (print "Caaaalm down. There is not need to break things randomly."))
+
+(defcom
+  "THROW %" "THROW #" "THROW @ %" "THROW 1 #" "THROW A #"
+  "HURL %" "HURL #" "HURL @ %" "HURL 1 #" "HURL A #"
+  "CHUCK %" "CHUCK #" "CHUCK @ %" "CHUCK 1 #" "CHUCK A #"
+  (print "What good will that do?"))
+
+(defcom
+  "KISS #" "KISS 1 #" "KISS A #"
+  (print (nformat "The {} doesn't seem to share your amourous intentions." #)))
+(defcom
+  "KISS %"
+  (if (group? &)
+      (print (nformat "None of the {} would ever respond in kind." &))
+      (print (nformat "Your amourous intentions are not shared by the {}." &))))
+(defcom
+  "KISS @ %"
+  (if (and (group? &) (> @ 1))
+      (print (nformat "Why ever would anyone want to kiss some {}?" &))
+      (print "Singular. Plural. It takes a while for people to understand.")))
+
+(defcom
+  "ENLIGHTEN #" "ENLIGHTEN 1 #" "ENLIGHTEN A #"
+  (print (nformat "You try to enlighten the {}. It refuses." #)))
+(defcom
+  "ENLIGHTEN %"
+  (if (group? &)
+      (print (nformat "The {} do not become enlightened, no matter how hard you try." &))
+      (print (nformat "You try to enlighten the {}. It refuses." &))))
+(defcom
+  "ENLIGHTEN @ %"
+  (if (and (group? &) (> @ 1))
+      (print (nformat "You try to get the {} to reach enlightenment, but you fail." &))
+      (print "Two dogs. One dog. One cat. Two cats. One fool. Hundreds of errors.")))
+
+
+;; ---------------- THE LOOKS -----------------------
+
+
+(defcom
+  "LOOK IN %" "LOOK IN #" "LOOK IN A #" "LOOK IN 1 #" "LOOK IN @ %"
+  (print "You find nothing interesting."))
+(defcom
+  "LOOK AROUND %" "LOOK AROUND #" "LOOK AROUND A #" "LOOK AROUND 1 #" "LOOK AROUND @ %"
+  (print "You find nothing interesting."))
+(defcom
+  "LOOK UNDER %" "LOOK UNDER #" "LOOK UNDER A #" "LOOK UNDER 1 #" "LOOK UNDER @ %"
+  (print "You find nothing interesting."))
+(defcom
+  "LOOK ON %" "LOOK ON #" "LOOK ON A #" "LOOK ON 1 #" "LOOK ON @ %"
+  (print "You find nothing interesting."))

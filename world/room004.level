@@ -1,0 +1,103 @@
+$baselibrary.level
+
+(Room
+    "GARDEN STORE"
+    (names
+        "Garden Store"
+        "Garden Tool Storage Facility"
+    )
+    (description
+        "This seems to be the place for garden tools. A few bags of seed are in the corner, along with some coils of rope. A shovel stands by the wall, with a pair of shears next to it. The door on the west leads back to the hallway, and from there it is one step to the garden..."
+    )
+    (west "DOOR CLOSED" "HALLWAY")
+    (objects
+        "BAGS OF SEED"
+        "ROPES_GARDEN STORE"
+        "SHOVEL"
+        "SHEARS"
+    )
+)
+
+(Object
+  "BAGS OF SEED"
+  (names
+    "Bags of Seed"  "Bags of Seeds"  "Seed Bags"  "Bags"
+    "Bag of Seed"   "Bag of Seeds"   "Seed Bag"   "Bag"
+    "Sacks of Seed" "Sacks of Seeds" "Seed Sacks" "Sacks"
+    "Sack of Seed"  "Sack of Seeds"  "Seed Sack"  "Sack"
+    "Grain" "Seeds" "Seed" "Grains")
+  (counter found-crowbar? False)
+  (description
+      "These three seed bags all contain vast amounts of assorted seeds."
+      (if (gec "CROWBAR" untaken?)
+          (chain (if (not (gec "BAGS OF SEED" found-crowbar?))
+                      (chain (sec! "BAGS OF SEED" found-crowbar? True)
+                        (place "CROWBAR" "GARDEN STORE")))
+            "You can see a piece of metal in one of them.")))
+
+  (takeable False "They are both too heavy and too unweildy.")
+  (method
+      "COUNT %"
+      (print "There are three."))
+  (method
+    "LOOK IN %"
+    "LOOK THROUGH %"
+    "SEARCH %"
+    (if (not (gec "BAGS OF SEED" found-crowbar?))
+            (chain (sec! "BAGS OF SEED" found-crowbar? True)
+                  (place "CROWBAR" "GARDEN STORE")
+                  (print "You find a crowbar in one of the bags."))
+        (print "You find nothing else of interest.")))
+)
+
+(Object
+  "CROWBAR"
+  (names "Crowbar" "Metal")
+  (desc "A plain crowbar, simply made, but very strong. It appears to be close to its original condition.")
+  (counter untaken? True)
+  (method
+    "TAKE %"
+    (chain (take & "You take the crowbar.")
+      (if (gec & untaken?)
+          (sec! & untaken? False))))
+  (weight 1.5)
+  ; ^ 7.5 kg, a nice piece
+)
+
+(Object
+    "ROPES_GARDEN STORE"
+    (names
+        "Ropes"
+        "Coils of Ropes"
+    )
+    (description "Two long ropes, made out of some unidentifiable material. The ends are frayed.")
+    ;; one could say you don't even need a ugroup;
+    (group 2 "ROPE")
+)
+
+(Object
+    "ROPE"
+    (names "Rope")
+    (description "This lengthy piece of rope is thick enough to support quite a lot of weight.")
+    (weight 1)
+    ;; 5 kg!
+)
+
+
+(Object
+    "SHEARS"
+    (names "Shears")
+    (description "These long shears were most probably used for trimming bushes. Unfortunately, there are blunt and rusted.")
+    (weight 2)
+)
+
+(Object
+    "SHOVEL"
+    (names
+        "Shovel"
+        "Spade"
+        "Manual Earth Removing Implement"
+    )
+    (description "The plain shovel is sturdy, but chipped and worn from years of use. However, it appears to be usable.")
+    (weight 2)
+)

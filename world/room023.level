@@ -1,0 +1,285 @@
+$baselibrary.level
+
+(Room
+    "HERB STORE"
+    (names
+        "Herb Store"
+        "Herb Chamber"
+        "Plant Pantry"
+    )
+    (desc "This storage chamber contains all sorts of various herbs. A cupboard by the wall probably contains some more. Through the southern exit you can see a caved in room, and you can see a staircase in the room to the north...")
+    (north "FREE" "NORTHEAST STAIRWELL")
+    (south "DOOR CLOSED" "CAVED IN ROOM")
+    (objects
+        "BAGS OF HERBS_HERB STORE"
+        ; ^ 260
+        ; "JARS OF HERBS"
+        ; ^ 150 :-)
+        "CUPBOARD"
+    )
+)
+
+(Room
+  "CUPBOARD INTERIOR"
+  (names "Inside of the cupboard")
+  (desc "Reserved for closed cupboard contents and crazed debuggers.")
+  (objects "JARS OF HERBS_CUPBOARD INTERIOR")
+  (north 0 0 "You go north and return back were you started. It is a pocket dimension, you know.")
+  (up 0 0 "You go up and return back were you started. It is a pocket dimension, you know.")
+  (east 0 0 "You go east and return back were you started. It is a pocket dimension, you know.")
+  (south 0 0 "You go south and return back were you started. It is a pocket dimension, you know.")
+  (down 0 0 "You go down and return back were you started. It is a pocket dimension, you know.")
+  (west 0 0 "You go west and return back were you started. It is a pocket dimension, you know.")
+)
+
+(Object
+  "CUPBOARD"
+  (desc
+    (let d (gec & door-state)
+      (if (= d 2)
+          "This cupboard, while probably containing only herbs, is locked."
+          (= d 0)
+          "This cupboard is open. It reeks of aromatic plants."
+          "This cupboard, well, it's closed. (Try again later.)")))
+  (counter door-state 2)
+  (counter found-hook? False)
+  ;; _the_ place for grappling hooks and jars is the cupboard
+  ;; 0 - open; 1 - closed; 2 - locked
+  (method "TAKE %" "GET %"
+      (print "It is firmly attached to the wall and floor."))
+  (method
+    "OPEN %"
+    (let d (gec & door-state)
+      (if (= d 1)
+          (chain (print "You open the cupboard.")
+            (if (in "JARS OF HERBS_CUPBOARD INTERIOR" "CUPBOARD INTERIOR")
+                (chain (move-n "JARS OF HERBS_CUPBOARD INTERIOR" "CUPBOARD INTERIOR" "HERB STORE" (get-count "JARS OF HERBS_CUPBOARD INTERIOR"))
+                  (if (> (get-count "JARS OF HERBS_HERB STORE") 1)
+                      (print "You find ... jars of herbs!")
+                      (print "You find ... a jar of herbs!"))))
+            (if (in "GRAPPLING HOOK" "CUPBOARD INTERIOR")
+                (chain (move "GRAPPLING HOOK" "CUPBOARD INTERIOR" "HERB STORE")
+                  (print "You find a grappling hook."))))
+          (= d 2)
+          (print "That cupboard door is locked.")
+          (print "It is already open! (You swing it shut and open it again, just in case.)"))))
+  (method
+    "CLOSE %"
+    (let d (gec & door-state)
+      (if (= d 0)
+          (chain (print "You close the cupboard.")
+            (sec! & door-state 1)
+            (if (in "JARS OF HERBS_HERB STORE" "HERB STORE"))
+                (chain (if (not gec "JARS OF HERBS_HERB STORE" in-cupboard?) (chain (print "You also remember to put the jars of herbs back in. Otherwise you'd start to go insane.") (sec! "JARS OF HERBS_HERB STORE" in-cupboard? True))
+                (move-n "JARS OF HERBS_HERB STORE" "HERB STORE" "CUPBOARD INTERIOR" (get-count "JARS OF HERBS_HERB STORE"))))
+            (if (in "GRAPPLING HOOK" "HERB STORE")
+                (move "GRAPPLING HOOK" "HERB STORE" "CUPBOARD INTERIOR")))
+          (= d 1)
+          (print "The door is already closed.")
+          (print "The door is both closed and locked. No need to close it again."))))
+  (method
+    "UNLOCK %"
+    "LOCK %"
+    (print "To do that, you'd need to use a key."))
+  (method
+    "PUT $ IN %"
+    (if (and (str= $ "JARS OF HERBS_HERB STORE") (not (gec "JARS OF HERBS_HERB STORE" in-cupboard)))
+        (if (= 0 (gec & door-state))
+            (chain (print "You put the jars back into the cupboard, where they belong (and where you don't need to think about them anymore. Ugh. Plants.)") (sec! "JARS OF HERBS_HERB STORE" in-cupboard True))
+            (print "The cupboard isn't open."))
+        (print "You don't need to do that, and you WON'T!")))
+)
+
+(Object
+    "BAGS OF HERBS_HERB STORE"
+    (names "Bags of Herbs" "Herbs" "Bags")
+    (desc "These bags are labeled with the names of various herbs, and many you have not heard of before." (if (in "BAGS OF HERBS" "HERB STORE") "They are all over the room."))
+    (group 260 "BAG OF HERBS")
+    (method
+        "LOOK INSIDE #"
+        "LOOK INTO #"
+        "OPEN #"
+        (print "You open the bag. Just dried plants. You close it again.")
+    )
+    (method
+        "CLOSE #"
+        (print "It's already shut.")
+    )
+)
+
+(Object
+    "BAG OF HERBS"
+    (names "Bag of Herbs" "Herbs" "Bag")
+    (weight 2)
+    (desc "A bag of herbs. You don't recognize the name scrawled on the side in ink.")
+)
+
+(Object
+  "JARS OF HERBS_CUPBOARD INTERIOR"
+  (names "Jars of Herbs" "Herb Jars" "Jars")
+  (desc "The labels on these herb jars are now as good as illegible.")
+  (group 150 "JAR OF HERBS")
+  (counter in-cupboard? True)
+  ; ^ found hook
+
+  (method
+    "TAKE %"
+    "GET %"
+    ; when there are less than 80, or you look behind them, you find the hook
+    (chain (take & "You take the jars of herbs.")
+      (if (and (not (in & "HERB STORE")) (not (gec "CUPBOARD" found-hook?)))
+          (chain (sec! "CUPBOARD" found-hook? True)
+            (place "GRAPPLING HOOK" "HERB STORE")
+            (print "In taking the jars of herbs, you discover a grappling hook behind them.")))))
+  (method
+    "TAKE @ %" "GET @ #"
+    (chain (take-n & @ (format-1 "You take {} jars of herbs." @))
+           (if (in & "HERB STORE")
+               (if (> (random) (/ (- (get-count &) 40) 110))
+                   (chain (print "While trying to take the jars of herbs, you find a grappling hook.")
+                      (sec! "CUPBOARD" found-hook? True)
+                      (place "GRAPPLING HOOK" "HERB STORE"))))))
+  (method
+    "TAKE A #" "TAKE 1 #" "TAKE #" "GET 1 #" "GET #"
+    (chain (take-n & 1 "You take an herb jar.")
+           (if (in & "HERB STORE")
+               (if (> (random) (/ (- (get-count &) 40) 110))
+                   (chain (print "While trying to take the jar of herbs, you find a grappling hook in the back of the cupboard.")
+                      (sec! "CUPBOARD" found-hook? True)
+                      (place "GRAPPLING HOOK" "HERB STORE"))))))
+
+  (method
+    "DROP %"
+    (if (= 2 (gec "CUPBOARD" door-state))
+        (chain (drop & "You drop the herb jars, making a note to put them back in eventually.")
+          (sec! in-cupboard? False))
+        (drop & "You put the herb jars back into the cupboard.")))
+        ;;; DROP FAILS IN ANOTHER ROOM FIXME
+  (method
+    "DROP @ %"
+    (if (= 2 (gec "CUPBOARD" door-state))
+        (chain (drop-n & @ "You drop the herb jars, making a note to put them back in eventually.")
+          (sec! in-cupboard? False))
+        (drop-n & "You put the herb jars back into the cupboard.")))
+  (method
+    "DROP A #" "DROP 1 #" "DROP #"
+    (if (= 2 (gec "CUPBOARD" door-state))
+        (chain (drop-n & 1 "You drop the herb jar, making a note to put it back into the cupboard eventually.")
+          (sec! in-cupboard? False))
+        (drop-n & 1 "You put an herb jar back into the cupboard.")))
+
+  (method
+    "LOOK BEHIND %" "SEARCH BEHIND %" "REARRANGE %" "MOVE %" "SHIFT %"
+    (if (and (in & "HERB STORE") (not (gec "CUPBOARD" found-hook?)))
+        (chain (sec! "CUPBOARD" found-hook? True)
+          (place "GRAPPLING HOOK" "HERB STORE")
+          (print "In moving the jars of herbs, you discover a grappling hook."))
+        (print "You move the jars of herbs around. You find nothing of interest.")))
+  (method
+    "READ #" "READ A #"
+    (print "The label is not legible."))
+  (method
+    "READ %" "READ SOME %"
+    (print "The labels are not legible."))
+  (method
+    "READ ALL %"
+    (print "You aren't that crazy about herbs. You rather dislike them in quantities like this."))
+)
+
+(Object
+    "JAR OF HERBS"
+    (names "Jar of Herbs" "Herb Jar" "Jar")
+    (weight 1.5)
+    (desc "A pretty hefty jar of herbs. You can't read the label..")
+)
+
+(Object
+  "GRAPPLING HOOK"
+  (names "Grappling Hook" "Hook")
+  (weight 1)
+  (desc "This iron three-prong grappling hook has a hole with which to attach a rope.")
+  (method
+    "ATTACH % TO $"
+    "ATTACH % TO A $"
+    "ATTACH $ TO %"
+    "ATTACH A $ TO %"
+    "JOIN % TO $"
+    "JOIN % TO A $"
+    "JOIN $ TO %"
+    "JOIN A $ TO %"
+    "JOIN % WITH $"
+    "JOIN % WITH A $"
+    "JOIN $ WITH %"
+    "JOIN A $ WITH %"
+    "JOIN % AND $"
+    "JOIN % AND A $"
+    "JOIN $ AND %"
+    "JOIN A $ AND %"
+    "COMBINE % AND $"
+    "COMBINE % AND A $"
+    "COMBINE $ AND %"
+    "COMBINE A $ AND %"
+    (if (or (str= $ "ROPES_SELF_SUB") (str= $ (format-1 "ROPES_{}_SUB" (get-room))))
+        (chain
+          (if (not (in "ROPES_SELF" "SELF"))
+              (take-n (roomtag "ROPES" (get-room)) 1 "You first take a rope."))
+          (if (not (in & "SELF"))
+              (take & "You take the grappling hook."))
+          (if (and (in "ROPES_SELF" "SELF") (in & "SELF"))
+              (chain (print "You tie the rope to the grappling hook.")
+                (remove-n "ROPES" "SELF" 1)
+                (remove "GRAPPLING HOOK" "SELF" 1)
+                (place "GRAPPLING ROPE" "SELF"))))
+        (print "That won't work.")))
+)
+
+(Object
+  "GRAPPLING ROPE"
+  (names "Grappling Rope" "Rope" "Knot" "Grappling Hook" "Hook" "Tower Climbing Apparatus")
+  (desc "A grappling hook tied to a rope. You made sure to tie the knot so well nobody, not even you, could detach it." (if (gec & attached?) "It is hanging from the southwest tower down to the balcony."))
+  ;; 5kg hook, 5kg rope
+  (weight 2)
+  (method
+    "SEPERATE %"
+    "BREAK %"
+    (print "First you'd have to get through the knot. And that is not possible."))
+  (method
+    "THROW %"
+    "HURL %"
+    "CHUCK %"
+    (print "What at?"))
+  (method
+    "TAKE %"
+    (if (gec & attached?)
+        (print "The grappling rope is caught on the tower. You can't get it back, unless you go up and detach it.")
+        (take & "You take the grappling rope.")))
+  (method
+    "CLIMB %"
+    "GO UP %"
+    (if (gec & attached?)
+        (chain (print "You climb up the rope to the tower.") (set-room "TOWER ROOF") (look-at-room) (tire .2))
+        (print "But the rope isn't attached to anything!")))
+  (counter attached? False)
+  (method
+    "THROW % AT $" "THROW % TOWARD $"
+    "HURL % AT $"  "HURL % TOWARD $"
+    "CHUCK % AT $" "CHUCK % TOWARD $"
+    (if (str= $ "SOUTHWEST TOWER")
+        (chain (print "You grab the end of the rope in one hand, and hurl the grappling hook at the tower.")
+          (if (> (get-strength) 15)
+              (chain (if (in & "SELF")
+                         (drop & "The hook reaches the tower and falls onto it, just as the rope is almost gone. The hook seems to hold on the roof; you yank on the rope, and it stays.")
+                         (print "The hook reaches the tower and falls onto it, just as the rope is almost gone. The hook seems to hold on the roof; you yank on the rope, and it stays."))
+                (sec! & attached? True))
+              (print "Unfortunately, it falls short, and you collect the hook end from where it landed, a few meters away from you.")
+          )
+          (tire .3)
+        )
+        (or (str= $ "NORTHWEST TOWER") (str= $ "NORTHEAST TOWER") (str= $ "SOUTHEAST TOWER"))
+        (chain (print "You grab the end of the rope in one hand, and hurl the grappling hook at the tower.")
+          (if (> (get-strength) 15)
+              (print "The hook reaches the tower, but slides off the roof and falls back down to you.")
+              (print "Unfortunately, it falls short, and you collect the hook end from where it landed, a few meters away from you."))
+          (tire .3))
+        (print "Why do that??")))
+)

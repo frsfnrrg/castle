@@ -1,0 +1,76 @@
+; Logic and mathematics
+; chain and if are hard-defined ( IF obviously. CHAIN since it take any number of args.
+; (let label value ( ...function with args impacted by 'let'... ) )
+
+;; chain, if, and, or are hard-defined
+
+
+(ques
+  (xor a b)
+  (or (and a
+            (not b))
+      (and (not a)
+            b)))
+
+(ques
+  (eq a b)
+  (or (and a
+           b)
+      (and (not a)
+           (not b))))
+
+(ques
+  (not a)
+  (if a False True))
+
+(func
+    (count-Trues a b c)
+    (+ (if a 1 0) (+ (if b 1 0) (if c 1 0)))
+)
+
+(pyq
+    (> a b)
+    "({0} > {1})")
+
+(pyq
+    (= a b)
+    "({0} == {1})")
+
+(pyq
+    (< a b)
+    "({0} < {1})")
+
+(pyq
+    (>= a b)
+    "({0} >= {1})")
+
+(pyq
+    (<= a b)
+    "({0} <= {1})")
+
+(pyq
+    (!= a b)
+    "({0} != {1})")
+
+(pyq
+    (* a b)
+    "{0} * {1}")
+
+(pyq
+    (/ a b)
+    "{0} / {1}")
+
+(pyq
+    (// a b)
+    "{0} // {1}")
+
+(pyq
+    (+ a b)
+    "{0} + {1}")
+
+(pyq
+    (- a b)
+    "{0} - {1}")
+
+(pyq (expt a b)
+     "{0} ** {1}")

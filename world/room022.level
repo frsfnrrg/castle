@@ -1,0 +1,134 @@
+$baselibrary.level
+$wrappers.level
+
+(Room
+    "TREASURY"
+    (names "Treasury")
+    (desc "This small room barely holds anything. A diamond lies on the floor, forgotten by whoever cleared this treasury out. The southern door is heavily reinforced, to keep thieves out. The only window is a grid of metal bars, that barely lets light in at all. A circle is engraved on the wall...")
+    (south "DOOR LOCKED" "KITCHEN")
+    (objects
+        "TREASURY WINDOW"
+        "SKY"
+        "FOREST"
+        ; ^ with several, interlocking layers of bars. security freaks.
+        "DIAMOND"
+        "CIRCLE"
+    )
+)
+
+(Object
+    "TREASURY WINDOW"
+    (names "Window" "Barred Window" "Bars" "Bar")
+    (desc "The large rectangular window on the west wall seems to be designed to let anyone see out (or in), but not exit or enter at all, thanks to the bars.")
+    (takeable False)
+    (method
+        "LEAVE BY %"
+        "EXIT THROUGH %"
+        "GO OUT %"
+        "EXIT OUT %"
+        "GO THROUGH %"
+        (print "The bars suffice to ensure nobody will ever come in or out.")
+    )
+    (hidden)
+)
+
+(Object
+    "DIAMOND"
+    (names "Diamond" "Gem")
+    (desc "The only thing of worth left in the treasury. It is large and simply cut.")
+    (method
+        "TAKE %"
+        "GET %"
+        "TOUCH %"
+        (chain (print "The second you touch the diamond, it compresses slightly, and then explodes violently. The blast kills you immediately.")
+               (die)))
+)
+
+(Object
+    "CIRCLE"
+    (names "Circle" "Ring Shaped Indent" "Circular Indent" "Prongs")
+    (takeable False)
+    (desc "This circular indent in the wall is barely perceptible. Small prongs stick out of the wall, implying that this held some flat, ring shaped object.")
+)
+
+(Object
+  "COMPLETED CIRCLE"
+  (names "Circle" "Completed Circle" "Ring of Glass" "Glass Ring" "Colored Glass" "Prongs" "Indent" "Ring Shaped Indent"
+    "Red"       "Blue"       "Yellow"       "Green"       "Purple"       "Violet"       "Orange"
+    "Red Shard" "Blue Shard" "Yellow Shard" "Green Shard" "Purple Shard" "Violet Shard" "Orange Shard"
+    "Red Glass" "Blue Glass" "Yellow Glass" "Green Glass" "Purple Glass" "Violet Glass" "Orange Glass"
+    "Multicolored Ring" "Rainbow Glass")
+  (desc "This circular indent in the wall holds a ring of colored glass. Of course, the ring varies through all the colors of the spectrum. The ring of glass is held in position be small metal prongs.")
+  (method
+    "TAKE %"
+    "GET %"
+    (print "The prongs hold the glass in very well: to remove it, you'd need to break the glass all over again.")
+  )
+  (method
+    "BREAK %"
+    "DESTROY %"
+    (print "It was tricky getting the shards in there. You don't want to undo your hard work.")
+  )
+)
+
+; generalized version of POTIONS, same applies to TREASURES?
+
+(Wrapper3
+  "SHARDS"
+  (names
+      "Shards"
+      "Pieces of Glass"
+  )
+  (desc "Shards of glass, which seem be parts of a circle." (if (= 3 (get-counter & number)) "You seem to have all of them."  "You have a bit more than half of the glass."))
+  (counter wrapped1 "RED-BLUE SHARD")
+  (counter wrapped2 "BLUE-YELLOW SHARD")
+  (counter wrapped3 "YELLOW-RED SHARD")
+  (method
+    "PUT % IN $"
+    (if (str= $ "CIRCLE")
+        (if (and (= 3 (gec & number)) (in & "SELF"))
+            (chain (remove "SHARDS" "SELF")
+              ; ^ weightless wrapper
+              (silent-self-removal "RED-BLUE SHARD")
+              (silent-self-removal "BLUE-YELLOW SHARD")
+              (silent-self-removal "YELLOW-RED SHARD")
+              (print "You place the shards in the ring-shaped indent in the wall. The shards shine brightly and fuse together. You hear a rumbling noise in the distance.")
+              (place "BLOCK OF MARBLE" "SILENT ROOM")
+              (place "COPPER KEY" "FOGGY ROOM")
+              (place "FOGGY LEVER" "FOGGY ROOM")
+              (remove "CIRCLE" "TREASURY")
+              (place "COMPLETED CIRCLE" "TREASURY")
+              (sec! "KEYHOLE" appeared? True)
+              (increase-score 1)
+            )
+            (print "You might as well just wait until you have all of them."))
+        (print "You can't see the need to do that.")))
+  (method
+    "JOIN %"
+    (print "You have neither the training nor the experience of how join these narrow pieces of colored glass."))
+)
+
+(func
+  ;; NOT for groups
+  (silent-self-removal &)
+  (chain (remove & "SELF")
+         (inc-carry-capacity (get-weight &))))
+
+(Class Shard
+  (extends Object)
+  (counter typetag Shard)
+  (method
+      "TAKE %" "GET %" "AQUIRE %"
+      (chain (take & "You take the shard (carefully).") (update-wrapper3 "SHARDS")))
+  (method
+      "DROP %"
+      (chain (drop & "You gently place the shard on the ground.") (update-wrapper3 "SHARDS")))
+  (method
+      "THROW %" "BREAK %"
+      (print "Are you crazy? It must be worth thousands!"))
+  (method
+    "PUT % IN $"
+    (if (str= $ "CIRCLE")
+        (print "You might as well just put all of the pieces in at once.")
+        (print "You can't see the need to do that.")))
+  (weight .8))

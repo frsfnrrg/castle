@@ -1,0 +1,149 @@
+$baselibrary.level
+
+(Room
+    "DUNGEON"
+    (names "Dungeon" "Prisoner Pit")
+    (desc "This dark, dismal room is the castle dungeon. The prisoners seem to have been forgotten, as shown by the skeletons lying around. Some of the bones have been snapped open for marrow, and others look queerly disfigured. You can spot some chains anchored to the walls, illuminated by the dim light shining through the"
+          (if (in "GRATE BOTTOM" "DUNGEON") "grate" "hole")
+          "above. Already depressed by the skeletons, you turn to view a set of long, deep scratches in the stone. They do not look like they were made by something human..."
+          (if (<= (random) .25)
+              "A spider crawls through the eye sockets of the lone skull that rests in a corner...")
+          (if (<= (random) .25)
+              "You shiver... It is colder here than expected, and the stains on the chains do not help your mood..."))
+    (method
+        "WEST" "W" "GO WEST"
+        (chain (print "You go west, avoiding the pits you found before.")
+               (set-room "CAVE")
+               (look-at-room)))
+
+    (method
+        "UP" "U" "GO UP"
+        (if (in "GRATE BOTTOM" "DUNGEON")
+            (print "The grate is blocking the way.")
+            (call-obj "HOLE IN CEILING" "GO UP %")))
+    (method
+        "LOOK UP"
+        (if (in "GRATE BOTTOM" "DUNGEON")
+            (print "Through the grate you can see the ceiling of a room above you.")
+            (print "Through the hole you can see the ceiling of a room above you.")))
+
+    (objects
+        "SKELETONS"
+        "SKULL"
+        "BONES"
+        "DUNGEON CHAINS"
+        "SCRATCHES"
+        "GRATE BOTTOM"
+    )
+)
+
+
+(Object
+  "SKELETONS"
+  (names "Skeletons" "Skeleton")
+  (desc "These two skeletons would be in good shape, were they not missing a few body parts.")
+  (takeable False)
+)
+
+(Object
+  "SKULL"
+  (names "Skull" "Kid Surprise")
+  (method
+    "TAKE %"
+    "GET %"
+    (take & "You take the skull. Why? You yourself aren't sure. But everyone needs a skull or two to scare kids with."))
+  (desc "A white skull, unmarred. You don't know where the rest of the skeleton is.")
+)
+
+(Object
+  "DUNGEON CHAINS"
+  (names "Chains" "Lock" "Chain" "Locks")
+  (desc "A few chains hanging from the south wall. The locks on the ends are well built, while the other ends of the chains are stuck deep in the stone wall.")
+  (takeable False)
+)
+
+(Object
+  "BONES"
+  (names "Bones")
+  (desc "As you look over the bones lying around, you notice that many are deformed or snapped from marrow.")
+  (hidden)
+  (method
+    "TAKE %" "TAKE #" "TAKE A #" "TAKE 1 #" "TAKE @ %"
+    "GET %" "GET #" "GET A #" "GET 1 #" "GET @ %"
+    (print "Really, you don't want any bones. You can't use them for anything."))
+  (group 369 "BONE")
+)
+
+(Object
+  "BONE"
+  (names "Bone")
+  (desc (randomc "A bone. White and shiny." "It is kind of gruesome how this bone was snapped." "That is not a natural shape for a bone.")))
+
+(Object
+  "SCRATCHES"
+  (hidden)
+  (takeable False)
+  (desc "These long grooved furrows are all over the stone walls. They are quite deep, and must have needed inhuman strength to make...")
+  (names "Scratches" "Furrows" "Scratch" "Furrow"))
+
+
+(Object
+    "GRATE BOTTOM"
+    (names "Grate" "Metal Grate")
+    (desc "This thick metal grate is placed right in the center of the ceiling.")
+    (method
+        "TAKE %"
+        "GET %"
+        "REMOVE %"
+        "OPEN %"
+        (if (in "CROWBAR" "SELF")
+            (call-obj & "TAKE % WITH CROWBAR")
+            (chain (print "The grate is stuck in the ceiling. There is a little pocket next to it, as if some prisoner had tried to dig it out, but failed. You reach up and try to pull it there, but do not get enough leverage.")
+                   (tire .2))))
+    (method
+        "TAKE % WITH $"
+        "GET % WITH $"
+        "TAKE % USING $"
+        "GET % USING $"
+        "REMOVE % WITH $"
+        "REMOVE % USING $"
+        "OPEN % WITH $"
+        "OPEN % USING $"
+        (if (str= $ "CROWBAR")
+            (chain (print "You reach up and place the crowbar in a little pocket next to the grate. You push, and jump out of the way just as the grate comes falling down in a pile of dust.")
+                   (remove "GRATE BOTTOM" "DUNGEON")
+                   (remove "GRATE TOP" "GUARD ROOM")
+                   (place "GRATE" "DUNGEON")
+                   (place "HOLE IN FLOOR" "GUARD ROOM")
+                   (place "HOLE IN CEILING" "DUNGEON"))
+            (print "That won't work.")))
+    (method
+        "GRAB %"
+        (print "You reach up and grab the grate. Nothing happens. You let go again.")
+    )
+)
+
+(Object
+    "GRATE"
+    (names "Grate" "Metal Grate" "Marks" "Heavy Grate" "Heavy Metal Grate" "Thick Metal Grate")
+    (desc "A very thick, very heavy metal grate, which used to cover the dungeon. You can see marks where the crowbar pulled it down.")
+    (weight 25)
+    ; ^ just too heavy, eq. 125 kg
+)
+
+(Object
+    "HOLE IN CEILING"
+    (names "Hole in Ceiling" "Hole")
+    (hidden)
+    (desc "The rough, rectangular hole in the ceiling where the grate was. The edges are rather crumbly.")
+    (takeable False)
+    (method
+        "LOOK THROUGH %"
+        (print "You can see the ceiling of the guard room.")
+    )
+    (method
+        "CLIMB UP %"
+        "GO UP %"
+        (print "You don't think it safe to climb up a crumbling hole in the ceiling.")
+    )
+)

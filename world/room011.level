@@ -1,0 +1,438 @@
+$baselibrary.level
+
+(Room
+    "NORTHWEST STAIRWELL BOTTOM"
+    (names
+        "Northwest Stairwell"
+        "Stairwell"
+        "Spiral Staircase"
+    )
+    (desc
+        "A well used stone staircase wraps around the edge of stairwell."
+        (if (in "YARGLE" "NORTHWEST STAIRWELL BOTTOM")
+            "You spot a yargle opposite the southern door, hiding in the shadows under the stairs. It stares around, protecting whatever is behind it."
+            "You are at the bottom of the stairwell. The only door here is to the south."
+        )
+        "Fluttering noises come from far above..."
+    )
+    (south "DOOR CLOSED" "SILENT ROOM")
+    (up "FREE" "NORTHWEST STAIRWELL TOP")
+    (objects
+        "YARGLE"
+        "IRON KEY"
+        ;; ^ under the guise of a 'thing'
+        "STONE STAIRCASE 1"
+        ; Note: there are two staircase objs; one in top, one in bottom (well 3, batty attic)
+    )
+    ; entryscript, if yargle in room, and "COOKIE PATROL" does not exist, create a daemon that makes the yargle snatch any cookies you drop :-)
+    (method
+        "UP"
+        "GO UP"
+        "U"
+        "ASCEND"
+        (chain
+            (print "You ascend.")
+            (set-room "NORTHWEST STAIRWELL TOP")
+            (look-at-room)
+        )
+    )
+    (method
+        "DOWN"
+        "GO DOWN"
+        "D"
+        (print "You are at the base of the stairwell. You can't go any lower.")
+    )
+)
+
+(Object
+    "STONE STAIRCASE 1"
+    (names
+        "Stone Staircase"
+        "Stairs"
+        "Staircase"
+        "Stairway"
+        "Stair"
+        "Stone Staircase"
+        "Stone Stairway"
+        "Stone Stair"
+    )
+    (desc "The stairs of this spiral staircase are made of an angular white stone. They are cold to the touch.")
+    (method
+        "ASCEND %"
+        "GO UP %"
+        (call-room "GO UP")
+    )
+    (method
+        "TAKE %"
+        "GET %"
+        (print "They're part of the room; you cannot take them.")
+    )
+)
+
+(Object
+  "YARGLE"
+  (names
+      "Yargle"
+      "Monster"
+  )
+  ;           text                        except  ...
+  (tag "The yargle is in the room." "NORTHWEST STAIRWELL BOTTOM")
+  (desc "One of the most harmless monsters ever to exist."
+    (if (= 0 (gec & asleep?))
+        (join "But it still has claws on its four limbs, and sharp teeth in its wide mouth. Of course, it is very fast, hyperactive, and best of all, immortal."
+          (if (or (in "COOKIES_SELF" "SELF") (in "CHOCOLATE COCONUT COOKIES_SELF" "SELF"))
+              "It is eyeing your food."))
+        "It is asleep, lying curled up in a corner.")
+    (if (gec & has-key?)
+        (if (gec "IRON KEY" identified?)
+            "The yargle is holding a large iron key."
+            "The yargle is holding something.")))
+  (counter asleep? 0)
+  (counter has-key? True)
+  ; 0 - False; 1 - True
+  (method
+    "TAKE %"  "GET %"
+    (chain
+      (if (= 0 (gec & asleep?))
+          (print "You move forward, and lunge for the Yargle. It jumps a meter to the side; you miss, crashing into the wall.")
+          (print "You move forward, and lunge for the Yargle. Despite its apparent lack of wakefulness, it jumps a meter to the side; you miss, crashing into the wall."))
+      (if (in "COOKIES_SELF" "SELF")
+          (chain (print "When you pick yourself up again, you notice you are missing something.")
+              (remove-n "COOKIES" 1 "SELF"))
+          (in "CHOCOLATE COCONUT COOKIES_SELF" "SELF")
+          (chain (print "When you pick yourself up again, you notice you are missing something.")
+              (remove-n "CHOCOLATE COCONUT COOKIES" 1 "SELF")))
+      (if (= 1 (gec & asleep?))
+          (print "The yargle has fallen asleep again."))
+      (tire .2)))
+  ; 0 - has key; 1 - does not have it; just do true-false!
+  (method
+    "SCARE % WITH $"    "FRIGHTEN % WITH $"    "SURPRISE % WITH $"  "MOVE % WITH $"   "SHIFT % WITH $"
+    "SCARE % USING $"   "FRIGHTEN % USING $"   "SURPRISE % USING $" "MOVE % USING $"  "SHIFT % USING $"
+    "WAVE $ AT %" "BRANDISH $ AT %"
+    (if (= 0 (gec & asleep?))
+        (if (or (str= $ "SWORD") (str= $ "MAGIC SWORD"))
+            (chain
+              (if (gec & has-key?)
+                  (chain
+
+                    (if (not (gec "IRON KEY" identified?))
+                        (chain
+                          (sec! "IRON KEY" identified? True)
+                          (remove-name "IRON KEY" "Thing")
+                          (remove-name "IRON KEY" "Object")
+                          (remove-name "IRON KEY" "Shiny Thing")
+                          (remove-name "IRON KEY" "Yargle's Thing")
+                          (remove-name "IRON KEY" "What the Yargle is Holding")
+                          (add-name "IRON KEY" "Iron Key")
+                          (add-name "IRON KEY" "Key of Iron")
+                          (add-name "IRON KEY" "Key")
+                          (add-name "IRON KEY" "Iron")))
+                    (print "You wave your sword at the Yargle. It realizes that you have a sharp pointy object and almost warps to a different corner of the room. It forgets to take a large iron key."))
+                  (print "You wave your sword at the Yargle. It realizes that you have a sharp pointy object and almost warps to a different corner of the room."))
+              (moved-yargle "SCARED YARGLE" 1))
+            (print (nformat "The yargle sits there, happy in its superiority. It knows you cannot harm it with the {}." $)))
+        (print "The yargle appears to be sleeping. It looks so nice and peaceful that you don't want to disturb it.")))
+  (method
+    "SCARE %" "FRIGHTEN %"  "SURPRISE %"  "MOVE %"  "SHIFT %"  "FOOL %"  "TRICK %"
+    (if (= 0 (gec & asleep?))
+        (if (or (in "SWORD" "SELF") (in "MAGIC SWORD" "SELF"))
+            (call-obj "YARGLE" "SCARE % WITH SWORD")
+            (print "You yell, scream, dance ritual yargle-hunt dances. The yargle is merely amused."))
+        (print "The yargle appears to be sleeping. It looks so nice and peaceful that you don't want to disturb it.")))
+  (method
+    "GIVE % $"    "GIVE $ TO %"
+    "OFFER % $"    "OFFER $ TO %"
+    "DONATE % $"    "DONATE $ TO %"
+    (if (str= "COOKIES_SELF_SUB" $)
+        (call-obj & "GIVE % A MORSEL OF HEAVEN")
+        (str= "CHOCLATE COCONUT COOKIES_SELF_SUB" $)
+        (call-obj & "GIVE % A COCONUT COOKIE")
+        (or (str= "COOKIES_SELF" $) (str= "CHOCOLATE COCONUT COOKIES_SELF" $))
+        (let num (get-count $)
+          (chain
+            (if (gec & given-scepter?)
+                (chain
+                  (drop-n $ num "The yargle smiles and accepts your donation.")
+                  (remove-n (base $) num (get-room)))
+                (let room (get-room)
+                  (chain
+                    (drop $ "The yargle happily accepts your donation. It vanishes somewhere, and quickly returns. It drops a glowing crystal scepter in front of you.")
+                    (remove-n (base $) num room)
+                    (sec! & given-scepter? True)
+                    (place "BRIGHT SCEPTER" "NORTHWEST STAIRWELL BOTTOM")
+                    (place "SCEPTER BAND" "NORTHWEST STAIRWELL BOTTOM")
+                    (wander "HAPPY YARGLE" "YARGLE" room))))
+
+            (if (and (not (gec & baked-cookies?))
+                    (str= "CHOCOLATE COCONUT COOKIES_SELF" $))
+                (chain (print "The yargle gives you a point for the coconut cookies.")
+                  (increase-score 1)
+                  (sec! & baked-cookies? True)))))
+        (print "The yargle is not interested.")))
+  (counter given-scepter? False)
+  (counter baked-cookies? False)
+  (method
+    "GIVE % A $"    "GIVE A $ TO %"
+    "OFFER % A $"    "OFFER A $ TO %"
+    "DONATE % A $"    "DONATE A $ TO %"
+    (if (or (str= "COOKIES_SELF_SUB" $) (str= "CHOCOLATE COCONUT COOKIES_SELF_SUB" $))
+        (chain
+          (if (gec & given-scepter?)
+              (chain
+                (drop-n (de-subtag $) 1 "The yargle smiles and accepts your donation.")
+                (remove-n (base $) 1 (get-room)))
+              (let room (get-room)
+                (chain
+                  (drop-n (de-subtag $) 1 "The yargle happily accepts your donation. It vanishes somewhere, and quickly returns. It proffers you a glowing crystal scepter.")
+                  (wander "HAPPY YARGLE" "YARGLE" room)
+                  (remove-n (base $) 1 room)
+                  (sec! & given-scepter? True)
+                  (place "BRIGHT SCEPTER" "NORTHWEST STAIRWELL BOTTOM")
+                  (place "SCEPTER BAND" "NORTHWEST STAIRWELL BOTTOM"))))
+
+          (if (and (not (gec & baked-cookies?))
+                   (str= "CHOCOLATE COCONUT COOKIES_SELF_SUB" $))
+              (chain (print "The yargle gives you a point for the coconut cookie.")
+                (increase-score 1)
+                (sec! & baked-cookies? True))))
+        (print "The yargle is not interested.")))
+  (counter told-watermelon-story? False)
+  (method
+    "TALK TO %"
+    "ASK %"
+    "SPEAK WITH %"
+    (if (= 0 (gec & asleep?))
+        (let seed (random)
+          (if (<= seed .3)
+              (print "You babble on about your favorite recipe. The yargle yawns, but pays attention (it seems).")
+              (<= seed .6)
+              (chain
+                (print "You tell the yargle one of your favorite childhood stories, of the watermelon that refused to grow. It stares at you.")
+                (sec! & told-watermelon-story? True))
+              (or (<= seed .9) (not (gec & told-watermelon-story?)))
+              (print "You greet the yargle. It just looks around the room. You end the conversation")
+              (chain
+                (print "You greet the yargle. It suddenly starts talking back, in a perfect replica of your voice. You realize it is telling you a variant of your watermelon tale, save with a different theme: the cookie that nobody baked. The yargle is an excellent storyteller, far better than you.")
+                (sec! & told-watermelon-story? False))))
+        (print "The yargle appears to be sleeping. It looks so nice and peaceful that you don't want to disturb it.")))
+  (method
+    "PRAISE %"
+    "THANK %"
+    "KISS %"
+    (if (= 0 (gec & asleep?))
+        (print "You loudly praise and thank the yargle for its existance and all it has done for you.")
+        (print "The yargle appears to be sleeping. It looks so nice and peaceful that you don't want to disturb it.")))
+  (method
+    "KILL %"
+    (if (= 0 (gec & asleep?))
+        (call-obj & "TAKE %")
+        (print "The yargle appears to be sleeping. It looks so nice and peaceful that you don't want to disturb it.")))
+)
+
+(daemon
+  (moved-yargle & time)
+  (counter countdown time)
+  (step
+    (if (= 0 countdown)
+        (chain
+          (if (and (inr "IRON KEY") (gec "YARGLE" has-key?))
+              (print "The yargle returns to its original position, and grabs the iron key again, hiding it behind itself.")
+              (print "The yargle returns to its original position, keeping an eye trained on you."))
+          (stop-daemon &))
+        (chain
+          (set! countdown (- countdown 1))
+          (print "The yargle stares at you with one eye, while looking sideways with the other.")))))
+
+(Object
+  "IRON KEY"
+  (names
+    "Thing"
+    "Object"
+    "Shiny Thing"
+    "Yargle's Thing"
+    "What the Yargle is Holding"
+    ;; a name exchange occurs later
+  )
+  (desc
+    (if (gec & identified?)
+        "An iron key, shoddily made, and very large."
+        "Some shiny metal object the yargle is holding. You can't see more than that.")
+    (if (not (or (gec "YARGLE" has-key?) (daemon-exists? "SCARED YARGLE")))
+        "The yargle has it."))
+  (counter identified? False)
+  (weight .5)
+  (method
+    "STEAL %"
+    "PURLOIN %"
+    "GRAB %"
+    (if (gec "YARGLE" has-key?)
+        (print (nformat "There's a problem; you don't know how you will get the yargle to forget about the {}." &))
+        (daemon-exists? "SCARED YARGLE")
+        (call-obj & "TAKE %")
+        (print "There is not reason to steal it again if the yargle doesn't have it.")))
+  (method
+    "TAKE %"
+    "GET %"
+    (if (gec "YARGLE" has-key?)
+        (if (daemon-exists? "SCARED YARGLE")
+            (chain (sec! "YARGLE" has-key? False)
+                (take & "You grab the iron key as quickly as you can."))
+            (print "The yargle has it (and you don't like the sight of those sharp little teeth)."))
+        (take & "You take the iron key.")))
+  (key "WEAPON STORAGE" "BLACKSMITH'S FORGE")
+)
+
+(Object
+  "BRIGHT SCEPTER"
+  (names
+      "Bright Scepter"
+      "Scepter of Light"
+      "Scepter"
+      "Wand"
+      "Rod"
+      "Luminous Wand"
+      "Crystal Scepter"
+  )
+  (weight 2)
+  ; you see, the band is part of itself, unlisted, but can be accessed like any object.
+  (counter high-end? False)
+  (desc "This crystal scepter was given to you by the Yargle. It shines light out of one end, illuminating the room with a soft glow. It has a band around it at the bottom.")
+  (method
+      "SHINE AT %"
+      (print (nformat "You illuminate the {}." &)))
+  (method
+    "TAKE %"
+    "GET %"
+    (chain
+      (take & "You take the crystal scepter.")
+      (if (not (in "SCEPTER BAND" "SELF"))
+          (move "SCEPTER BAND" (get-room) "SELF"))))
+  (method
+    "DROP %"
+    (chain
+      (drop & "You drop the bright scepter.")
+      (move "SCEPTER BAND" "SELF" (get-room))))
+)
+
+(Object
+  "SCEPTER BAND"
+  (names
+      "Scepter Band"
+      "Band"
+  )
+  (desc "This crystal band is attached to the scepter, but not very tightly. It still can't be taken off though; just rotated.")
+  (weight 0)
+  (hidden)
+  (method
+      "TURN %"
+      "ROTATE %"
+      "MOVE %"
+      (if (gec "BRIGHT SCEPTER" high-end?)
+          (call-obj & "TURN % LEFT")
+          (call-obj & "TURN % RIGHT")))
+  (method
+      "TURN % LEFT"
+      "ROTATE % LEFT"
+      (if (gec "BRIGHT SCEPTER" high-end?)
+          (chain (print "You turn the band to the left. The scepter dims.")
+              (sec! "BRIGHT SCEPTER" high-end? False)
+              (if (str= (get-room) "FOGGY ROOM")
+                  (chain (print "The fog advances, swallowing up the room.")
+                    (FOGGY-hide))))
+          (print "It is already turned all the way to the left."))
+  )
+  (method
+      "TURN % RIGHT"
+      "ROTATE % RIGHT"
+      (if (gec "BRIGHT SCEPTER" high-end?)
+          (print "It is already turned all the way to the right.")
+          (chain (print "You turn the band to the right. The scepter becomes much, much brighter.")
+              (sec! "BRIGHT SCEPTER" high-end? True)
+              (if (str= "FOGGY ROOM" (get-room))
+                  (chain
+                    (if (daemon-exists? "MISTS") (stop-daemon "MISTS"))
+                    (FOGGY-show)
+                    (if (in "COPPER KEY" "FOGGY ROOM")
+                        ; ^ if the ck, then the fl too
+                        (print "As the fog recedes, you find a copper key and a lever in the room.")
+                        (in "FOGGY LEVER" "FOGGY ROOM")
+                        (print "As the fog retreats, you see a metal lever in the middle of the room.")
+                        (print "The fog recedes away from you.")))))))
+  (method
+    "TAKE %"
+    "GET %"
+    "DROP %"
+    "REMOVE %"
+    "DETACH %"
+    "TAKE OFF %"
+    (print "It is part of the scepter the yargle gave you. You don't want to break it."))
+)
+
+(daemon
+    (wander & wanderer location)
+    ; a wandering object: i.e. yargle. moves from room to room. entry-scripts do not apply to it.
+    ; wanders forever
+    (counter last-room "NOWHERE")
+    (counter current-room location)
+    (counter unmoved 0)
+    (counter tiredness 0)
+    (counter sleeptime 0)
+    (counter justmoved? False)
+    (step
+      (if (and (= sleeptime 0) (not (daemon-exists? "SCARED YARGLE")))
+          (let choice (get-any-neighbor current-room)
+            ;; it is possible to trap the yargle in a room by locking the way out
+            ;; closed doors are no problem
+            (if (or (and (str= choice last-room)
+                         (> (random) (- 1 (* .075 unmoved))))
+                    (and (not (str= choice last-room))
+                         (> (random) .7)
+                         (not (str= choice "NONE"))))
+                  (chain
+                      (if (str= (get-room) current-room)
+                          (print (format-1 "The {} leaves the room." (lowercase wanderer))))
+                      (if (str= (get-room) choice)
+                          (print (format-1 "The {} enters the room." (lowercase wanderer))))
+                      (move wanderer current-room choice)
+                      (if (and (str= wanderer "YARGLE") (and (= 0 (gec wanderer has-key?)) (in "IRON KEY" current-room)))
+                          (move "IRON KEY" current-room choice)
+                      )
+                      (set! justmoved? True)
+                      (set! last-room current-room)
+                      (set! current-room choice)
+                      (set! tiredness (+ tiredness unmoved))
+                      (set! unmoved 0)
+                  )
+                  (set! unmoved (+ unmoved 1))
+              )
+          )
+          (chain
+              (set! sleeptime (- sleeptime 1))
+              ; then, if sleeptime was one before, wake up
+              (if (= 0 sleeptime)
+                  (sec! wanderer asleep? 0)
+              )
+          )
+      )
+
+      (if (and (>= tiredness 50) (not (daemon-exists? "SCARED YARGLE")))
+          (chain
+              (set! sleeptime (randomr 3 50))
+              (set! tiredness 0)
+              (sec! wanderer asleep? 1)
+          )
+      )
+      ;; well... if's do not do variables. :-(
+      (if (not justmoved?)
+          (pass)
+          (set! justmoved? False))))
+
+      ; the wandering object prefers not to go into the previous room.
+      ; it goes along any free room 80% of the time
+      ; if in a dead end, it has a 100%, then 90%, then 80%, then 70% chance not to move
+      ; whenever unmoved is decreased by n, tiredness is increased by n
+      ; when tiredness is 10, the wanderer sleeps for between 3 and 50 turns
+      ; (sec! wanderer asleep? 1)
+      ; if you are in the same room (just check get-room), then it print "The {} is in the room."
+      ; "it is sleeping". "It stares at you." "It is leaving the room."

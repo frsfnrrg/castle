@@ -1,0 +1,42 @@
+$baselibrary.level
+
+(Room
+  "WELL"
+  (names "Bottom of Well" "Well")
+  (desc "You are in the bottom of the castle well, which dried out long ago."
+    (if (in "EMERALD" "WELL") "An emerald lies on the ground next to you, and a" "A")
+    "rope hangs down from the top of the well, the only way to leave...")
+  (north 0 0 "You bump into the layered stone rim of the well.")
+  (east 0 0 "You bump into the layered stone rim of the well.")
+  (west 0 0 "You bump into the layered stone rim of the well.")
+  (south 0 0 "You bump into the layered stone rim of the well.")
+  (method
+    "UP"
+    "GO UP"
+    "U"
+    (chain (print "You climb up the well rope. It supported you down, and it doesn't break on your way up.") (set-room "COURTYARD") (look-at-room) (tire .2)))
+  (objects "WELL STONES" "WELL ROPE" "WELL SKY")
+)
+
+(Scenic
+  "WELL STONES"
+  (names "Well Stones" "Stones" "Stone Rim" "Layered Stone Rim" "Rim of the Well" "Well Walls" "Walls" "Wall" "Stone")
+  (desc "These rounded, layered stones form the walls of this ancient well.")
+  (counter take-excuse "Each stone is stuck under the one above. None of them will even come out.")
+)
+
+
+;; don't bother about a wrapper3; the emerald, sapphire, ruby are not that close
+(Treasure
+  "EMERALD"
+  (names "Emerald"
+    "Gem" "Treasure" "Green" "Green Thing" "Something Green" "Green Gem"
+    "Green Jewel" "Jewel" "Sparkling Emerald" "Treasure")
+  (desc "This sparkling emerald is still in good shape despite having been carried around by a crow and dropped forty meters down into a well.")
+)
+
+(Scenic
+  "WELL SKY"
+  (names "Sky" "Evening Sky" "Stars" "Red")
+  (desc "Just a little patch of evening sky is visible to you, far above.")
+)

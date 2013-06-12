@@ -1,0 +1,115 @@
+$baselibrary.level
+
+(Room
+    "NORTHWEST STAIRWELL TOP"
+    (names
+        "Northwest Stairwell"
+        "Stairwell"
+        "Spiral Staircase"
+    )
+    (desc "The stairwell here is quite plain. Stone steps leading around along the walls, a couple windows, and the usual stone walls. The stairs go from a story down to a level up, and the solitary door leads east. One thing is remarkable--there is some writing on the stairs...")
+    (up "FREE" "BATTY ATTIC" "You walk up the stairs into the attic.")
+    (down "FREE" "NORTHWEST STAIRWELL BOTTOM" "You descend.")
+    (east "DOOR CLOSED" "ALCHEMIST'S LABORATORY")
+    (objects
+        "STONE STAIRCASE 2"
+        "WINDOWS"
+        "INSCRIPTION"
+        "SKY"
+        "FOREST"
+    )
+    (method
+        "DOWN"
+        "GO DOWN"
+        "D"
+        "DESCEND"
+        (chain
+            (print "You descend.")
+            (set-room "NORTHWEST STAIRWELL BOTTOM")
+            (look-at-room)
+        )
+    )
+)
+
+(Object
+    "INSCRIPTION"
+    (names
+        "Inscription"
+        "Writing"
+        "Writing on the Stairs"
+        "Text"
+        "Graffiti"
+    )
+    (hidden)
+    (takeable False)
+    (desc "This inscription is carved into the stone staircase. It reads, \"Bright lights dispel fog\".")
+    (method
+        "READ %"
+        (print "The inscription reads, \"Bright lights dispel fog\".")
+    )
+)
+
+(Object
+    "STONE STAIRCASE 2"
+    (names
+        "Stone Staircase"
+        "Stairs"
+        "Staircase"
+        "Stairway"
+        "Stair"
+        "Stone Staircase"
+        "Stone Stairway"
+        "Stone Stair"
+    )
+    (takeable False)
+    (desc "These angular stone stairs have an inscription on them.")
+    (method
+        "READ %"
+        (call-obj "INSCRIPTION" "READ %")
+    )
+    (method
+        "DESCEND %"
+        "GO DOWN %"
+        (call-room "GO DOWN")
+    )
+    (method
+        "ASCEND %"
+        "GO UP %"
+        (call-room "GO UP")
+    )
+)
+
+(Object
+    "WINDOWS"
+    (group 3 "WINDOW")
+    (desc "The three narrow windows, placed every five steps, let in a bit of light, and some view of the surrounding forest.")
+    (method
+        "TAKE %"
+        "GET %"
+        (print "These windows are not for the taking.")
+    )
+    (method
+        "TAKE A #"
+        "GET A #"
+        "TAKE 1 #"
+        "GET 1 #"
+        "TAKE #"
+        "GET #"
+        (print "Why??")
+    )
+    (method
+        "TAKE @ %"
+        "GET @ %"
+        (if (= 1 @)
+            (print "You realize with a sinking heart that your \"grammers\" is lacking.")
+            (print "You can't do that.")
+        )
+    )
+    (hidden)
+)
+
+(Object
+    "WINDOW"
+    ; (hidden) by extension of its parent group
+    (desc "A narrow window on the side of the wall. It lets in dim light from outside.")
+)

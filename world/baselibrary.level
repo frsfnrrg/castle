@@ -1,0 +1,480 @@
+$logic.level
+$takedrop.level
+
+;; OBJECT CHARACTERISTICS -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+(pyf (show obj)
+    "objects[\"{0}\"].show()")
+(pyf (hide obj)
+    "objects[\"{0}\"].hide()")
+(pyq (visible? obj)
+    "objects[\"{0}\"].is_visible()")
+
+
+(pyq (describe-o object)
+    "objects[\"{0}\"].describe()")
+
+(pyq (object? object)
+     "(\"{0}\" in objects)")
+
+(pyq (group? object)
+     "objects[\"{0}\"].is_group()")
+
+;; a ugroup is a group, but not always the other way around
+(pyq (ugroup? object)
+     "objects[\"{0}\"].is_ugroup()")
+
+(pyq (takeable? object)
+     "objects[\"{0}\"].is_takeable()")
+
+(pyq (sub object)
+     "objects[\"{0}\"].subs()")
+
+(pyq (get-nut-value object)
+     "objects[\"{0}\"].get_nutritive_value()")
+
+(pyq (get-weight object)
+     "objects[\"{0}\"].get_weight()")
+
+(pyq (key-works key room1 room2)
+     "objects[\"{0}\"].key_works(\"{1}\",\"{2}\")")
+
+(pyq (key? key)
+     "objects[\"{0}\"].is_key()")
+
+(pyq (get-count object)
+     "objects[\"{0}\"].count()")
+
+(pyq (set-weight object weight)
+     "objects[\"{0}\"].set_weight({1})")
+
+
+;; COUNTERS -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+;; these are the new, more concise, better versions (with warnings builting for bad access)
+(pyq (gec & label) "objects[\"{0}\"].get_counter(\"{1}\")")
+(pyq (ged & label) "running_daemons[\"{0}\"].get_counter(\"{1}\")")
+
+(pyq (sec! & label value) "objects[\"{0}\"].set_counter(\"{1}\",{2})")
+(pyq (sed! & label value) "running_daemons[\"{0}\"].set_counter(\"{1}\",{2})")
+
+(pyq (exc? & label) "(\"{1}\" in objects[\"{0}\"].counters)")
+
+;; old names: to be phased out
+(pyq
+    (get-counter obj cname)
+    "objects[\"{0}\"].get_counter(\"{1}\")"
+)
+
+(pyf
+    (set-counter obj cname value)
+    "objects[\"{0}\"].set_counter(\"{1}\",{2})"
+)
+
+(pyf
+    (set-dcounter dname cname value)
+    "running_daemons[\"{0}\"].set_counter(\"{1}\",{2})"
+)
+
+;; STRING MANIPULATIONS -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+;; (format txt a b c ...) is a builtin
+;; (join ta tb tc ...) is a builtin
+
+(func
+    (nformat text object)
+    (format text (lowercase (name object))))
+
+(pyq (vowel-start?)
+      "(\"{0}\"[0] in ('a','e','i','o','u','A','E','I','O','U'))")
+
+(pyq (input text)
+      "input60(\"{0}\")")
+
+(func (bookpause)
+  (chain (print-line)
+    (input "\t(Press Enter to Continue)")
+    (print-line)))
+
+;; TODO; clean strings with \t,\n not at parse-time, but in print60
+;; fix """"monkeys"""" issue (last is thought real; add an escape? (spec pyt func,))
+(pyf (print text)
+    "print60(\"\"\"{0}\"\"\")")
+
+(pyf (print-line)
+     "print()")
+
+(pyf (print-center text)
+     "print60(\"\"\"{0}\"\"\", adjust='center')")
+
+(pyf (print_continuable text)
+     "print60(\"\"\"{0}\"\"\", last=\"\")")
+
+(pyq (str= str1 str2)
+     "(\"{0}\"==\"{1}\")")
+
+(pyq (lowercase string)
+     "\"{0}\".lower()")
+(pyq (uppercase string)
+     "\"{0}\".upper()")
+
+(func (format-1 str ins)
+  (format str ins))
+
+(func (format-2 str ins ins2)
+  (format str ins ins2))
+
+;; Notice the difference between 'catch'es: one is for strings, the other for values
+(pyq (catch-str returns)
+    "catch(\"{0}\")")
+
+(pyq (catch-value returns)
+     "catch({0})")
+
+;; for setting counters to string values, use (sec! thing label (strtag "monkeys"))
+(pyq (strtag str)
+     " \"'\" + \"{0}\" + \"'\"")
+
+(pyq (str v)
+     "\"{0}\"")
+
+;; OBJECT MOTION & NAMES -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+(func
+  (str=g/s basename $)
+  (let r (roomtag basename (get-room))
+    (let s (roomtag basename "SELF")
+      (or (str= $ r) (str= $ s) (str= $ (roomtag r "SUB")) (str= $ (roomtag s "SUB"))))))
+
+(func
+  (str=g basename $)
+  (or (str= $ (roomtag basename (get-room)))
+      (str= $ (roomtag basename "SELF"))))
+
+(func
+  (str=s basename $)
+  (or (str= $ (roomtag (roomtag basename (get-room)) "SUB"))
+    (str= $ (roomtag (roomtag basename "SELF") "SUB"))))
+
+(pyf (remove-name obj name)
+     "objects[\"{0}\"].remove_name(\"{1}\")")
+(pyf (add-name obj name)
+     "objects[\"{0}\"].add_name(\"{1}\")")
+
+(pyq (base object)
+     "base(\"{0}\")")
+
+(pyq (tail object)
+     "tail(\"{0}\")")
+
+(pyq (de-subtag object)
+     "\"{0}\"[:-4]")
+
+(pyq (name obj)
+    "objects[\"{0}\"].name()")
+
+(pyq (rname obj)
+     "objects[\"{0}\"].any_name()")
+
+(pyq (roomtag object room)
+     "\"{0}\"+\"_\"+\"{1}\"")
+
+(pyq (in object location)
+     "inl(\"{0}\",\"{1}\")")
+
+;; new style function, with returns!
+(func (ins obj)
+  (in obj "SELF"))
+(func (inr obj)
+  (in obj (get-room)))
+(func (insc obj)
+  (or (ins obj) (inr obj)))
+
+;; this auto-roomtags
+(pyq (in-n obj num loc)
+     "inn(\"{0}\",{1},\"{2}\")")
+
+(pyq (in-u sub parent)
+     "objects[\"{1}\"].is_ugroup_member(\"{0}\")")
+
+ ;; use the basename of the object
+(pyf (remove-n obj num loc)
+     "removen(\"{0}\",{1},\"{2}\")")
+
+(pyf (place object location)
+     "rooms[\"{1}\"].add(\"{0}\")")
+
+(pyf (remove obj loc)
+     "rooms[\"{1}\"].remove(\"{0}\")")
+
+
+(pyf (move & source dest)
+     "move(\"{0}\",\"{1}\",\"{2}\",num=None)")
+
+(pyf (move-n & source dest number)
+     "move(\"{0}\",\"{1}\",\"{2}\",num={3})")
+
+(pyf (move-u-n % source dest number)
+     "move_ugroup(\"{0}\"+\"_\"+\"{1}\", \"{0}\"+\"_\"+\"{2}\", \"{1}\", \"{2}\", {3})")
+
+(pyf (move-u transferee parent source dest)
+    "move_indiv_ugroup(\"{0}\", \"{1}\"+\"_\"+\"{2}\", \"{1}\"+\"_\"+\"{3}\", \"{2}\", \"{3}\")")
+
+;; THE SELF -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+(pyq (get-carry-capacity)
+     "rooms['SELF'].get_carrying_capacity()")
+
+(pyq (inc-carry-capacity amount)
+     "rooms['SELF'].decrease_load({0})")
+
+(pyq (dec-carry-capacity amount)
+     "rooms['SELF'].increase_load({0})")
+
+(pyf (increase-str amount)
+     "rooms[\"SELF\"].feed({0})")
+
+(pyq (get-strength)
+     "rooms[\"SELF\"].get_strength()")
+
+(pyf (set-strength value)
+     "rooms[\"SELF\"].set_strength({0})")
+
+(pyf (set-max-strength value)
+     "rooms[\"SELF\"].set_max_strength({0})")
+
+(func
+  (inc-speed)
+  (if (= (get-speed) 1)
+      (set-speed 2)
+      (set-speed 3)))
+
+(func
+  (dec-speed)
+  (if (= (get-speed) 2)
+      (set-speed 1)
+      (set-speed 2)))
+
+(pyq (get-speed)
+     "rooms[\"SELF\"].get_speed()")
+
+(pyf (set-speed value)
+     "rooms[\"SELF\"].set_speed({0})")
+
+
+(func
+  (tire amount)
+  (chain (_weaken amount)
+    (_start-drop-list)
+    (_rec-drop _get-next-item)))
+
+; also used by DROP ALL (global command)
+(func
+  (_rec-drop f)
+  (let c (f)
+    (if (not (str= "NONE" c))
+        (chain
+          (if (and (group? c) (= 1 (get-count c)))
+              (call-obj c "DROP #")
+              (call-obj c "DROP %"))
+          (_rec-drop f)))))
+
+(pyf (_weaken amount) "rooms['SELF'].weaken({0})")
+(pyq (_get-next-item) "rooms['SELF'].gdl()")
+(pyf (_start-drop-list) "rooms['SELF'].sdl()")
+
+;; THE ROOM -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+(pyq (roomc? room)
+    "(current_room == \"{0}\")")
+
+(pyq (room-exists? name)
+     "(\"{0}\" in rooms)")
+
+(pyf (set-room-name name)
+     "rooms[current_room].names[0] = \"{0}\"")
+
+(pyq (name-room room)
+    "rooms[\"{0}\"].name()")
+
+
+(pyq (locked-door? room dir)
+     "rooms[\"{0}\"].door_locked(\"{1}\")")
+
+(pyf (set-door room dir value)
+     "rooms[\"{0}\"].set_door(\"{1}\",\"{2}\")")
+
+(pyq (get-neighbor room dir)
+     "rooms[\"{0}\"].neighbor(\"{1}\")")
+
+(pyq (describe-r room)
+     "rooms[\"{0}\"].describe()")
+
+(pyf (set-room room)
+     "set_room(\"{0}\")")
+
+(pyq (get-room)
+     "get_current_room()")
+
+(pyq (get-door direction)
+     "rooms[current_room].get_door(\"{0}\")")
+
+(pyf (look-at-room)
+     "look_at_room()")
+
+(pyq (get-any-neighbor currentr)
+     "rooms[\"{0}\"].random_connection()")
+
+(pyq (get-random-item room)
+     "rooms[\"{0}\"].get_random_item()")
+
+
+;; ACTION/DESC CHANGES -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+;; these are really unpopular; why? counters, and ifs everywhere override the need for them
+
+(pyf (replace-room-desc room old new)
+     "rooms[\"{0}\"].replace_desc(\"{1}\", \"{2}\")")
+
+(pyf (replace-obj-desc obj old new)
+     "objects[\"{0}\"].replace_desc(\"{1}\", \"{2}\")")
+
+(pyf (replace-obj-action object hook quoted-script)
+     "objects[\"{0}\"].set_action(\"{1}\",{2})")
+
+(pyf (remove-obj-action object hook)
+     "objects[\"{0}\"].remove_action(\"{1}\")")
+
+;; RECALLING -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+(pyf (call-room command)
+     "rooms[current_room].call(\"{0}\")")
+
+(pyf (call-global command)
+     "exec_script(globalscripts[\"{0}\"])")
+
+(pyf (call-obj obj command)
+     "objects[\"{0}\"].call(\"{1}\".split(\" \"))")
+
+;; SELF MOTION -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+;; NORTH,SOUTH,EAST,WEST,UP, DOWN are the possible directions
+(pyf (go direction)
+  "rooms[current_room].go(\"{0}\")")
+
+(func (go-random)
+  (go (randomc "NORTH" "EAST" "SOUTH" "WEST")))
+
+;; DAEMONS -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+(pyq (daemon-exists? name)
+     "(\"{0}\" in running_daemons)")
+
+(pyf (stop-daemon name)
+     "stop_daemon(\"{0}\")")
+
+;; GAME ACTIONS -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - -- - --
+
+
+
+(pyf
+    (wait time)
+    ; In case time is not loaded yet
+    "wait({0})"
+)
+
+(pyf (quit)
+    "quit()")
+
+(pyf (printscore)
+     "print_score()")
+
+(pyf
+    (pass)
+    "pass"
+)
+
+(func
+    (eat-n object number bytext)
+    (if
+        (in-n object number "SELF")
+        (chain
+            (print bytext)
+            (remove-n object number "SELF")
+            (let old-str (get-strength)
+                (chain
+                    (increase-str (*
+                        (get-nut-value (sub (roomtag
+                            object
+                            "SELF")))
+                        number))
+                    (if (= (get-strength) old-str)
+                        (print (format-1 "You strength remains at maximum, at {}." old-str))
+                        (print (format-1 "You strength increases to {}." (get-strength))))))
+        )
+        (print "You do not have any.")
+    )
+)
+
+(func
+  (opposite dir)
+  (if (str= dir "NORTH")
+      "SOUTH"
+      (str= dir "EAST")
+      "WEST"
+      (str= dir "WEST")
+      "EAST"
+      (str= dir "SOUTH")
+      "NORTH"))
+
+(func
+    (unlock-door dir &)
+    (if (locked-door? (get-room) dir)
+        (if (key? &)
+            (if (key-works & (get-room) (get-neighbor (get-room) dir))
+                (chain
+                    (set-door (get-room) dir "DOOR CLOSED")
+                    (set-door (get-neighbor (get-room) dir) (opposite dir) "DOOR CLOSED")
+                    (print (format-1 "The key fits! You unlock the {} door." (lowercase dir)))
+                )
+                (print "The key does not fit.")
+            )
+            (print "Um... that is not a key.")
+        )
+        (print "The door isn't locked anyway.")
+        ; and if there isn't a door?
+    )
+)
+
+(func
+  (lock-door dir &)
+  (let dtype (get-door dir)
+    (if (str= dtype "DOOR LOCKED")
+        (print "That door is locked anyway.")
+        (or (str= dtype "DOOR CLOSED") (str= dtype "DOOR OPEN"))
+        (if (key? &)
+            (if (key-works & (get-room) (get-neighbor (get-room) dir))
+                (chain (set-door (get-room) dir "DOOR LOCKED")
+                  (set-door (get-neighbor (get-room) dir) (opposite dir) "DOOR LOCKED")
+                  (print (format-1 "The key fits! You lock the {} door." (lowercase dir))))
+                (print "The key does not fit."))
+            (print "Um... that is not a key."))
+        (print "That is not a door."))))
+
+(func (die)
+  (chain (print "YOU ARE DEAD")
+    (printscore)
+    (quit)))
+
+(pyf (increase-score amount)
+     "increase_score({0})")
+
+(pyf (decrease-score amount)
+     "decrease_score({0})")
+
+(pyq (random)
+     "random.random()")
+
+;; inclusive range
+(pyq (randomr start stop)
+     "random.randrange({0},{1}+1)")

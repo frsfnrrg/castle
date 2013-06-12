@@ -1,0 +1,262 @@
+$baselibrary.level
+
+(Room
+    "BALCONY"
+    (names "Balcony")
+    (desc "This balcony overlooks the garden below, while doors face all four main directions. A railing goes along the edge of the balcony, but it is rusted, bent in places, and thin. Looking up, you can see the four towers, one per corner of the castle. A crow flies around overhead, and you hear rustling noises in the courtyard.")
+    (method
+        "RUN"
+        "RUN AWAY"
+        (chain
+            (print "You run like a crazy person away from the shadow.")
+            (tire .3)
+            ; all it does is .... sum nothing
+            (set-dcounter "IMPENDING DOOM" countdown (+ 1 (get-dcounter "IMPENDING DOOM" countdown)))))
+    (entryscript
+        ;; note; if you debug goto balcony from the balcony, the new shadow overwrites the old (a dict is used)
+        (if (in "SHADOW" "BALCONY")
+          (launch-shadow "IMPENDING DOOM")))
+    (north "DOOR OPEN" "FOGGY ROOM")
+    (east "DOOR OPEN" "CAVED IN ROOM")
+    (south "DOOR CLOSED" "EAST GALLERY")
+    (west "DOOR CLOSED" "KITCHEN")
+    (objects
+        "SHADOW" "RAILING" "CROW" "SKY" "WIND" "TREE"
+        "TOWERS" "NORTHWEST TOWER" "NORTHEAST TOWER" "SOUTHEAST TOWER" "SOUTHWEST TOWER"
+        ;; castle walls?
+    )
+    (method
+      "DOWN"
+      "D"
+      "GO DOWN"
+      "JUMP DOWN"
+      (if (in "ARMOR" "SELF")
+          (chain (print "You leap from the balcony and land on a thick cushion of weeds. The armor protects you from most of the collision.") (tire 1) (set-room "COURTYARD") (look-at-room))
+          (chain (print "You leap from the balcony and land on a thick cushion of weeds. Still, it hurts.") (tire 3) (set-room "COURTYARD") (look-at-room))))
+)
+
+(Object "SHADOW"
+  (names "Shadow" "Evil Thing")
+  (desc (if (gec & visible?)
+            "A tall, dark being that is moving quickly toward you, holding two blades in a manner that is anything but encouraging. It seems to be some cursed sorcerer or king of ages past."
+            "This is a dark shadow moving along the edge of the balcony. There is nothing visible creating the shadow.")
+    "You are afraid. Very afraid.")
+  (method
+      "TAKE %"
+      "GET %"
+      (if (daemon-exists? "VILE POISON")
+          (chain (print "You go toward the shadow and try to grab it. You fail because it is immaterial. The shadow passes through you; you fall to the floor, dead.") (die))
+          (print "You really do not want to get any closer than you need to.")))
+  (counter visible? False)
+  (method
+    "SHINE %"
+    "BRIGHTEN %"
+    "ILLUMINATE %"
+    "LIGHT UP %"
+    (if (ins "BRIGHT SCEPTER")
+        (call-obj & "SHINE BRIGHT SCEPTER AT %")
+        (ins "TORCHES_SELF")
+        (call-obj & "SHINE TORCH AT %")
+        (ins "CANDLES_SELF")
+        (call-obj & "SHINE CANDLE AT %")
+        (print "You have nothing to illuminate it with.")))
+  (method
+    "SHINE $ AT %"   "POINT $ AT %"   "DIRECT $ AT %"
+    "SHINE % USING $"  "SHINE % WITH $"
+    "BRIGHTEN % USING $"  "BRIGHTEN % WITH $"
+    "ILLUMINATE % USING $"  "ILLUMINATE % WITH $"
+    "LIGHT UP % USING $"  "LIGHT UP % WITH $"
+    (if (or (str= $ "BRIGHT SCEPTER") (str=g/s "TORCHES" $) (str=g/s "CANDLES" $))
+        (let c (get-light-level)
+          (if (= c 50)
+              (chain
+                (print "You turn the scepter so its bright beam of light faces the shadow. You see the pale outlines of a tall, dark creature holding two swords as long as your arm...")
+                (add-name & "Dark Thing")
+                (add-name & "Dark")
+                (add-name & "Dark Creature")
+                (add-name & "Swords")
+                (add-name & "Blades")
+                (add-name & "Tall Being")
+                (sec! & visible? True))
+              (print "The shadow stays as dark and mysterious as ever. That paltry light did nothing.")))
+        (print "The shadow stays as dark and mysterious as ever.")))
+;;  (STR=20,S=Fast You leap toward the Shadow, catching it by surprise, and stab it in the chest. It stumbles, and dissolves into a cloud of smoke, which is blown away by the wind. You realize that you have destroyed a great evil... ELSE You attack the Shadow, but it manages to block your attack, and promptly slices your head off. YOU ARE DEAD)
+
+  (method
+    "ATTACK % WITH $"
+    "ATTACK % USING $"
+    "KILL % WITH $"
+    "KILL % USING $"
+    "DESTROY % WITH $"
+    "DESTROY % USING $"
+    (if (str= $ "MAGIC SWORD")
+        (if (gec & visible?)
+            (if (= 3 (get-speed))
+                (if (> (get-strength) 17)
+                    (chain (print "You leap toward the Shadow, catching it by surprise, and stab it in the chest. It stumbles, and dissolves into a cloud of smoke, which is blown away by the wind. You realize that you have destroyed a great evil...")
+                      (stop-daemon "IMPENDING DOOM")
+                      (remove "SHADOW" "BALCONY")
+                      (increase-score 2))
+                    (chain (print "You leap toward the Shadow, catching it by surprise, and stab it in the chest. The sword just stops there; you weren't strong enough to kill it. The shadow slices your head off.") (die)))
+                (chain (print "You attack the Shadow, but it manages to block your attack, and promptly slices your head off....") (die)))
+            (chain (print "You swing the sword at the shadow. You kind of miss. Still, your body splits into three pieces as the shadow gets you.") (die)))
+        (str= $ "BOW")
+        (if (ins "ARROWS_SELF")
+            (chain
+              (if (gec & visible?)
+                  (drop-n "ARROWS_SELF" 1 "You shoot the being. Your arrow passes through it, and it continues, unharmed.")
+                  (drop-n "ARROWS_SELF" 1 "You shoot the shadow. Your arrow bounces off a wall, and the shadow proceeds onward, unchanged."))
+              (tire .05))
+            (print "You have nothing to shoot the bow with."))
+        (str= $ "SWORD")
+        (chain (if (gec & visible?)
+                   (print "You swing your sword at the shadow. The sword cuts through ... nothing. The evil monster just glides right through you, and you feel as if you are burning up.")
+                   (print "You stab at the shadowy thing, but seem to miss. It reaches you, and you suddenly collapse."))
+          (die))
+        (str= $ "ORB")
+        (print "You throw the orb. It does nothing to the shadow, and rolls back off a wall to you.")
+        (chain (if (gec & visible?)
+                   (print "You attack the being, but pass right through and feel as your arm and then you are quickly frozen into ice.")
+                   (print "You don't seem to have hit the shadow. It seems to have hit you.")) (die))))
+
+;; Look at the redirects!!
+
+  (method
+    "ATTACK %"
+    "KILL %"
+    "DESTROY %"
+    (if (ins "MAGIC SWORD")
+        (call-obj & "ATTACK % WITH MAGIC SWORD")
+        (ins "SWORD")
+        (call-obj & "ATTACK % WITH SWORD")
+        (ins "BOW")
+        (call-obj & "ATTACK % WITH BOW")
+        (ins "ORB")
+        (call-obj & "ATTACK % WITH ORB")
+        (chain (print "You attack the shadow; it does nothing. You suddenly grow very cold, and keel over, dead, as the shadow passes through you. The shadow glides on.")
+          (die))))
+  (method
+    "STAB % WITH $"
+    "CUT % WITH $"
+    "STAB % USING $"
+    "CUT % USING $"
+    (if (str= $ "MAGIC SWORD")
+        (call-obj & "ATTACK % WITH MAGIC SWORD")
+        (str= $ "SWORD")
+        (call-obj & "ATTACK % WITH SWORD")
+        (chain (print "You attack the shadow; the attack does nothing. You suddenly grow very cold, and keel over, dead, as the shadow passes through you. The shadow glides on.") (die))))
+  (method
+    "SHOOT % WITH $"
+    "SHOOT % USING $"
+    (if (str= $ "BOW")
+        (call-obj & "ATTACK % WITH BOW")
+        (print "That can't shoot anything.")))
+  (method
+    "SHOOT %"
+    (if (ins "BOW")
+        (call-obj & "ATTACK % WITH BOW")
+        (print "You don't have anything to shoot with.")))
+  (method
+    "CUT %"
+    "STAB %"
+    (if (ins "MAGIC SWORD")
+        (call-obj & "ATTACK % WITH MAGIC SWORD")
+        (ins "SWORD")
+        (call-obj & "ATTACK % WITH SWORD")
+        (chain (print "You attack the shadow, and, predictably, fail. You suddenly grow very cold, and keel over, dead, as the shadow passes through you. The shadow glides on.") (die))))
+)
+
+(Object "RAILING"
+    (takeable False)
+    (hidden)
+    (desc "The wooden railing goes around the inside of the balcony. It is very low.")
+    (method
+        "JUMP OVER %"
+        "LEAP %"
+        (call-room "DOWN"))
+)
+
+(Object "CROW"
+  (names "Crow" "Black Crow" "Large Crow"
+         "Bird" "Black Bird" "Large Bird"
+         "Raven" "Black Raven" "Large Raven"
+         "Something Green" "Green" "Green Thing")
+  (takeable False)
+  (desc "This sizeable crow, circling high above the garden, holds something green in its mouth.")
+  ;; shoot crow
+  (method
+    "SHOOT %"
+    (if (ins "BOW")
+        (call-obj & "SHOOT % WITH BOW")
+        (print "You have nothing to shoot the crow with.")))
+  (method
+    "THROW $ AT %"
+    (print "You don't think you can throw anything that far. Anyway, your aim with throwing things is horrible.")
+    ;; if the object is heavier than 2, you fail. if it misses, it lands in the garden
+
+  )
+  (counter has-emerald? True)
+
+  ;; shoot crow [with bow [and arrows]]
+  (method
+    "SHOOT % WITH $"
+    "SHOOT % USING $"
+    (if (str= $ "BOW")
+        (if (ins "ARROWS_SELF")
+            (if (gec & has-emerald?)
+                (chain (drop-n "ARROWS_SELF" 1 "You shoot the crow. Your shot misses, of course, since you haven't played around with a bow in years. The crow squawks, surprised by this bow wielding moron, and thus drops the green object it holds in its mouth. It sparkles in the air and lands somewhere in the courtyard.")
+                  (sec! & has-emerald? False)
+                  (remove-n "ARROWS" 1 "BALCONY")
+                  (remove-name & "Something Green") (remove-name & "Green") (remove-name & "Green Thing")
+                  (place "EMERALD" "WELL"))
+                (chain (drop-n "ARROWS_SELF" 1 "You shoot the crow, but your aim is pathetic, and you miss again.") (remove-n "ARROWS" 1 "BALCONY")))
+            (print "You have no arrows to shoot it with."))
+        (print "That cannot even shoot anything.")))
+)
+
+
+(daemon
+  (launch-shadow &)
+  (counter countdown 3)
+  (step
+    ; print doom messages; strike
+    (if (str= (get-room) "BALCONY")
+        (chain
+          (if (= 3 countdown)
+              (print "You see a rippling shadow gliding around the edge of the balcony...")
+              (= 2 countdown)
+              (print "The shadow comes ever closer...")
+              (= 1 countdown)
+              (print "The shadow is almost here...")
+              (chain (print "Suddenly, you are dealt a massive blow to the head. You tumble over the railing, and hit the ground. The shadow glides onward...")
+                  (die)))
+            (set! countdown (- countdown 1)))
+        (chain (sec! "SHADOW" visible? False)
+          (stop-daemon &)))))
+
+(Scenic
+  "TOWERS"
+  (names "Towers" "Tower Tops" "Tops of Towers" "Four Towers")
+  (desc "The southeast tower is square, the other three are cylindrical. The southwest tower holds a black flag.")
+)
+(Scenic
+  "NORTHWEST TOWER"
+  (names "Northwest Tower" "Tower" "Slate" "Tower Top" "Cone")
+  (desc "This stone tower has a plain, conical slate roof.")
+)
+(Scenic
+  "NORTHEAST TOWER"
+  (names "Northeest Tower" "Tower" "Slate" "Tower Top" "Cone")
+  (desc "This tower uses wood tiles for its conical roof.")
+)
+(Scenic
+  "SOUTHEAST TOWER"
+  (names "Southeast Tower" "Tower" "Slate" "Tower Top" "Pyramid")
+  (desc "This is the only square tower; the slate roof is in the shape of a pyramid.")
+)
+
+(Scenic
+  "SOUTHWEST TOWER"
+  (names "Southwest Tower" "Tower" "Slate" "Tower Top" "Cone" "Flag" "Flagpole" "Black Flag")
+  (desc "You can see the flagpole on the top of this tower; it holds a black flag that contrasts oddly with the light blue slate of the tower roof." (if (gec "GRAPPLING ROPE" attached?) "A rope hangs down from it to the balcony."))
+)

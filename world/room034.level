@@ -1,0 +1,98 @@
+$baselibrary.level
+
+(Room
+  "TOWER ROOF"
+  (names "Tower Roof" "Top of Tower" "Roof" "Above Assassin's Cove")
+  (desc "The tower roof is the most dangerous part of the castle, as well as the most beautiful. You can see the entire forest for miles and miles. A flagpole with a large, triangular flag attached is in a metal socket at the peak."
+    (if (in "MAGIC SWORD" &)
+      "A glowing sword has been stuck in the flagpole socket, and the"
+      "The")
+      "room below is partially viewable through a crack in the roof. In the crack is a grappling hook, which is attached to a rope leading down to the balcony. The footing is precarious, made more so by the powerful winds that blow toward you...")
+  ;; ^ INSERT FLAG!!!!!
+  (objects "FLAG" "FLAGPOLE" "FLAGPOLE SOCKET" "MAGIC SWORD" "GRAPPLING ROPE TOP" "STRONG WIND" "SKY" "FOREST" "CRACK IN ROOF")
+  (down "FREE" "BALCONY" "You rappel down the rope to the balcony.")
+  (up "SKY" 0 "You are nowhere near the clouds, and will not get there, even if you jump.")
+  (east 0 0 "That way leads to a broken neck.")
+  (west 0 0 "That way leads to a broken neck.")
+  (north 0 0 "That way leads to a broken neck.")
+  (south 0 0 "That way leads to a broken neck.")
+)
+
+(Scenic
+  "FLAG"
+  (names "Flag" "Standard" "Pennant" "Black" "Wool" "Cloth" "Black Flag" "Shadow Flag")
+  (desc "This triangular black pennant is rather sinister. You get a feeling this really isn't just a regular ancient cursed monster infested temporally odd castle; that there is something more to it.")
+)
+
+(Scenic
+  "FLAGPOLE"
+  (names "Flagpole" "Pole" "Pole of Flagginess" "Flag Stick" "Metal" "Steel")
+  (desc "A long, tall flagpole reaching up into the sky. The black flag is at one end, and the other end is secured in a socket.")
+  (method
+    "CLIMB %"
+    "CLIMB UP %"
+    "GO UP %"
+    (print "It is too slippery. Anyway, you don't need a flag."))
+  (method
+    "TAKE %"
+    "GET %"
+    (print "You pull on the flagpole. It just bends a bit."))
+)
+
+(Scenic
+  "FLAGPOLE SOCKET"
+  (names "Flagpole Socket" "Socket" "Metal Socket" "Roof Cap")
+  (desc "This socket for a flagpole is oddly made: the pole is round, yet the socket is ... triangular. The pole is still stuck fast," (if (in "MAGIC SWORD" "TOWER ROOF") "but there is enough space to lodge a sword in there moderately securely." "however."))
+)
+
+(Object
+  "MAGIC SWORD"
+  (names "Magic Sword" "Sword" "Purple Sword" "Magic Blade" "Blade" "Purple Blade" "Shadow-Chopper")
+  (desc "This purple sword's edge look like it could split a hair. The sword itself is perfectly made; it is well balanced and unmarred. You can easily tell that it is magic (it's purple!).")
+  (weight 2.5)
+)
+
+(Object
+  "CRACK IN ROOF"
+  (names "Crack in the Roof" "Crack" "Crack in Roof" "Roof Gap" "Gap")
+  (desc "A narrow crack in the castle roof, to small to slip through, but just right to catch a grappling hook in!")
+  (takeable False)
+  (method
+    "GO THROUGH %" "GO OUT %" "GO IN %" "GO INTO %" "GO DOWN %"
+    "CLIMB INTO %" "CLIMB DOWN %"
+    "ENTER BY %" "ENTER %"
+    (print "The crack in the roof is too narrow to achieve anything with."))
+  (method
+    "PUT $ IN %"
+    "DROP $ IN %"
+    (print "Why bother?"))
+)
+
+(Scenic
+  "STRONG WIND"
+  (names "Strong Wind" "Powerful Wind" "Forceful Wind" "Wind" "Blowing Wind" "Cool Wind" "Brisk Wind"
+    "Strong Winds" "Powerful Winds" "Forceful Winds" "Winds" "Blowing Winds" "Cool Winds" "Brisk Winds"
+    "Strong Gust" "Powerful Gust" "Forceful Gust" "Gust" "Blowing Gust" "Cool Gust" "Brisk Gust"
+    "Strong Gusts" "Powerful Gusts" "Forceful Gusts" "Gusts" "Blowing Gusts" "Cool Gusts" "Brisk Gusts"
+    "Strong Breeze" "Powerful Breeze" "Forceful Breeze" "Breeze" "Blowing Breeze" "Cool Breeze" "Brisk Breeze"
+    "Strong Breezes" "Powerful Breezes" "Forceful Breezes" "Breezes" "Blowing Breezes" "Cool Breezes" "Brisk Breezes"
+    "Light Zephyrs")
+
+  (desc "A nice, brisk, cool refreshing breeze. Where it any louder or stronger, you'd be deaf and flying through the air.")
+)
+
+(Object
+  "GRAPPLING ROPE TOP"
+  (names "Grappling Rope" "Rope" "Knot" "Grappling Hook" "Hook" "Tower Climbing Apparatus")
+  (desc "The end of your rope with a grappling hook attached. It is how you got up, and how you hope to get down.")
+  (method
+    "TAKE %" "GET %"
+    (print "That thing is your ticket down.")
+  )
+  (method
+    "RAPPEL %" "RAPPEL DOWN %"
+    "GO DOWN %" "GO ALONG %"
+    "CLIMB DOWN %" "CLIMB %" "CLIMB ALONG %"
+    "DESCEND %" "DESCENT BY %"
+    (call-global "DOWN"))
+)

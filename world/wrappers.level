@@ -1,0 +1,118 @@
+$baselibrary.level
+
+(Class Wrapper3
+  ; for dealing with distinct triads that belong in a group
+  (extends Object)
+
+  (counter typetag Wrapper3)
+  (counter wrapped1 "variable")
+  (counter wrapped2 "variable")
+  (counter wrapped3 "variable")
+
+;; #############################################################################
+
+;; still needs adjustment before it can be let at orange,blue,purple potions...
+
+  (counter in1 False)
+  (counter in2 False)
+  (counter in3 False)
+  (counter number 0)
+
+  (weight 0)
+  (hidden)
+
+  (method
+    "TAKE %"
+    (if (in & "SELF")
+        (print "You already have them.")
+        (let i1 (gec & in1)      (let i2 (gec & in2)      (let i3 (gec & in3)
+        (let w1 (gec & wrapped1) (let w2 (gec & wrapped2) (let w3 (gec & wrapped3)
+
+        (let weight (sum3 (if i1 (get-weight w1) 0) (if i2 (get-weight w2) 0) (if i3 (get-weight w3) 0))
+          (if (>= (get-carry-capacity) weight)
+              (chain (if i1 (take w1 (nformat "You take the {}." w1)))
+                (if i2 (take w2 (nformat "You take the {}." w2)))
+                (if i3 (take w3 (nformat "You take the {}." w3)))
+                (update-wrapper3 &))
+              (print "You can't carry that much.")))))))))))
+  (method
+    "DROP %"
+    (if (in & "SELF")
+        (chain
+          ;; or just call the functions... then special texts, side effects occur
+          (let w1 (gec & wrapped1)
+            (if (in w1 "SELF")
+                (drop w1 (nformat "You drop the {}." w1))))
+          (let w2 (gec & wrapped2)
+            (if (in w2 "SELF")
+                (drop w2 (nformat "You drop the {}." w2))))
+          (let w3 (gec & wrapped3)
+            (if (in w3 "SELF")
+                (drop w3 (nformat "You drop the {}." w3))))
+          (update-wrapper3 &))
+        (print "But you don't have them!")))
+  (method
+    "TAKE @ %"
+    "GET @ %"
+    (let n (sum3 (if (gec & in1) 1 0) (if (gec & in2) 1 0) (if (gec & in3) 1 0))
+      (if (= @ n)
+          (call-obj & "TAKE %")
+          (> @ n)
+          (print "There aren't that many to take.")
+          (= @ 1)
+          (print "Singular... Plural... (anyway, the potions have specific names).")
+          (= @ 2)
+          (print "But which two?"))))
+  (method
+    "DROP @ %"
+    (let n (sum3 (if (gec & in1) 1 0) (if (gec & in2) 1 0) (if (gec & in3) 1 0))
+      (if (= @ n)
+          (call-obj & "DROP %")
+          (> @ num)
+          (print "There aren't that many to drop.")
+          (= @ 1)
+          (print "Singular... Plural..."))))
+  (method
+    "COUNT %"
+    (if (in & "SELF")
+        (print (format-2 "You have {} {}." (gec & number) (lowercase (name &))))
+        (print (format-2 "There are {} {} in the room." (gec & number) (lowercase (name &))))))
+
+  ; all the appropriate (many) methods and functions
+)
+
+;; should I switch to (let ((name (value))
+;;                           (name (value)))
+;;                         (block)
+
+(func
+  ;; & - name of the wrapper
+  (update-wrapper3 &)
+  (let room (get-room)
+  (let w1 (gec & wrapped1) (let w2 (gec & wrapped2) (let w3 (gec & wrapped3)
+  (let r1 (in w1 room)     (let r2 (in w2 room)     (let r3 (in w3 room)
+  (let s1 (in w1 "SELF")   (let s2 (in w2 "SELF")   (let s3 (in w3 "SELF")
+  (chain
+    (if (in & room)
+        (remove & room)
+        (in & "SELF")
+        (remove & "SELF"))
+    (if (>= (sum3 (if r1 1 0) (if r2 1 0) (if r3 1 0)) 2)
+        (place & room)
+        (>= (sum3 (if s1 1 0) (if s2 1 0) (if s3 1 0)) 2)
+        (place & "SELF"))
+
+    (let dest (if (in & room) room (in & "SELF") "SELF" "NOWHERE")
+      (if (not (str= dest "NOWHERE"))
+          (chain (sec! & in1 (in w1 dest))
+            (sec! & in2 (in w2 dest))
+            (sec! & in3 (in w3 dest)))))
+
+    (sec! & number (sum3 (if (gec & in1) 1 0) (if (gec & in2) 1 0) (if (gec & in3) 1 0)))))))))))))))
+
+(ques
+  (sum3 a b c)
+  (+ a (+ b c))
+)
+
+;; do a n-name format: you take the a, the b, the c?

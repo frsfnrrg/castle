@@ -1,0 +1,250 @@
+$baselibrary.level
+
+(Room
+    "MAGICIAN'S STUDY"
+    (names
+        "Magician's Study"
+        "Wizard Closet"
+    )
+    (desc "This small room is full of queer contraptions, books, and other objects. An entire wall is covered by a bookshelf, and the north and east walls have doors. A table rests in the middle of the room."
+    (let o (in "ORB" "MAGICIAN'S STUDY")
+    (let v (in "VIAL" "MAGICIAN'S STUDY")
+    (let b (in "ENCIPHERED BOOK" "MAGICIAN'S STUDY")
+      (if (and o b v)
+          "Your attention is drawn to three things; a glowing crystal orb, a vial of noxious liquid, and a mysterious book resting in the middle of the room."
+          (and o v)
+          "You can see a glowing crystal orb and a vial of noxious liquid on the table."
+          (and o b)
+          "You can see a glowing crystal orb and a mysterious book lying in the middle of the room."
+          (and b v)
+          "You can see a vial of bubbling liquid and a large book on the table."
+          o
+          "There is a bright crystal orb on the table."
+          v
+          "You can see a vial of liquid."
+          b
+          "A heavy tome is on the table."))))
+      "You can sense heat emanating from the north...")
+    ; make a changable description
+    (objects
+        "ORB"
+        "ENCIPHERED BOOK"
+        "VIAL"
+        "BOOKSHELF"
+        "MAGICIAN'S TABLE"
+
+        "GEN3WALLS" "GENCEILING" "GENFLOOR"
+    )
+    (north "DOOR CLOSED" "FIREPLACE CHAMBER")
+    (east "DOOR LOCKED" "HALLWAY")
+    (west "BOOKSHELF" 0 "You walk into the bookshelf.")
+)
+
+(Object
+    "MAGICIAN'S TABLE"
+    (names
+       "Magician's Table"
+       "Table"
+       "Rectangular Table"
+       "Pentadecagram"
+    )
+    (desc "The plain rectangular table has a pentadecagram carved into the smooth surface.")
+    (takeable False)
+)
+
+(Object
+  "BOOKSHELF"
+  (names
+    "Bookshelf"
+    "Shelf" "Books" "Shelves")
+  (desc "This simple, floor-to-ceiling bookshelf is crowded with books. You select a random book and open it to read the title:"
+    (randomc
+        "\"Principles of Sorcery\"."
+        "\"Art of Nothingness\"."
+        "\"Fifth Element\"."
+        "\"How to Square Circles, Trisect Angles, and Cube Segments\"."
+        "\"101 Ways Make Stuff Explode\"."
+        "\"Mind Reamer Ed. 8\"."
+        "\"Illusions\"."
+        "\"Fire and Water\"."
+        "\"Ghosts, Specters, and Demons\"."
+        "\"Curses for Imbeciles\"."
+        "\"Poisons and How To Use Them\"."
+        "\"The Fine Art of Cookie Making\".")
+    "You put it back and promptly forget where you put it. Since there are myriad books, finding one again would be a monumental task.")
+  (takeable False)
+)
+
+(Object
+  "VIAL"
+  (names
+      "Vial"
+      "Vial of Bubbly Liquid"
+      "Bubbly Liquid"
+      "Liquid")
+  (desc "This small container holds a bubbling liquid. It does not look safe.")
+  (weight .1)
+  (method
+    "DRINK %"
+    "CHUG %"
+    (chain
+      (if (ins "VIAL")
+          (drop "VIAL" "You drink the vial of liquid, which promptly vanishes. Suddenly, you feel invincible, infinitely strong, and as if you could outrun anything.")
+          (print "You drink the vial of liquid, which promptly vanishes. Suddenly, you feel invincible, infinitely strong, and as if you could outrun anything."))
+      (remove "VIAL" (get-room))
+      (set-max-strength 30)
+      (set-strength 30)
+      (set-speed 3)
+      (vial-poison "VILE POISON" 5)))
+       ; Yes. 5 turns, then YOU ARE DEAD. There is no antidote
+  (method
+    "SMELL %"
+    "SNIFF %"
+    (print "The liquid in the vial does not smell of anything."))
+  (method
+    "THROW %"
+    "BREAK %"
+    (chain
+      (if (in "VIAL" "SELF")
+          (drop "VIAL" "You throw the vial against a wall. It shatters, and the liquid inside falls to the floor and disappears.")
+          (print "You take the vial and throw the vial against a wall. It shatters, and the liquid inside falls to the floor and disappears."))
+      (remove "VIAL" (get-room))))
+  (method
+    "POUR % ON $"
+    "POUR % ONTO $"
+    (if (or (str=g/s "STALE BREAD" $) (str=g/s "FRESH BREAD" $))
+        ;; even if plural, you make yourself a "VIAL-DUNKED BREAD" (stale, fresh doesn't matter)
+        (let room (get-room)
+          (let gname (if (str= (tail $) "SUB") (de-subtag $) $)
+            (chain
+              ; first drop the bread
+              (if (not (inr gname))
+                  (drop-n gname 1 "You first drop a loaf of bread."))
+              (place "TAINTED BREAD" room)
+              (remove-n (base gname) 1 room)
+              (if (ins "VIAL")
+                  (drop "VIAL" "You pour the vial of liquid onto a loaf of bread. It quickly absorbs into the bread, making it spongy and turn oddly orange. The vial just vanishes.")
+                  (print "You pour the vial of liquid onto a loaf of bread. It quickly absorbs into the bread, making it spongy and turn oddly orange. The vial just vanishes."))
+              (remove "VIAL" room))))
+        (print "Why bother doing that?")))
+)
+
+(daemon
+    (vial-poison & time)
+    (counter timer time)
+    (step
+      (if (= 0 timer)
+          (chain (print "You suddenly collapse. The liquid has done its work.")
+            (die))
+          (set! timer (- timer 1)))))
+
+(Object
+  "TAINTED BREAD"
+  (names "Vial-Tainted Bread" "Orange Bread" "Vial Bread" "Bread" "Tainted Bread"
+         "Vial-Tainted Loaf" "Orange Loaf" "Vial Loaf" "Loaf" "Tainted Loaf"
+         "Vial-Tainted Loaf of Bread" "Orange Loaf of Bread" "Vial Loaf of Bread" "Loaf of Bread" "Tainted Loaf of Bread"
+         "Vial-Tainted Bread Loaf" "Orange Bread Loaf" "Vial Bread Loaf" "Bread Loaf" "Tainted Bread Loaf")
+  (desc "A peculiar, orange loaf of bread. That is what happens when you pour a vial of something onto bread.")
+  (method
+    "EAT %"
+    (print "One color and consistency set you do your best to avoid is orange and spongy. Alone, these are fine, together, you tend to lose your lunch. You don't know why, but you still avoid the combination and thus the bread."))
+  (weight 2)
+)
+
+(Object
+  "ENCIPHERED BOOK"
+  (names
+      "Enciphered Book"
+      "Book"
+      "Coded Book"
+      "Magician's Book"
+      "Cryptic Tome"
+  )
+  (desc "The hefty tome is written in a strange alphabet. Some type of cipher, perhaps. The pages are yellow and crinkled at the edges. Reading this is definitely out of the question.")
+  (counter read-once? 0)
+  ; 0 false, 1 true
+  (counter actually-read? False)
+  (method
+    "READ %"
+    (if (= 0 (get-counter & read-once?))
+        (print "You can't understand a thing.")
+        (chain (book-EVIL-MONSTERS) (set-counter & actually-read? True))))
+  (method
+    "DECODE %"
+    "DECIPHER %"
+    "DECRYPT %"
+    (if (in "CIPHER SHEET" "SELF")
+        (chain
+          (print "You use the handy cipher sheet you found.")
+          (call-obj & "DECODE % WITH CIPHER SHEET"))
+        (print "You really, really want to. But you don't know how!")))
+  (method
+    "DECODE % WITH $"
+    "DECIPHER % WITH $"
+    "DECRYPT % WITH $"
+    "DECODE % USING $"
+    "DECIPHER % USING $"
+    "DECRYPT % USING $"
+    (if (str= $ "CIPHER SHEET")
+        (if (= 0 (get-counter & read-once?))
+            (chain
+              (set-counter & read-once? 1)
+              (print "You slowly decode a few paragraphs, then some more, then some more. Soon you master the cipher and can read the book directly."))
+            (print "You don't need to: you have already learned to read the cipher the book is in."))
+        (print "That won't work: it tells you nothing about the cipher.")))
+  (weight 1)
+)
+
+; Note: there is a 1024 char/line limit; (that is why I paragraphed)
+
+(func
+  (book-EVIL-MONSTERS)
+  (chain
+    (print "(You read the book.)")
+    (print-line)
+    (print-center "Chapter 1: HOW TO DEFEAT EVIL MONSTERS")
+    (print-center "Archie the Magnificent")
+    (print-line)
+    (bookpause)
+    (print "\tMonsters are an annoying, yet unavoidable part of life. For one to overcome these annoyances, one must study their weaknesses. Fortunately, most if not all monsters have a weakness, a characteristic that lets them be defeated. Of course, the most cardinal rule of monster avoidance is never to enter unknown, uninhabited areas, especially when it is dark outside. Monsters traditionally love to reside there, because foolish adventurers arrive alone or in small groups, as meals ready to eat. Good luck!")
+    (print-line)
+    (print "\tThere are seven major monsters that you need to worry about. Of course, there are many more, but these tend to be insignificant (Nocturnal toe-sniffing gruel), weak (Three legged ankle-biter), or very rare and extremely powerful (Big White Arctic Monster). The seven monsters are: of the Y-gle family, the Yorgle, the Yargle, the Yongle, and of course the Yurgle; a close relative the the Y-gles, the Bongle; then lastly the magical monsters, the Ghost and the Shadow.")
+    (bookpause)
+    (print "\t\tYorgle")
+    (print "\tYorgles are a very common monster. In shape, they are akin to a bear, save that they have much longer, sharper claws and several times stronger. Yorgles tend to live alone in dark places, like caves. They can see in the dark and have a good sense of smell. Fortunately, a Yorgle is very stupid and rather slow. A Yorgle can be tricked easily, by putting out bait or setting a trap. Since they will eat anything, and are not resistant to poison, poisoned food is often a good option. When dealing with Yorgles, one should try to maximize one's capabilities where the Yorgle is weak. Plate armor is like butter to them, and contests of strength are bound to lose.")
+    (bookpause)
+    (print "\t\tYargle")
+    (print "\tYargles are a special type of monster. They are rather small, have fur in any color, and are distinguishable by their large heads, which host a proportionally large number of teeth. One should watch out for the teeth, because even though they are small, when combined with supernatural jaws, they can cut through anything. Yargles have no specific habitat: they do not need one. They are extremely intelligent, more than most people they encounter. They are not vary strong (save for their bite), but, in contrast, are very fast. Nobody has ever caught a Yargle. Yargles are constantly on the search for food, and especially like baked goods. They can easily steal things without the victim's knowledge, and sometimes even take something that isn't food, like keys or magical artefacts. Keys are especially well liked, as with them, a Yargle can go almost anywhere without a trace (and eat massive quantities, also without a trace).")
+    (print "\tMost importantly, Yargles cannot be defeated; it is not advised to try. Even if a yargle looks like it is sleeping deeply, it can wake up and be a meter away in less than a tenth of a second. It is advised to bring massive quantities of food with oneself when in yargle territory (anywhere), and to leave some food (not poisoned, they are immune to that, but think it tastes bad) available as a ... peace offering. Be nice to yargles! :-)")
+    (print-line)
+    (print "[The last two sentences were written in a conspicously different handwriting.]")
+    (bookpause)
+    (print "\t\tYongle")
+    (print "\tYongles are big, bright, feathery beasts. They are identifiyable by three pairs of wings, one in front of the other. The body between the wings is akin to ... that of a rocket. It is round, almost cylindrical, and has a large, facetted eye in front. How Yongles get their food, nobody knows. The most prevalent hypothesis is photosynthesis. Yongles tend to be active only in the dead of night, especially when the moon is out. They fly around in large circles, usually in a group, but sometimes alone.")
+    (print "\tWhen a group of Yongles discovers a traveler, they swoop to the ground, pick up objects, like rocks, or animals, or even other monsters, circle around, and deliver them onto the traveler. This may have unintented consequences; if rocks or angry monsters are available, the target will have a hard time. Sometimes, however, they chance upon a picnic table and provide free supplies. Generally, Yongles are a problem. However, Yongles, always flying, are only susceptible to aerial attacks. A few arrows suffice to take one down. Yongles provide excellent meat, though not a lot of it. If others see someone consuming Yongle, then that person will be in big trouble. Trees and large boulders have been dropped. The best advice is to stay inside or under forest cover.")
+    (bookpause)
+    (print "\t\tYurgle")
+    (print "\tThese wolflike monsters prowl the woods are night. They are very sensitive to light, despite their thick black camouflaged fur, and try to avoid it. If they are hungry though, they will take risks. Yurgles always hunt in packs, and even one alone is a challenge to kill. Since their fur blocks arrows and most other weapons, the best strategy is to cut their legs out from under them. (Sharp wires are an excellent trap.) For the solitary traveler, the best recourse is a very tall tree; they can jump very high, but not more than a few meters. Yurgles must be faced by two or more people; one to wave a sword in front of its face in the front, and another to circle around and cut its feet out from under it. Yurgles will, of course, also try to circle their target, but since they only think of one person at a time, they can be distracted easily. The best advice is to stay out in the open, under sun- or moonlight. Never try to run away from them when in the woods; they will find you.")
+    (bookpause)
+    (print "\t\tBongle")
+    (print "\tBongles are rare, tree dwelling creatures that come out in the morning to terrorize villagers. They are very rotund; imagine a blue panda bear that is well on its way to becoming spherical. They have a tendency to walk through houses on their search for food; fruit preferably, whole trees if nothing else works. The pressure of the food inside them makes them impossible to harm; arrows just bounce off like toothpicks, Their heads are not vulnerable either; their fur is very thick there. The eyes are safe, as they need just close their eyelids to protect them.")
+    (print "\tBongles do not mean much harm; they are 'merely' hungry. When not searching for breakfast, they sleep or socialize in large assemblies of about fifty, playing games. To neutralize a bongle, one is advised to bring a spare balloon, or at least some prepared fruit. The fruit should have gas injected into it, so upon eating it the Bongle expands and its density decreases. Then, a balloon can be attached, and the bongle safely floated away to an unihabited (or competing) area.")
+    (bookpause)
+    (print "\t\tGhosts")
+    (print "\tThis diverse category of immaterial undead is neutralized in only one way; ghost dispelling orbs. The production of these is too complicated and arcane to explain. Since ghosts want to depart the world, they try to do so by ... turning living beings into ghosts, to provide the energy they need to disappear. Permanently destroying a ghost is hard; that requires very advanced magic, akin to that needed to create a new ghost in the first place. However, a ghost dispelling orb is good enough; the ghosts are repelled by the orb and temporarily vanish. They do not move into a different area, though: ghosts are anchored to the place they were first created. The ghost dispelling orb will always work, but the wisest choice is still to bring a very powerful magician to destroy the ghosts. If neither is at hand, one should not even enter an area with ghosts.")
+    (bookpause)
+    (print "\t\tShadows")
+    (print "\tThese evil beings are hard to describe; nobody has ever seen one in much detail and lived. What is known is that they are anchored to an area; they require very powerful magical artefacts to destroy; and they only appear at night. Where shadows exist, other monsters proliferate. There is only one advice to give: if a dark, formless something approaches, leave.")
+    (bookpause)
+    (print "[The next chapter is on curses and sorcery, but that is too arcane for you to understand. The rest of the book is just as incomprehensible. You stop reading.]")))
+
+(Object
+  "ORB"
+  (names
+    "Orb" "Glowing Orb"  "White Orb" "Glowing White Orb"
+    "Ball" "Glowing Ball" "White Ball"  "Glowing White Ball"
+    "Radiant 3-Ball")
+  (desc "The glowing white orb has swirling shades of gray in its depths.")
+  (weight .8)
+  ;; 4 kg; provides no noticable light
+)

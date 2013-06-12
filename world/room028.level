@@ -1,0 +1,121 @@
+$baselibrary.level
+
+(Room
+    "ASSASSIN'S HIDEOUT"
+    (names
+        "Assassin's Hideout"
+        "Attic")
+    (desc "This small room at the top of the southwest tower is filled with deadly items. A dagger is stuck in the wall, and a lever is attached to the floor. The trapdoor down is small, and the same texture as the wooden floor. You can see the sky through a crack in the ceiling..."
+          (if (> (random) .7)
+              (randomc "A spider swings through the crack..."
+                       "The wind sounds loud up here...")))
+    (objects
+        "PENDULUM LEVER"
+        "DAGGER 2"
+        "TRAPDOOR"
+        "CRACK IN CEILING"
+        "DEADLY ITEMS"
+        "SKY"
+        "WIND")
+    (method
+        "DOWN"
+        "D"
+        "GO DOWN"
+        ; _ when the daemon exists, safe passage. It prevents regular bathroom entry script
+        (chain (self-destructor "SAFE MURDERER" 1)
+               (call-obj "TRAPDOOR" "ENTER %"))
+    )
+)
+
+;; (Object TRAPDOOR) $ room015.level
+
+(Object
+    "CRACK IN CEILING"
+    ; just for grappling hook throw
+    (names "Crack in the Ceiling" "Crack" "Crack in Ceiling" "Roof Gap" "Gap")
+    (desc "A narrow crack in the ceiling. It lets in a bit of light, but only that.")
+    (hidden)
+    (takeable False)
+    (method
+        "GO THROUGH %"
+        "GO OUT %"
+        "CLIMB INTO %"
+        "CLIMB UP %"
+        "EXIT BY %"
+        "GO UP %"
+        (print "The crack in the ceiling is too narrow to achieve anything with."))
+)
+
+(Object
+    "DEADLY ITEMS"
+    (names "Deadly Items" "Items" "Weapons" "Instruments")
+    (hidden)
+    (desc "All very complex, very sharp instruments of pain. They lie scattered around the room.")
+    (method
+        "TAKE %"
+        "GET %"
+        (print "You want to have nothing to do with these things. (You might cut yourself by accident.)"))
+)
+
+(Object
+    "PENDULUM LEVER"
+    (names "Pendulum Lever" "Pendulum Control Lever" "Lever" "Mounting" "Lever Mounting" "Writing")
+    (desc
+        "This large, heavy wooden lever is mounted to the"
+        (if (get-counter "PENDULUM LEVER" broken?)
+            "floor, but since the handle snapped off, it is useless. There is writing on it."
+            (join "floor. There is writing on it. The lever is currently in the"
+                (if (get-counter "PENDULUM LEVER" pendulum-on?)
+                    "far position."
+                    "near position."))))
+    (method
+        "READ %"
+        (print "'Pendulum'. That is all."))
+    (takeable False)
+    (counter pendulum-on? True)
+    (counter broken? False)
+    (counter movements 0)
+    (method
+        "PULL %"
+        (if (get-counter & broken?)
+            (print "You already broke the lever. Now you cannot use it.")
+            (if (get-counter & pendulum-on?)
+                (if (>= (get-strength) 9)
+                    (chain (set-counter & pendulum-on? False)
+                           (let m (get-counter & movements)
+                                (if (= m 2)
+                                    (chain (print "You pull the lever a third time. Snap! The handle breaks off, and you find half of a key in the fragments.")
+                                           (set-counter & broken? True)
+                                           (move-n "KEY HALVES" "KEY ROOM" "ASSASSIN'S HIDEOUT" 1))
+                                    (chain (print "You pull the lever toward you. You hear many objects creak below you.")
+                                           (set-counter & movements (+ 1 m))))))
+                    (print "You try, but the lever is too heavy and there is too much resistance."))
+                (print "It is already in the near setting."))))
+    ; strength limit: 9+ watermelons
+    (method
+        "PUSH %"
+        (if (get-counter & broken?)
+            (print "You cannot use the lever anymore. It is broken.")
+            (if (get-counter & pendulum-on?)
+                (print "It is already in the far setting.")
+                (if (>= (get-strength) 9)
+                    (chain (print "You push the lever away from you. You hear loud creaking noises.")
+                           (set-counter & pendulum-on? True)
+                           (set-counter & movements (+ 1 (get-counter & movements))))
+                    (print "You try, but the lever is too heavy and there is too much resistance."))))))
+
+(Object
+    "DAGGER 2"
+    (names "Dagger" "Knife")
+    (desc "This dagger could harm nobody; its blade is bent and chipped.")
+    (weight .6)
+    ; ^ 3 kg
+)
+
+(daemon
+    (self-destructor & time)
+    (counter t time)
+    (step
+        (set! t (- t 1))
+        (if (= t 0)
+            (stop-daemon &))))

@@ -1,0 +1,104 @@
+$baselibrary.level
+
+(Room
+  "SILENT ROOM"
+  (names
+      "Silent Room"
+      "Room of Silence"
+  )
+  (desc
+    "This bare gray room is totally silent. Not a sound, even with all the weather. There should be noises coming from the exits to the east and north, but there are none..."
+    (if (in "BLOCK OF MARBLE" "SILENT ROOM")
+        (join "Your attention is drawn to a huge block of stone, placed in the center of the room."
+          (if (and (in "MARBLE CORNER" "SILENT ROOM") (in "SAPPHIRE" "SILENT ROOM"))
+              "The corner of the block has broken off, and a sapphire lies next to it on the floor."
+              (in "MARBLE CORNER" "SILENT ROOM")
+              "The corner of the block has broken off and lies on the floor."
+              (in "SAPPHIRE" "SILENT ROOM")
+              "A sapphire lies on the floor."
+              (gec "BLOCK OF MARBLE" split?)
+              "The corner of the block is chipped off."))))
+  (entryscript
+    ; Silence is tiring
+    (tire .5))
+  (north "DOOR CLOSED" "NORTHWEST STAIRWELL BOTTOM")
+  (east "DOOR CLOSED" "COURTYARD")
+  (method
+    "SHOUT"
+    "YELL"
+    "SCREAM"
+    (print "You try, but the room just swallows up the sound."))
+  (method
+    "WAIT"
+    (chain
+      (print "Time passes.\n... \n You stop waiting, and realize that you have no idea how long it has been.")
+      ; Silence is tiring
+      (tire .8)))
+)
+
+(Object
+    "BLOCK OF MARBLE"
+    (names
+        "Block of Marble"
+        "Rock"
+        "Block"
+        "Marble"
+        "Monolith"
+    )
+    (desc "The large hunk of marble is almost the same color as the walls. It is a [perfect] rectangular prism [with a corner chipped off], slightly taller than you and polished so that it reflects everything in the room.")
+    (method
+        "TAKE %"
+        "GET %"
+        (print "You might as well try to swim across an ocean. This thing will not move.")
+    )
+    (counter split? False)
+)
+
+(Object
+    "MARBLE CORNER"
+    ; splits off when the lever in the foggy room is pulled
+    (names
+        "Marble Corner"
+        "Rock Corner"
+        "Piece of Rock"
+        "Corner"
+        "Rock" "Marble"
+    )
+    (desc "This corner of the large rock is still very heavy.")
+    (weight 5)
+)
+
+(Treasure
+  "SAPPHIRE"
+  ; Appears when the lever in the foggy room is pulled
+  (names
+    "Sapphire"
+    "Gem" "Blue Gem" "Blue Thing" "Blue" "Something Blue"
+    "Jewel" "Blue Jewel" "Treasure"
+    "Dodecahedron")
+  (desc "This large, perfect sapphire is cut in the shape of a dodecahedron.")
+)
+
+(Class Treasure
+  (extends Object)
+  (typetag Treasure)
+  (weight .3)
+  ;; 1.5 kg. rather hefty, but whatever
+    (method
+    "TAKE %" "GET %"
+    (chain (take & (nformat "You take the {}." &))
+      (if (in & "SELF")
+          (increase-score 1))))
+  (method
+    "DROP %"
+    (let s (in & "SELF")
+      (chain (drop & (nformat "You drop the {}." &))
+        (if s (decrease-score 1)))))
+  (method
+    "THROW %"
+    "HURL %"
+    "BREAK %"
+    "DESTROY %"
+    (chain (print (nformat "You throw the {} against a wall, where it shatters into millions of little pieces." &))
+      (decrease-score 1)
+      (remove & (get-room)))))

@@ -1,0 +1,117 @@
+
+; This... this is the real deal.
+
+;; TODO: _remove_ the auto-selection of grouped things. That is what the input options are for, and this confuses.
+
+(func
+    (take & bytext)
+    (if (takeable? &)
+        (let p& (if (group? &) (roomtag (base &) (get-room)) &)
+          (if (in p& (get-room))
+              (if (ugroup? p&)
+                  (_sub-get p& move-u-n bytext (* (get-weight (sub p&)) (get-count p&)))
+                  (group? p&)
+                  (_sub-get p& move-n bytext (* (get-weight (sub p&)) (get-count p&)))
+                  (_sub-get p& move bytext (get-weight p&)))
+              (print "You can't take what you already have.")))
+        (if (group? &)
+            (print "You can't take them!")
+            (print "You can't take it!")
+        )
+    )
+)
+
+(func
+    (_sub-get & function bytext weight)
+    (if (>= (get-carry-capacity) weight)
+        (chain
+            (dec-carry-capacity weight)
+            (function (base &) (get-room) "SELF" (get-count &))
+            (print bytext)
+        )
+        (print "You can't carry that much.")
+    )
+)
+
+(func
+    (take-n & num bytext)
+    (if (in (roomtag (base &) (get-room)) (get-room))
+        (if (in-n (base &) num (get-room))
+            (if (ugroup? &)
+                (_sub-get-n & move-u-n bytext (* (get-weight (sub &)) num) num)
+                (_sub-get-n & move-n bytext (* (get-weight (sub &)) num) num)
+            )
+            (print "There aren't even that many.")
+        )
+        (if (= 1 num)
+            (print "It isn't there for you to take.")
+            (print "They aren't there for you to take.")
+        )
+    )
+)
+
+(func
+    (_sub-get-n & function bytext weight num)
+    (if (>= (get-carry-capacity) weight)
+        (chain
+            (dec-carry-capacity weight)
+            (function (base &) (get-room) "SELF" num)
+            (print bytext)
+        )
+        (print "You can't carry that much.")
+    )
+)
+
+(func
+    (drop & bytext)
+    (if (in & "SELF")
+        (let p& (if (group? &) (roomtag (base &) "SELF") &)
+          (if
+              (ugroup? p&)
+              (_sub-drop (base p&) move-u-n bytext (* (get-weight (sub p&)) (get-count p&)) (get-count p&))
+              (group? p&)
+              (_sub-drop p& move-n bytext (* (get-weight (sub p&)) (get-count p&)) (get-count p&))
+              (_sub-drop p& move bytext (get-weight p&) (get-count p&))))
+        (if (group? &)
+            (print "You don't have them!")
+            (print "You don't have it!")
+        )
+    )
+)
+
+(func
+    (_sub-drop & function bytext weight count)
+    (chain
+        ; Note: (move ) conveniently ignores all extra arguments, so the get-count just fizzles
+        ; should really, really do lazy-eval. but whatever
+        (function & "SELF" (get-room) count)
+        (inc-carry-capacity weight)
+        (print bytext)
+    )
+)
+
+(func
+    (drop-n & num bytext)
+    (if (in & "SELF")
+        (if (in-n (base &) num "SELF")
+            (if (ugroup? &)
+                (_sub-drop-n & (base &) move-u-n bytext num)
+                (_sub-drop-n & & move-n bytext num)
+            )
+            (print "You don't even have that many.")
+        )
+        (if (= 1 num)
+            (print "You don't have it!")
+            (print "You don't have them!")
+        )
+    )
+)
+
+(func
+    (_sub-drop-n & arg function bytext num)
+    (chain
+        (inc-carry-capacity (* (get-weight (sub &)) num))
+        (function arg "SELF" (get-room) num)
+        (print bytext)
+    )
+)

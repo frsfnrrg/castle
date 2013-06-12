@@ -1,0 +1,359 @@
+$baselibrary.level
+$lightstick.level
+
+(Room
+    "HALLWAY"
+    (names "Hallway")
+    (description
+        "The hallway's low ceiling goes just above your head. Torch holders line the walls, and there are still some nearly unused torches lying in them. The wooden floor is dirty, probably because of the door on the north, which is open, and lets in cool air (and muck) from outside. The door back to the gatehouse is to the south, while two doors are opposite each other east and west of you."
+        (randomc
+            "You hear the soft hooting of owls to the north..."
+            "The wind is still audible, coming from the space north of here..."
+            "You wonder why you ever came to this place..."
+        )
+    )
+    (north "DOOR OPEN" "COURTYARD")
+    (east "DOOR CLOSED" "GARDEN STORE")
+    (south "DOOR CLOSED" "GATEHOUSE")
+    (west "DOOR LOCKED" "MAGICIAN'S STUDY")
+    (objects
+        "TORCHES_HALLWAY"
+        "TORCH HOLDERS_HALLWAY"
+        "DIRTY WOODEN FLOOR"
+        "WIND"
+        "DIRT X"
+    )
+)
+
+(Scenic
+  "DIRT X"
+  (names "Dirt" "Muck")
+  (desc "It's everywhere!")
+  (method
+    "CLEAN %"
+    "REMOVE %"
+    "TAKE %"
+    "GET %"
+    (call-obj "DIRTY WOODEN FLOOR" "CLEAN %"))
+)
+
+(Object
+    "DIRTY WOODEN FLOOR"
+    (names
+        "Dirty Wooden Floor"
+        "Wooden Floor"
+        "Floor"
+        "Ground"
+        "Wooden Floor Panels"
+        "Splinter Alley"
+        "Planks"
+    )
+    (hidden)
+    (desc "A floor. Made of wood planks. With dirt and dust and grime on top."
+      (if (gec "KEYHOLE" appeared?) (chain (if (not (in "KEYHOLE" "HALLWAY")) (place "KEYHOLE" "HALLWAY") (place "FLOOR COMPARTMENT" "HALLWAY")) "You see a small keyhole in the middle of the floor.")))
+    (takeable False)
+    (counter cleaning-attempts 0)
+
+    (method
+      "CLEAN %"
+      (chain
+        (if (= (gec & cleaning-attempts) 2)
+            (print "As you think about cleaning the floor, a little voice whispers to you about the benefits of premium mud, and the cost savings you'd get from buying this product over others. Worms are not included.")
+            (print "You look at the floor and give up. It evidently wants to be dirty."))
+        (sec! & cleaning-attempts (+ 1 (gec & cleaning-attempts)))))
+
+)
+
+(Object
+  "TORCH HOLDERS_HALLWAY"
+  (names
+      "Torch Holders"
+      "Holders of Torches"
+      "Sconces"
+      "Fire Holders"
+  )
+  (description
+      "These metal torch holders are attached to the walls of the hallway: six on the left, six on the right. The ceiling is marked by soot above each sconce."
+      ;This depends on how many torches have been left in the room
+  )
+  (takeable False)
+  (group 12 "TORCH HOLDER")
+
+  (method
+      "TAKE %" "GET %" "TAKE @ %" "GET @ %"
+      (print "They're bolted to the wall!"))
+  (method
+      "TAKE #" "GET #" "TAKE A #" "GET A #" "TAKE 1 #" "GET 1 #"
+      (print "It is bolted to the wall. You can neither take nor understand why you want to."))
+  (method
+    "PUT $ IN #"
+    (print "You can't understand why you'd want to. Your mother is not here."))
+)
+
+(Object
+    "TORCH HOLDER"
+    (names
+        "Torch Holder"
+        "Holder of Torch"
+        "Sconce"
+        "Flame-bearers"
+    )
+    (description
+        "This is metal torch holder. It is bolted to the wall."
+    )
+)
+
+(LightStickGroup
+    "TORCHES_HALLWAY"
+    (names
+        "Torches"
+        "Firey Sticks"
+    )
+    (description "Some simple wooden torches. Amazingly, all still have sticky goop on the end, and so should work.")
+    (ugroup
+        8
+        "TORCH"
+    )
+
+    (counter totalnumber 8)
+    (counter unlit 8)
+)
+
+(LightStick
+    "TORCH"
+    (names
+        "Torch"
+        "Stick 'n Goop"
+    )
+    ; meh. TODO add & and % into the description execution. &.lit? for counters, and the world is perfect :-)
+    (description "A plain torch, made of wood, and covered on one end in a flammable substance.")
+    (counter turns 30)
+    (weight 1.2)
+    ; ^ 6 kg
+)
+
+(Object
+  "KEYHOLE"
+  (counter appeared? False)
+  (desc "This, this is the tiny keyhole to a secret compartment in the floor. Once you found the keyhole, the compartment was obvious.")
+  (takeable False)
+  (hidden)
+  (method
+    "UNLOCK %"
+    (print "To do so, you'd need to use a key."))
+)
+
+(Room "COMPARTMENT INTERIOR" (names "Seeeeecret!") (desc "What a badly kept secret it is too.")
+  (objects "ARROWS_COMPARTMENT INTERIOR" "STAFF" "STAFF END" "STAFF HEAD")
+  (north "FREE" "CUPBOARD" "You warp.")
+  (south "FREE" "KEY ROOM" "You warp.")
+  (up "FREE" "TOWER ROOF" "You warp.")
+  (down "FREE" "COOKIE WORLD" "You warp.")
+  (west "FREE" "COMPARTMENT INTERIOR" "You warp.")
+  (east "FREE" "GATEHOUSE" "You warp.")
+)
+
+(Object
+  "FLOOR COMPARTMENT"
+  (names "Secret Compartment" "Floor Compartment" "Floor Door" "Compartment")
+  (desc (let d (gec & door-state)
+    (if (= d 0)
+        (join "The compartment is open, and holds"
+            (if (and (gec & holds-staff?) (gec & holds-arrows?))
+                "some arrows and a staff."
+                (gec & holds-staff?)
+                "a staff."
+                (gec & holds-arrows?)
+                "some arrows."
+                "nothing."))
+        (= d 1)
+        "The compartment in the floor is closed."
+        "It is locked.")))
+  (counter door-state 2)
+  (counter holds-staff? True)
+  (counter holds-arrows? True)
+  (takeable False)
+  (method
+    "OPEN %"
+    (let d (gec & door-state)
+      (if (= d 1)
+          (chain (print "You open the compartment.")
+            (sec! & door-state 0)
+            (if (in "ARROWS_COMPARTMENT INTERIOR" "COMPARTMENT INTERIOR")
+                (chain (move-n "ARROWS_COMPARTMENT INTERIOR" "COMPARTMENT INTERIOR" "HALLWAY" (get-count "ARROWS_COMPARTMENT INTERIOR"))
+                  (if (> (get-count "ARROWS_HALLWAY") 1)
+                      (print "You find some arrows.")
+                      (print "You find a lone arrow."))))
+            (if (in "STAFF" "COMPARTMENT INTERIOR")
+                (chain (move "STAFF" "COMPARTMENT INTERIOR" "HALLWAY")
+                  (move "STAFF HEAD" "COMPARTMENT INTERIOR" "HALLWAY")
+                  (move "STAFF END" "COMPARTMENT INTERIOR" "HALLWAY")
+                  (print "You find a staff."))))
+          (= d 2)
+          (print "That compartment is locked.")
+          (print "It is already open!"))))
+  (method
+    "CLOSE %"
+    (let d (gec & door-state)
+      (if (= d 0)
+          (chain (print "You close the compartment.")
+            (sec! & door-state 1)
+            (if (gec! & holds-staff?)
+                (chain (move "STAFF" "HALLWAY" "COMPARTMENT INTERIOR")
+                  (move "STAFF HEAD" "HALLWAY" "COMPARTMENT INTERIOR")
+                  (move "STAFF END" "HALLWAY" "COMPARTMENT INTERIOR")))
+            (if (gec! & holds-arrows?)
+                (move-n "ARROWS_HALLWAY" "HALLWAY" "COMPARTMENT INTERIOR" (get-count "ARROWS_HALLWAY"))))
+          (= d 1)
+          (print "The compartment is already closed.")
+          (= d 2)
+          (print "Not only closed, but locked. Remember to compile 'brain.c' next time."))))
+
+  (method
+    "UNLOCK %"
+    (print "To do so, you'd need to use a key."))
+  (method
+    "PUT $ IN %"
+    (print "You don't need to use a secret compartment."))
+  (method
+    "EMPTY %"
+    (let a (gec & holds-arrows?) (let s (gec & holds-staff?)
+      (chain
+        (if a
+            (chain (print "You take the arrows out and put them on the floor.") (sec! & holds-arrows? False)))
+        (if b
+            (chain (print "You take the staff out and put it on the floor.") (sec! & holds-staff? False)))
+        (if (not (or a b))
+            (print "The compartment is already empty."))))))
+)
+
+(Object
+  "ARROWS_COMPARTMENT INTERIOR"
+  (names "Arrows" "Straight Arrows" "Bow Sticks" "Pointy Things" "Black Arrows" "Black Feathered Arrows")
+  (desc "A group of long, pointy arrows.")
+  (group 20 "ARROW")
+  (method
+    "TAKE %" "GET %"
+    (chain (take & "You take the arrows.")
+      (if (and (not "ARROWS_HALLWAY" "HALLWAY") (gec "FLOOR COMPARTMENT" hold-arrows?))
+          (sec "FLOOR COMPARTMENT" hold-arrows? False))))
+  (method
+    "TAKE @ %" "GET @ %"
+    (chain (take-n & @ (format-1 "You take {} arrows." @))
+      (if (and (not "ARROWS_HALLWAY" "HALLWAY") (gec "FLOOR COMPARTMENT" hold-arrows?))
+          (sec "FLOOR COMPARTMENT" hold-arrows? False))))
+  (method
+    "TAKE AN #" "TAKE #" "TAKE 1 #" "GET AN #" "GET #" "GET 1 #"
+    (chain (take-n & 1 "You take an arrow.")
+      (if (and (not "ARROWS_HALLWAY" "HALLWAY") (gec "FLOOR COMPARTMENT" hold-arrows?))
+          (sec "FLOOR COMPARTMENT" hold-arrows? False))))
+;; I have to overload ... all the main # commands (not many, yet): it is not 'A', but 'AN' !
+;; at least ARROW should be the only one ;-)
+  (method
+    "DROP #" "DROP AN #" "DROP 1 #"
+    (drop-n & 1 "You drop an arrow.")
+  )
+  (method
+    "DESCRIBE #" "DESCRIBE AN #"
+    "EXAMINE #"  "EXAMINE AN #"
+    "LOOK AT #"  "LOOK AT AN #"
+    "X #"        "X AN #"
+    (print (describe-o (sub &))))
+
+  (method
+    "THROW %"
+    (print "They are useless without a bow."))
+  (method
+    "THROW #" "THROW 1 #" "THROW AN #"
+    (print "It isn't meant for throwing."))
+  (method
+    "KISS #" "KISS 1 #"  "KISS AN #"
+    (print "It doesn't seem to be interested."))
+  (method
+    "ENLIGHTEN #" "ENLIGHTEN 1 #" "ENLIGHTEN AN #"
+    (print "You try to enlighten the arrow. It refuses."))
+)
+
+(Object
+  "ARROW"
+  (names "Arrow" "Straight Arrow" "Iron Point" "Black Feathers" "Feathers" "Pointy Thing" "Point" "Feather")
+  (desc "This arrow is made of a long, straight, unidentifiable wood. It is tipped with an iron point, and ended with black feathers.")
+  (weight .05)
+  ;; ^ 250 g
+)
+
+(Object
+  "STAFF"
+  (desc "This long wooden staff has a dull green stone on one end.")
+  (weight 1)
+  (counter whole? True)
+  ;; make one be able to see through the green stone, to see a red stone behind it? to add light condition?
+  (method
+    "BREAK %"
+    "SPLIT %"
+    (chain
+      (print "You break the staff over your knee. It breaks cleanly into two pieces, and a ruby rolls out of the head.")
+      (show "STAFF HEAD")
+      (show "STAFF END")
+      (if (ins &)
+          (chain (remove & "SELF")
+            (place "RUBY" "SELF"))
+          (let r (get-room)
+            (chain (remove & r)
+              (place "RUBY" r))))))
+  (method
+    "TAKE %"
+    "GET %"
+    (chain (take & "You take the staff.")
+      (if (and (ins "STAFF") (not (ins "STAFF HEAD")))
+          (chain (move "STAFF HEAD" (get-room) "SELF")
+            (move "STAFF END" (get-room) "SELF")))))
+  (method
+    "DROP %"
+      (chain (drop & "You drop the staff.")
+        (if (and (inr "STAFF") (not (inr "STAFF HEAD")))
+            (let r (get-room)
+              (chain (move "STAFF HEAD" "SELF" r)
+                (move "STAFF END""SELF" r))))))
+)
+
+(Object
+  "STAFF HEAD"
+  (names "Staff Head" "Head" "Staff End" "Dull Green Stone" "Green Stone")
+  (desc "This is the head of the wooden staff. The end has a dull green stone on it." (if (not (gec "STAFF" whole?)) "The staff head is hollow, and used to contain a ruby."))
+  (hidden)
+  (weight .1)
+  (method
+    "TAKE %" "GET %"
+    (print "It's part of the staff!")
+  )
+  (method
+    "BREAK OFF %"
+    "DETACH %"
+    "SEPERATE %"
+    (call-obj "STAFF" "BREAK %")
+  )
+)
+
+(Object
+  "STAFF END"
+  (names "Staff End" "End of Staff" "Wood" "Staff Part")
+  (desc "A long, straight piece of wood.")
+  (hidden)
+  (method
+    "TAKE %" "GET %"
+    (print "It's part of the staff!")
+  )
+  (weight .6)
+)
+
+(Treasure
+  "RUBY"
+  (names "Ruby"
+    "Gem" "Red Gem" "Red Thing" "Red" "Something Red"
+    "Jewel" "Red Jewel" "Treasure"
+    "Sparkly Red Thing")
+  (desc "A large, icosahedral ruby." (if (> (random) .9) "It sparkles in the light."))
+  ;; weight .3
+  ;; found by: entering fireplace room; or having a scepter at max
+)

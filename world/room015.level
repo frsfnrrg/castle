@@ -1,0 +1,202 @@
+$baselibrary.level
+
+(Room
+    "BATHROOM"
+    (names
+        "Bathroom"
+        "Toilet Stall"
+    )
+    (desc "The bathroom is a bare room with a row of toilets near the western window. Toilets is not a very good term--they are more like holes in a stone bench that drop waste down into the moat. The only door is to the west, but there is a trapdoor above you...")
+    (entryscript
+        (if (and
+                (not (daemon-exists? "SAFE MURDERER"))
+                (get-counter "PENDULUM LEVER" pendulum-on?))
+            (chain
+                (print "You hear a swishing noise, and turn, startled.")
+                (if (or (= 3 (get-speed)) (and (= 2 (get-speed)) (> (random) .8)))
+                    ;; On normal speed, you have a one in five chance of survival
+                    ;; Fast, you always live; Slow, goodbye
+                    (print "You dodge the pendulum that swipes down from above the door. Had you stayed there, you would have been knocked out the window.")
+                    (chain (print "SLAM! A giant pendulum hits you with massive force, killing you instantly. Your crumpled body flies out the window, splashing down into the moat.")
+                           (die)))
+                (redraw-pendulum "RESETTING DOOMCLOCK"))))
+    ;; could one auto-trigger it by throwing an object into the bathroom? no: magic is at hand
+
+    (east "DOOR CLOSED" "WEST GALLERY")
+    (objects
+        "BATHROOM WINDOW"
+        "MOAT"
+        "SKY"
+        "WIND"
+        "FOREST"
+        ; ^ or make global obj MOAT
+        "PENDULUM"
+        "TOILETS"
+        "TRAPDOOR")
+    (method
+      "GO TO BATHROOM" "GO POTTY"
+      "POOP" "PEE"
+      "DEFECATE" "URINATE"
+      (print "You don't feel the need."))
+    (method
+        "WEST"
+        "W"
+        "GO WEST"
+        ; VILE POISON
+        (if (daemon-exists? "VILE POISON")
+            (chain (print "You run to the window, leap out, and dive into the moat. The moat monsters get you.")
+                   (die))
+            (print "You could, but you don't want to fall into the moat and be eaten by whatever lives in there.")))
+    (method
+        "UP"
+        "U"
+        "GO UP"
+        (call-obj "TRAPDOOR" "ENTER %")
+    )
+)
+
+(daemon
+    (redraw-pendulum &)
+    (counter wait True)
+    (step
+        ; _dmap does not do variables in ifs: FIXME!
+        ; that is why we have (not (not wait))
+        (if (not (not wait))
+            (set! wait False)
+            (chain (if (str= (get-room) "BATHROOM")
+                       (print "The chain at the end of the massive pendulum is reeled in, and the pendulum resumes its former position above the door."))
+                   (stop-daemon &)))))
+
+(Object
+    "TOILET"
+    (names "Hole" "Toilet")
+    (desc "The cold stone of the toilet is anything but welcoming.")
+    ; it is very interesting how many adventurers never need to go to the toilet
+)
+
+(Object
+  "TOILETS"
+  (names
+      "Toilets"
+      "Holes"
+      "Row of Toilets"
+      "Row of Holes"
+      "Stone Bench")
+  (desc "These toilets are just a row of holes in a stone bench. Fortunately, they have not been used recently.")
+  (group 3 "TOILET")
+  (method
+      "DROP $ IN %"
+      (print "One thing you've learned on your long journeys is never to throw anything away. (If anything starts to decay, give it to someone else.)")
+  )
+  (method
+      "ENTER %" "ENTER A #" "ENTER #"
+      "GO DOWN %" "GO DOWN A #" "GO DOWN #"
+      (print "You don't fit and don't want to.")
+  )
+  (method
+      "TAKE %"
+      "GET %"
+      "TAKE @ %"
+      "GET @ %"
+      (print "You can't take them."))
+  (method
+      "TAKE #" "TAKE A #" "GET #" "GET A #"
+      (print "You cannot take that."))
+  (method
+    "SIT ON %" "SIT ON A #" "SIT ON #" "SIT ON 1 #" "SIT ON SOME %"
+    (print "You select on of the toilets and sit on it. You immediately stand up again, unimpressed by the seat quality."))
+  (method
+    "USE %" "USE A #" "USE #"
+    "PEE IN #"    "POOP IN #"
+    "PEE IN A #"  "POOP IN A #"
+    "PEE IN %"    "POOP IN %"
+    (call-room "GO TO BATHROOM"))
+)
+
+(Object
+    "PENDULUM"
+    (names
+        "Pendulum"
+        "Massive Pendulum"
+        "Weighted Pendulum"
+        "Weight"
+        "Chain"
+    )
+    (desc "A long, heavy pendulum hanging from the ceiling. It must build up to a great speed at the base of its swing. The weight is attached to a chain, which"
+          (if (daemon-exists? "RESETTING DOOMCLOCK")
+          "is slowly pulling it back to its starting spot above the door."
+          "keeps it in position above the door."))
+    (takeable False)
+)
+
+; make the below a bi room trapdoor: text depends on room
+
+(Object
+    "TRAPDOOR"
+    ; can be open or closed
+    (names "Trapdoor" "Handle" "Small Trapdoor")
+    (desc
+        (if (str= (get-room) "BATHROOM")
+            "This small trapdoor is painted to look like the ceiling. The paint has mostly worn away, so finding it was easy. A simple handle by which it can be opened is visible."
+            "This small trapdoor is simply built: just some rough wood on this side and a handle to open it on this side."))
+    ; if it is open, then show the ladder rungs on it, so you can climb up
+    (counter door-state 1)
+    ; 0 open, 1 closed || the door in the penguin bush
+    (takeable False)
+    (method
+        "OPEN %"
+        (if (= 1 (get-counter & door-state))
+            (chain (print "You grasp the trapdoor by the handle and try to open it. The trapdoor slowly swings open.") (set-counter & door-state 0))
+            (print "The trapdoor is already open."))
+    )
+    (method
+        "CLOSE %"
+        (if (= 0 (get-counter & door-state))
+            (chain (print "You grasp the trapdoor by the handle and close it.") (set-counter & door-state 1))
+            (print "The trapdoor is already closed."))
+    )
+    (method
+        "ENTER %"
+        (chain
+            (if (= 1 (get-counter & door-state))
+                (chain (if (str= (get-room) "BATHROOM")
+                           (chain (print "You open the trapdoor and climb up the rungs built into it.")
+                                  (set-room "ASSASSIN'S HIDEOUT"))
+                           (chain (print "You open the trapdoor and climb down the rungs built into it.")
+                                  (set-room "BATHROOM")))
+                       (set-counter & door-state 0))
+                (if (str= (get-room) "BATHROOM")
+                    (chain (print "You reach up and climb into the room above.")
+                           (set-room "ASSASSIN'S HIDEOUT"))
+                    (chain (print "You climb down into the room below.")
+                           (set-room "BATHROOM"))))
+            (look-at-room)))
+    (method
+        "CLIMB UP %"
+        "GO UP %"
+        (if (str= (get-room) "ASSASSIN'S HIDEOUT")
+            (print "You are already above the trapdoor. You cannot climb up it.")
+            (call-obj & "ENTER %")))
+    (method
+        "CLIMB DOWN %"
+        "GO DOWN %"
+        (if (str= (get-room) "BATHROOM")
+            (print "You are already below the trapdoor. You cannot climb down it.")
+            (call-obj & "ENTER %")))
+)
+
+(Object "BATHROOM WINDOW"
+    (names "Window" "Bars" "Holes" "Rectangle" "Opening")
+    (desc "This window is just a rectangular opening in the wall. The bars which should have been there have been removed (There is a row of holes along the sides and top).")
+    (takeable False)
+    (hidden)
+    (method
+        "JUMP OUT %"
+        "EXIT BY %"
+        (call-room "WEST"))
+    (method
+        "LOOK OUT %" "GAZE OUT %" "STARE OUT %" "LOOK THROUGH %" "GAZE THROUGH %" "STARE THROUGH %"
+        (print "You can see the moat below, as well as the endless waves of forest canopy. The sky just barely illuminates everything."))
+;; hidden message about crows?
+
+)

@@ -1,0 +1,406 @@
+
+
+; Style: Lisplike
+
+; We have (operator "string" (array "string" "string") 1)
+
+; " is to be the only quote symbol; The quote symbols in strings to
+
+; Syntax rules:
+; 1  defs are simply (name value)
+; 2+ defs are   (name
+;                   value
+;                   value
+;                   ...
+;               )
+
+; Any in-quote "\n"'s are to be replaced with true newlines
+; Same goes for \\ and \" :-)
+
+; Tabs (in function) are expressed as \t, and autoconved to spaces in the real word. But anyway, let '\t' be '    ', since spaces would be auto-removed
+
+; NEW RULE: groups are initialized ending in their location name. Hmph. A fix, but it sure as hex is cleaner and works
+;
+; group - w/o indiv state: ugroup - w/ indiv state
+
+; TODO create a drawing/map of each room, then improve the descriptions
+
+; BEGIN: 'Egad, a lisp comment keyword!'
+; END
+
+; ATTACKING: method of attacked obj
+; UNLOCK: method of key
+; DECODE: method of decoding obj
+; ATTACH: method of attaching obj
+; LIGHT: method of lighted obj
+; MELT obj IN obj USING obj; method of melted object
+
+;print and all that good stuff
+$baselibrary.level
+
+(introtext
+    "\n\nCastle Escape\n\n"
+    "You, a weary traveler, wanted to rest for a night. You thought the woods unsafe and instead took to a castle you just happened to stumble across. The castle didn't seem too bad, until you entered it. The entrance door swung shut behind you, and locked itself. Now you will need to find a way out."
+)
+
+; The time is permanently clamped at evening, as the moon starts to rise and the sun goes down. It is windy, cool, and the sky produces a dim light
+
+(extrotext "You made it!")
+
+; Default obj commands
+$defaultcommands.level
+
+; Global commands
+$globalscripts.level
+
+; Load rooms
+
+; Gatehouse
+$room001.level
+; Magician's Study
+$room002.level
+; Hallway
+$room003.level
+; Garden Store
+$room004.level
+; Dungeon;
+$room005.level
+;Fireplace Chamber
+$room006.level
+; Courtyard
+$room007.level
+; Rock Meets Head Room
+$room008.level
+; Silent Room
+$room009.level
+; Blacksmith's Forge
+$room010.level
+; Northwest Stairwell Bottom
+$room011.level
+; Wine Cellar
+$room012.level
+; Small Room
+$room013.level
+; Weapon Storage
+$room014.level
+; Bathroom
+$room015.level
+; West Gallery
+$room016.level
+; East Gallery
+$room017.level
+; Guard Room
+$room018.level
+; Kitchen
+$room019.level
+; Balcony
+$room020.level
+; Caved In Room
+$room021.level
+; Treasury
+$room022.level
+; Herb Store
+$room023.level
+; Northwest Stairwell Top
+$room024.level
+; Alchemist's Laboratory
+$room025.level
+; Foggy Room
+$room026.level
+; Northeast Stairwell
+$room027.level
+; Assassin's Hideout
+$room028.level
+; Batty Attic
+$room029.level
+; Armor Storage
+$room030.level
+; Cave
+$room031.level
+; Tunnel
+$room032.level
+; Well
+$room033.level
+; Roof to Assassin's Hideout;
+$room034.level
+
+; Generic Items. Nobody Cares.
+$generics.level
+
+
+;; Create a 'generics.level', that includes Scenics like
+;; Ceiling
+;; Floor
+;; Door
+;; Doors
+;; Wall
+; to be put in rooms like that
+
+
+(Cookies
+  "COOKIES_SELF"
+  (names
+      "Chocolate Cookies"
+      "Chocolate"
+      "Cookies"
+      "Own Cookies"
+      "Food of the Gods"
+  )
+  (description "Delicious, homemade chocolate cookies. Yum.")
+  (group 5 "COOKIE")
+
+    ; Also, _should_ let eating commence if the cookies are in the room: you don't need to 'carry' a cookie to eat it, just be able to access the cookie.
+)
+
+(Cookie
+    (description "A morsel from heaven, guaranteed to re-energize you fully once you taste the chocolate flavor. It is very, very potent, and so should be taken sparingly.")
+    (names
+        "Chocolate Cookie"
+        "Cookie"
+        "Morsel of Heaven"
+    )
+    ;; ^ a kg apiece. I want those cookies!!
+    "COOKIE"
+)
+
+;; random comment: Did you know that Kate follows 3 parenthese sets: in text, in string, in comments?  (
+
+(Self
+  "SELF"
+  (names
+      "Self" "Me"
+      "Guy"  "Beard")
+  (desc "A prime example of a guy. That beard is simply awe-inspiring.\n"
+    (format "You are strong enough to carry {0} large watermelons." (get-strength))
+    (let o (ins "ORB OF SPEED")
+      (let a (ins "ARMOR")
+        (if (and a o) "\nYou are wearing armor, but still can move around fine."
+            a "\nThe suit of armor you are wearing encumbers you."
+            o "\nTime seems to pass very slowly for you; your reactions are much faster than normal.")))
+    (if (daemon-exists? "VILE POISON")
+        "\nYou feel giddy, as if you could do anything."
+        (daemon-exists? "DOOZY")
+        "\nYou are feeling slightly dizzy."))
+  (strength 8)
+  (speed 2)
+  (maxstrength 10)
+  (objects "SELF" "COOKIES_SELF")
+  (method
+    "KILL %"
+    (print "You really don't want to do that. You're trying to escape ALIVE, not dead!"))
+  (method
+    "ENLIGHTEN %"
+    (print "You become enlightened."))
+  (method
+    "TAKE %" "GET %" "DROP %"
+    (print "Huh?"))
+)
+
+(position "GATEHOUSE")
+(score 0)
+
+; see above comment )
+
+(Object
+    "OMNIKEY"
+    (names
+        "Debug Key"
+        "Key of Debugging"
+        "Key"
+        "Debug"
+        "'Bug"
+        "Sudo"
+        ;; find a nice, 1 letter shortcut
+        "B"
+    )
+    (desc "A magical key, given by the gods of Code.")
+    (weight 0)
+    (key "HALLWAY" "MAGICIAN'S STUDY")
+    (key "WEAPON STORAGE" "BLACKSMITH'S FORGE")
+    (key "SMALL ROOM" "WINE CELLAR")
+    (key "TREASURY" "KITCHEN")
+    (method
+        "% HEAL"
+        (chain
+            (set-max-strength (* (+ (get-strength) 50) 2))
+            (set-strength (* (+ (get-strength) 50) 2))
+            (set-speed 3)
+            ; 1 is slow, 2 is med, 3 is fast
+            (print "The aura of the debug key surrounds you")
+            (replace-room-desc "SELF" "awe-inspiring." "magnificent. You possess the Debug Key and are surrounded by its aura.")
+            (auto-heal "AUTO-HEAL")
+        )
+    )
+    (method
+        "% NO AUTO HEAL"
+        "% NAH"
+        (stop-daemon "AUTO-HEAL"))
+    (method
+        "%"
+        (chain (print "Debugging toggled.")
+            (exec "toggleDebug()" )))
+    (method
+        "% LIGHT"
+        (chain (place "BRIGHT SCEPTER" "SELF")
+          (place "SCEPTER BAND" "SELF")
+          (call-obj "SCEPTER BAND" "TURN % RIGHT")))
+    (method
+        "DROP %"
+        (print "You cannot. It will not go."))
+    (method
+        "% GOTO !"
+        (if (room-exists? !)
+            (chain (set-room !) (look-at-room))))
+    (method
+        "% GOTO !1 !2"
+        (let n (join !1 !2)
+          (if (room-exists? n)
+              (chain (set-room n) (look-at-room)))))
+    (method
+        "% GOTO !1 !2 !3"
+        (let n (join !1 !2 !3)
+          (if (room-exists? n)
+              (chain (set-room n) (look-at-room)))))
+    (method
+        "% GOTO !1 !2 !3 !4"
+        (let n (join !1 !2 !3 !4)
+          (if (room-exists? n)
+              (chain (set-room n) (look-at-room)))))
+    (method
+        "% GET !"
+        (if (object? !)
+          (place ! "SELF") (print "Failed.")))
+    (method
+        "% GET !1 !2"
+        (let n (join !1 !2)
+          (if (object? n)
+            (place n "SELF") (print "Failed."))))
+    (method
+        "% GET !1 !2 !3"
+        (let n (join !1 !2 !3)
+          (if (object? n)
+            (place n "SELF") (print "Failed."))))
+    (method
+        "% GET !1 !2 !3 !4"
+        (let n (join !1 !2 !3 !4)
+          (if (object? n)
+            (place n "SELF") (print "Failed."))))
+    (method
+        "% W"
+        (chain (set-room (get-neighbor (get-room) "WEST")) (look-at-room)))
+    (method
+        "% N"
+        (chain (set-room (get-neighbor (get-room) "NORTH")) (look-at-room)))
+    (method
+        "% S"
+        (chain (set-room (get-neighbor (get-room) "SOUTH")) (look-at-room)))
+    (method
+        "% E"
+        (chain (set-room (get-neighbor (get-room) "EAST")) (look-at-room)))
+    ;; DEBUG STOP HAPPY YARGLE
+    ;; a proposal for the creation of stop-daemon debug commands (since they clutter some debugging)
+)
+
+(pyf
+    (exec string)
+    "exec(\"{0}\")"
+)
+
+(daemon
+  (auto-heal &)
+  (counter null 0)
+  (step
+    (let s (get-strength)
+      (chain
+        (set-strength (+ s 1))
+        (set-max-strength (+ s 1))))))
+
+; make a forest, moat, sky object shared by all the rooms with windows, open to sky, close to moat?
+
+
+(Class Scenic
+  (extends Hidden Fixed)
+  (typetag Scenic))
+
+
+(Class Hidden
+  (extends Object)
+  (counter typetag Hidden)
+  (hidden))
+
+(Class Fixed
+  (extends Object)
+  (counter typetag Fixed)
+  (method
+    "TAKE %" "GET %"
+    (print (gec & take-excuse)))
+  (counter take-excuse "You can't take it!")
+  (takeable False))
+
+(Scenic
+    "SKY"
+    (names "Sky" "Heavens" "Cosmic Ceiling" "Stars" "Clouds" "Sun")
+    (desc "The evening sky, streaked by a few deep orange clouds. The sun is no longer visible, and the stars are appearing, one by one.")
+)
+
+(Scenic
+    "FOREST"
+    (names "Forest" "Woods" "Trees" "Canopy")
+    (desc "The surrounding forest is dark and green, but rather dangerous. No less dangerous than this place, though. And you are rather sure that you could safely stay the night in a tree.")
+)
+
+(Scenic
+    "WIND"
+    (names "Wind" "Sound of the Wind" "Breeze" "Night Wind" "Night Breezes")
+    (desc "The ever-present wind you always hear but almost never feel in this old place. It has been windy for the last few days, but today things are really loud.")
+)
+
+(Scenic
+    "MOAT"
+    (names "Moat" "Trench" "Water" "Muck")
+    (desc "The moat surrounding the castle is a deep, slimy trench with dirty water. You think you've heard things swimming around in it.")
+)
+
+(Room
+    "KEY ROOM"
+    (names "Key Room")
+    (desc "A room, filled with the all the keys you need to store out of game.")
+    (objects "OMNIKEY" "KEY HALVES_KEY ROOM")
+    (north "SPARKLING KEY") (east "GOLD KEY") (up "COPPER KEY") (west "SILVER KEY") (south "BRONZE KEY") (down "IRON KEY")
+)
+
+(Object
+    "KEY HALVES_KEY ROOM"
+    (group 2 "KEY HALF")
+    (names "Key Halves" "Keys" "Halves of a Key")
+    (desc "Two key halves, obviously of the same key.")
+    (method
+        "JOIN %"
+        "PUT % TOGETHER"
+        "ASSEMBLE %"
+        (chain
+            (print "You take the two key halves and place them together. They glow brightly, and are replaced by a single key.")
+            (if (in "KEY HALVES_SELF" "SELF")
+                (chain (remove "KEY HALVES_SELF" "SELF")
+                       (place "GOLD KEY" "SELF"))
+                (let room (get-room)
+                     (chain (remove "KEY HALVES_SELF" room)
+                            (place "GOLD KEY" room))))))
+)
+
+(Object
+    "KEY HALF"
+    (names "Key Half" "Half of a Key" "Key")
+    (desc "This is obviously half of a key, split right down the middle.")
+    (weight .2)
+    ; take should update KEY HALVES
+    ; ^ 1 kg
+)
+
+(Object
+    "GOLD KEY"
+    (names "Gold Key" "Golden Key" "Yellow Key" "Gold" "Key")
+    (desc "A large, golden key. Looks classy.")
+    (weight .4)
+    (key "SMALL ROOM" "WINE CELLAR")
+)

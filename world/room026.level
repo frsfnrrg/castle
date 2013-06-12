@@ -1,0 +1,176 @@
+$baselibrary.level
+
+(Room
+    "FOGGY ROOM"
+    (names
+        "Foggy Room"
+    )
+    (desc
+        ;; should south exit be replaced by west exit?
+        (let light (get-light-level)
+          (if (= 50 light)
+            (join "The white fog is no match for the scepter. The strong light breaks through it and clearly illuminates the room. Doors are to the south and west, the former leading to the balcony."
+              (if (in "COPPER KEY" "FOGGY ROOM")
+                  "A copper key is lying on the floor.")
+              (if (in "FOGGY LEVER" "FOGGY ROOM")
+                  "A large, metal lever is in the middle of the room."))
+        ; max scepter ^
+            (= 5 light)
+            "The thick, white, fog here seems to be localized.  You can only barely make out the outline of the western door, but fortunately you can still see the exit south. The fog swirls around slowly..."
+        ; min scepter; torch ^
+            "The fog in this room is so thick, you cannot see through it. All you see of note is the exit south of you. Going anywhere in this room may be exceedingly dangerous..."
+        ;candle, nothing ^
+        ))
+
+    )
+    (west "DOOR CLOSED" "ALCHEMIST'S LABORATORY")
+    (south "DOOR OPEN" "BALCONY")
+    (entryscript
+      (if (<= (get-light-level) 5)
+          (FOGGY-hide)))
+    (objects
+      "FOG"
+    )
+    ; only with the scepter can you see enough; otherwise, you randomly blunder about
+    ; CANDLES, TORCHES have ~ light
+    (method
+        "NORTH" "N" "GO NORTH"
+        (FOGGY-motion "NORTH"))
+    (method
+        "EAST"  "E" "GO EAST"
+        (FOGGY-motion "EAST"))
+    (method
+        "SOUTH" "S" "GO SOUTH"
+        (FOGGY-motion "SOUTH"))
+    (method
+        "WEST"  "W" "GO WEST"
+        (FOGGY-motion "WEST"))
+)
+
+(func
+  (FOGGY-hide)
+  (chain (foggy-watcher "MISTS")
+    (if (in "COPPER KEY" "FOGGY ROOM")
+        (chain (remove "COPPER KEY" "FOGGY ROOM")
+          (sec! "COPPER KEY" hidden? True)))
+    (if (in "FOGGY LEVER" "FOGGY ROOM")
+        (chain (remove "FOGGY LEVER" "FOGGY ROOM")
+          (sec! "FOGGY LEVER" hidden? True)))))
+
+(func
+  (FOGGY-show)
+  (chain
+    (if (gec "COPPER KEY" hidden?)
+        (chain (sec! "COPPER KEY" hidden? False)
+          (place "COPPER KEY" "FOGGY ROOM")))
+    (if (gec "FOGGY LEVER" hidden?)
+        (chain (sec! "FOGGY LEVER" hidden? False)
+          (place "FOGGY LEVER" "FOGGY ROOM")))))
+
+(daemon
+  (foggy-watcher &)
+  (step
+    (if (not (str= (get-room) "FOGGY ROOM"))
+        ;; put things back when you leave
+        (chain (FOGGY-show)
+            (stop-daemon &)))))
+
+(func
+  (get-light-level)
+  ;; 0,3,5,50!
+    (if (and (in "BRIGHT SCEPTER" "SELF") (get-counter "BRIGHT SCEPTER" high-end?))
+        50
+        (or (in "BRIGHT SCEPTER" "SELF")
+            (or (and (in "TORCHES_SELF" "SELF") (< 0 (gec "TORCHES_SELF" lit)))
+                (let name (roomtag "TORCHES" (get-room))
+                  (and (in name (get-room)) (< 0 (gec name lit))))))
+        5
+        (or (and (in "CANDLES_SELF" "SELF") (< 0 (gec "CANDLES_SELF" lit)))
+            (let name (roomtag "CANDLES" (get-room))
+              (and (in name (get-room)) (< 0 (gec name lit)))))
+        3
+        0))
+
+(func
+  (FOGGY-motion dir)
+  (if (>= (get-light-level) 5)
+    (go dir)
+    (chain (print (format "You try to go {}, but the fog swirls around and confuses you, and you blunder around randomly." (lowercase dir))) (go-random))))
+
+(Object
+    "FOG"
+    (names "Fog" "Mist")
+    (takeable False)
+    (desc
+        (if (in "BRIGHT SCEPTER" "SELF")
+            "The white fog fills the room, but with the scepter you can still see everything."
+            (and (in "TORCHES_SELF" "SELF") (> (get-counter "TORCHES_SELF" lit) 0))
+            "The thick fog fills the room, obscuring almost everything."
+            "The thick fog fills the room, obscuring everything."))
+)
+
+(Object
+  "COPPER KEY"
+  (names "Copper Key"
+      "Copper"
+      "Key"
+      "Text")
+  (desc "This plain copper key has text on it.")
+  (counter hidden? False)
+  (method
+      "READ %"
+      (print "'Property of Lucifer XII'"))
+  (method
+      "UNLOCK $ WITH %"
+      "UNLOCK $ USING %"
+      (if (and (str= (get-room) "HERB STORE") (str= $ "CUPBOARD"))
+          (chain
+              (if (= 2 (get-counter "CUPBOARD" door-state))
+                  (chain
+                      (print "You unlock the cupboard.")
+                      (set-counter "CUPBOARD" door-state 1)
+                  )
+                  (print "The cupboard is already unlocked.")
+              )
+          )
+          (print "It doesn't work.")
+      )
+  )
+  (method
+      "LOCK $ WITH %"
+      "LOCK $ USING %"
+      (if (and (str= (get-room) "HERB STORE") (str= $ "CUPBOARD"))
+          (chain
+              (if (= 0 (get-counter "CUPBOARD" door-state))
+                  (print "You close and lock the cupboard.")
+                  ; add ^ closing chain (hide objects in cupboard)
+                  (print "You lock the cupboard.")
+              )
+              (set-counter "CUPBOARD" door-state 2)
+          )
+          (print "It doesn't work.")
+      )
+  )
+)
+
+(Object
+  "FOGGY LEVER"
+  (names "Lever" "Metal Lever")
+  (desc "A large, metal lever anchored into the floor.")
+  (counter hidden? False)
+  (method
+    "TAKE %"
+    "GET %"
+    (print "You cannot take it. It is built into the floor.")
+  )
+  (method
+    "PULL %"
+    "PUSH %"
+    (if (gec "BLOCK OF MARBLE" split?)
+        (print "You move the lever. Nothing happens.")
+        (chain
+          (print "You move the lever, and hear a loud crack from somewhere.")
+          (sec! "BLOCK OF MARBLE" split? True)
+          (place "MARBLE CORNER" "SILENT ROOM")
+          (place "SAPPHIRE" "SILENT ROOM"))))
+)

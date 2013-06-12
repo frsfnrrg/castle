@@ -1,0 +1,54 @@
+$baselibrary.level
+
+(globalmethod
+    "H"
+    "HELP"
+    "DIVINE AID"
+    "DIVINE AID, PLEASE"
+    "DIVINE AID PLEASE"
+    "HELP!"
+    "HELP!!"
+    "WHAT IS THIS?"
+    (help)
+)
+
+(globalmethod
+  "HELP COMMANDS"
+  (comhelp)
+)
+
+(func (comhelp) (chain
+  (print-line)
+  (print-center "COMMANDS")
+  (print-line)
+  (print "These are the few basic commands that will need to be used. Reasonable and simple actions should be understood.")
+  (print-line)
+  (print "LOOK\n\tGive room description and contents.")
+  (print "INVENTORY\n\tGive contents of inventory.")
+  (print "QUIT\n\tLeave this sorry world instance. Forever.")
+  (print "HELP\n\tPrint the help.")
+  (print "HELP COMMANDS\n\tMeta.")
+  (print "EXAMINE [object]\n\tGive the description of an object. You may learn something of value...")
+  (print "COUNT [objects]\n\tGives the number of an object that you or the room has.")
+))
+
+(func (help) (chain
+
+(print-line)
+(print-center "HELP")
+(print-line)
+(print "This is a game belonging to the IF (interactive fiction) genre. If you do not know what that is, use the internet.")
+(bookpause)
+(print "The commands of the game, will, of course, not be directly given to you. You will need to ask for \"HELP COMMANDS\" to be given a list. However, there are a few things about the command system that you should know.")
+(print-line)
+(print "Commands are not case sensitive; whether you type \"ELIMINATE GRUEL\" or \"EliMinATe gruel\" does not make a different. Leet-speak is for 1d1075. Commands are to be given one at a time, in the usual terse imperative tone. You should say: \"KILL FROG\", not \"Dear sir, please murder this pitiable frog.\" If a command does not work, either it is too crazy (\"LAMBAST CEILING\"), too complex \"WHILE BALANCING ON CHAIR, THROW SELF AT WINDOW\", or can be rephrased to be simpler (\"ACQUIRE THE CAT\": \"TAKE CAT\").")
+(print-line)
+(print "Some grammatical things are not recognized: \"THE\" will be ignored, as will other articles. Singular and plural should be noticed. If there is one sword, \"TAKE SWORDS\" will never work.")
+(print-line)
+(print "Lastly, if you have two keys, both referable to by \"KEY\", and you say \"DROP KEY\", you should be given a choice between the keys. Similar situations occur for all cases where on name can refer to two or more things.")
+(bookpause)
+(print "This game is not designed to be nice. You can, and should, die a few times when playing for the first time. Some things can and will kill you in annoying ways. No saves, no checkpoints are made. No map is provided. It is possible to nuke the side-quests: i.e, make it impossible for you to get all the points. However, the main quest, leaving, can always be done.")
+(print-line)
+(print "\tThank you (Please drive safely).")
+
+))

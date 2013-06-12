@@ -1,0 +1,317 @@
+$baselibrary.level
+
+(Class LightStickGroup
+  (extends Object)
+  (counter typetag LightStickGroup)
+  ;; also requires that totalnumber be the count of the u-group
+  (counter totalnumber "numerical variable")
+
+  (counter lit 0)
+  (counter dead 0)
+  (counter unlit "numerical variable: matches totalnumber")
+  ;; all start unlit
+
+  (method
+    "LIGHT A # IN $" "LIGHT # IN $"
+    "LIGHT A # WITH $" "LIGHT # WITH $"
+    (if (str= $ "FIREPLACE")
+;;         (if (= 0 (gec & unlit))
+;;             (print (nformat "There are no unlit {} to light." &))
+;;             (chain (print (nformat "You dip the {} in the fireplace. It flares up." #))
+;;               (sec! & lit (+ 1 (gec & lit)))
+;;               (sec! & unlit (- (gec & unlit) 1))
+;;               (light-one-light-stick &)))
+          (_sub-try-one-light & # "You dip the {0} in the fireplace. It flares up.")
+        (str= $ "KITCHEN FIREPLACE")
+        (if (gec "KITCHEN FIREPLACE" lit?)
+            (_sub-try-one-light & # "You dip the {0} in the kitchen fireplace. It burns with the power of, well, a {0}.")
+        )
+        (print "That won't work")))
+  (method
+    "LIGHT #" "LIGHT A #"
+    (if (inr "FIREPLACE")
+        (call-obj & "LIGHT # IN FIREPLACE")
+        (inr "KITCHEN FIREPLACE")
+        (call-obj & "LIGHT # IN KITCHEN FIREPLACE")
+        (print "What with?")))
+  (method
+    "UNLIGHT A #" "UNLIGHT #" "EXTINGUISH A #" "EXTINGUISH #" "SNUFF A #" "SNUFF #"
+    (if (= 0 (gec & lit))
+        (print (nformat "There are no lit {} here!" &))
+        (chain (print (nformat "You extinguish a {}." #))
+          (sec! & lit (- (gec & lit) 1))
+          (sec! & unlit (+ (gec & unlit) 1))
+          (ext-one-light-stick &))))
+
+  (method
+  ; redirect if neccessary
+      "TAKE %"
+      "GET %"
+      (chain
+          (take & (nformat "You take the {}." &))
+          (let dest (roomtag (base &) "SELF")
+                (if (not (in & (get-room)))
+                    (chain (update-light-stick-daemons dest)
+                          (count-light-sticks dest))))))
+      ;; but wait: if you take (or drop) all of them, all you gotta do is add the source numbers, kept via let, to the destination numbers!. Count-torches should only be for .. TAKE [any] @ %, TAKE [any] #
+  (method
+      "DROP %"
+      (chain
+          (drop & (nformat "You drop the {}." &))
+          (let dest (roomtag (base &) (get-room))
+              (if (not (in & "SELF"))
+                  (chain (update-light-stick-daemons dest)
+                          (count-light-sticks dest))))))
+  (method
+      "TAKE @ %"
+      (if (= @ 1)
+          (print "Singular and plural are very wonderful things, right?")
+          (chain
+              (take-n & @ (format-2 "You take {} {}." @ (lowercase (name &))))
+              (let dest (roomtag (base &) "SELF")
+                    (if (in dest "SELF")
+                        (chain (update-light-stick-daemons dest)
+                              (if (in & (get-room))
+                                  (count-light-sticks &))
+                              (count-light-sticks dest)))))))
+  (method
+    "DROP @ %"
+    (if (= @ 1)
+        (print "Singular and plural are very wonderful things, right?")
+        (chain
+          (drop-n & @ (format-2 "You drop {} {}." @ (lowercase (name &))))
+          (let dest (roomtag (base &) (get-room))
+            (if (in dest (get-room))
+                (chain (update-light-stick-daemons dest)
+                  (if (in & "SELF")
+                      (count-light-sticks &))
+                  (count-light-sticks dest)))))))
+  (method
+    "TAKE 1 #" "GET 1 #"
+    "TAKE A #" "GET A #"
+    "TAKE #"   "GET #"
+    (chain
+      (take-n & 1 (nformat "You take a {}." #))
+      (let dest (roomtag (base &) "SELF")
+        (if (in dest "SELF")
+            (chain (update-light-stick-daemons dest)
+              (if (in & (get-room))
+                  (count-light-sticks &))
+              (count-light-sticks dest))))))
+  (method
+    "DROP 1 #"
+    "DROP A #"
+    "DROP #"
+    (chain
+      (drop-n & 1 (nformat "You drop a {}." #))
+      (let dest (roomtag (base &) (get-room))
+        (if (in dest (get-room))
+            (chain (update-light-stick-daemons dest)
+              (if (in & "SELF")
+                  (count-light-sticks &))
+              (count-light-sticks dest))))))
+
+  (method
+    "COUNT %"
+    ;; make a lisp style let? with (let ( (label value) (label value)   ) (block))
+    (let s-addr (roomtag % "SELF")
+    (let r-addr (roomtag % (get-room))
+    (chain
+      (if (in s-addr "SELF")
+          (chain
+            (print-count-light-sticks "You have" "You have" s-addr lit "lit" & ".")
+            (print-count-light-sticks "You have" "You have" s-addr unlit "unlit" & ".")
+            (print-count-light-sticks "You have" "You have" s-addr dead "dead" & ".")
+          ))
+      (if (in r-addr (get-room))
+          (chain
+            (print-count-light-sticks "There is" "There are" r-addr lit "lit" & " in the room.")
+            (print-count-light-sticks "There is" "There are" r-addr unlit "unlit" & " in the room.")
+            (print-count-light-sticks "There is" "There are" r-addr dead "dead" & " in the room.")))))))
+  (method
+    "COUNT #"
+    "COUNT A #"
+    (print (join
+      (nformat "Of the {} you count, there is only one." (sub &))
+      (if (= 1 (get-count &))
+          (if (= 1 (gec & lit))
+            "It is lit."
+            (= 1 (gec & unlit))
+            "It is unlit."
+            (= 1 (gec & dead))
+            "It is dead.")))))
+  ;; method "DESCRIBE #"; return a random one that is in the self (use owl-alg?); then, having & descs of the subs will make a difference: just using # gives the... generic sub, which is never modified
+)
+
+;; me want lisp & lambda & pair, cons, car, cdr, set-car!, set-cdr!, define
+
+(func
+  (_sub-try-one-light & # text)
+  (if (= 0 (gec & unlit))
+      (print (nformat "There are no unlit {} to light." &))
+      (chain (print (nformat text #))
+        (sec! & lit (+ 1 (gec & lit)))
+        (sec! & unlit (- (gec & unlit) 1))
+        (light-one-light-stick &))))
+
+(func
+  (light-one-light-stick &)
+  (_sub-light-one-light-stick 0 (- (gec & totalnumber) 1) &))
+
+(func
+  (ext-one-light-stick &)
+  (_sub-ext-one-light-stick 0 (- (gec & totalnumber) 1) &))
+
+(func
+  (_sub-light-one-light-stick crn mxn &)
+  (let name (roomtag (sub &) crn)
+    (if (lightable? & name)
+        (call-obj name (format-1 "_light % {}" &))
+        (< crn mxn)
+        ; ^ crn: 0-k; mxn; k
+        (_sub-light-one-light-stick (+ crn 1) mxn &))))
+
+(func
+  (_sub-ext-one-light-stick crn mxn &)
+  (let name (roomtag (sub &) crn)
+    (if (and (in-u name &) (gec name lit?))
+        (call-obj name "_unlight %")
+        (< crn mxn)
+        (_sub-ext-one-light-stick (+ crn 1) mxn &))))
+        ;; really, no mxn termination is needed (check in "UL A #"), but you never know....
+        ;; same for _sub-light
+
+(func
+  (print-count-light-sticks singh plurh addr flag term & tail)
+  (let n (gec addr flag)
+    (if (= n 0)
+        (print (join plurh "no" term (format-2 "{}{}" (lowercase (name &)) tail)))
+        (= n 1)
+        (print (join singh "one" term (format-2 "{}{}" (lowercase (name (sub &))) tail)))
+        (print (join plurh (str n) term (format-2 "{}{}" (lowercase (name &)) tail))))))
+
+
+(func
+  (lightable? parent target)
+  (and (in-u target parent)
+       (< 0 (gec target turns))
+       (not (gec target lit?))))
+
+(func
+  (update-light-stick-daemons &)
+  (_sub-update-light-stick-daemons 0 & (- (gec & totalnumber) 1)))
+
+(func
+  (_sub-update-light-stick-daemons num & mnum)
+  (chain
+    (let dname (roomtag (sub &) num)
+      ;; the daemon name is the torch name as well..
+        (if (and (in-u dname &) (daemon-exists? dname))
+              (sed! dname pgroup (strtag &))))
+    (if (< num mnum)
+        (_sub-update-light-stick-daemons (+ num 1) & mnum))))
+
+
+(func
+  (count-light-sticks &)
+  (chain (sec! & lit 0)
+         (sec! & unlit 0)
+         (sec! & dead 0)
+         (_sub-count-light-sticks & 0 (- (gec & totalnumber) 1))))
+
+(func
+  (_sub-count-light-sticks & tnum mnum)
+  (chain
+    (let target (roomtag (sub &) tnum)
+      (if (in-u target &)
+          (if (= 0 (gec target turns))
+              (sec! & dead (+ 1 (gec & dead)))
+              (gec target lit?)
+              (sec! & lit (+ 1 (gec & lit)))
+              (sec! & unlit (+ 1 (gec & unlit))))))
+    (if (< tnum mnum)
+        (_sub-count-light-sticks & (+ tnum 1) mnum))))
+
+
+
+(Class LightStick
+  (extends Object)
+  (counter typetag LightStick)
+
+  (counter turns "numerical variable")
+  (counter lit? False)
+
+  (method "_light % !1"
+      (chain (sec! & lit? True)
+              (burn & !1)))
+  (method "_light % !1 !2"
+      (let n (join !1 !3)
+            (chain (sec! & lit? True)
+                  (burn & n))))
+  (method "_light % !1 !2 !3"
+      (let n (join !1 !2 !3)
+            (chain (sec! & lit? True)
+                  (burn & n))))
+  (method "_light % !1 !2 !3 !4"
+      (let n (join !1 !2 !3 !4)
+            (chain (sec! & lit? True)
+                  (burn & n))))
+  (method
+      "_unlight %"
+      (chain
+          (sec! & lit? False)
+          (stop-daemon &)))
+)
+
+(daemon
+    (burn & parent-group)
+    (counter pgroup parent-group)
+    ; ^ can be remotely set, as it is when you move torches
+    (step
+        (let left (gec & turns)
+            (if (> left 0)
+                (sec! & turns (- left 1))
+                (chain
+                    (if (str= (get-room) (tail pgroup))
+                      (print (nformat "The {} burns out." &)))
+                    (sec! & lit? False)
+                    (sec! pgroup dead (+ 1 (gec pgroup dead)))
+                    (sec! pgroup lit (- (gec pgroup lit) 1))
+                    (stop-daemon &))))))
+
+
+;; FROM THE WAND OF REPLENISHMENT
+
+;; notice the similarities; one just splits the if and cuts at end, the other cuts at renewing/end
+
+(func
+  (_renew-one-light-stick &)
+  (_sub-renew-one-light-stick & (sub &) 0 (- (gec & totalnumber) 1)))
+(func
+  (_sub-renew-one-light-stick parent child crn mxn)
+  (let n (roomtag child crn)
+    (let ideal (gec child turns)
+      (if (and (in-u n parent) (< (gec n turns) ideal))
+          (chain
+            (if (and (= 0 (gec n turns)) (not (gec n lit?)))
+                (chain (sec! parent dead (- (gec parent dead) 1))
+                  (sec! parent unlit (+ (gec parent unlit) 1))))
+            (sec! n turns ideal))
+          (< crn mxn)
+          (_sub-renew-one-light-stick parent child (+ crn 1) mxn)))))
+(func
+  (_renew-light-sticks &)
+  (_sub-renew-light-sticks & (sub &) 0 (- (gec & totalnumber) 1)))
+(func
+  (_sub-renew-one-light-stick parent child crn mxn)
+  (let n (roomtag child crn)
+    (let ideal (gec child turns)
+      (chain
+        (if (and (in-u n parent) (< (gec n turns) ideal))
+            (chain
+              (if (and (= 0 (gec n turns)) (not (gec n lit?)))
+                  (chain (sec! parent dead (- (gec parent dead) 1))
+                    (sec! parent unlit (+ (gec parent unlit) 1))))
+              (sec! n turns ideal)))
+        (if (< crn mxn)
+            (_sub-renew-one-light-stick parent child (+ crn 1) mxn))))))

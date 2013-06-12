@@ -1,0 +1,12 @@
+$baselibrary.level
+
+(Room "ROCKS MEET HEAD ROOM"
+  (names "Rocks Meet Head Room"
+         "Rock + Head = Death"
+         "Hall of Big Heavy Things")
+  (desc "You enter the room, and immediately notice some writing on the wall. It reads, 'YOU ARE DEAD.' A huge rock falls on your head, swiftly making the scrawled characters truth.")
+  (north "DOOR OPEN" "BLACKSMITH'S FORGE")
+  (entryscript (chain
+      (look-at-room)
+      (print-score)
+      (quit))))

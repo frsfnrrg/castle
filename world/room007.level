@@ -1,0 +1,351 @@
+$baselibrary.level
+
+(Room
+    "COURTYARD"
+    (names
+        "Courtyard"
+    )
+    (desc
+        "The courtyard of the castle has been dominated by weeds. The stone paths here connect the doors, and pass by the well in the southwest part of the courtyard. A large bush controls the northeast part of the square, while a gnarled tree stands guard over it. You can see the balcony on the second floor and the tops of a few towers higher up."
+        (randomc
+            "You see an owl fly to the tree. It turns around to look at you, while hooting quietly..."
+            "A owl is circling high above you..."
+            "You can still hear the sound of the wind..."
+        )
+    )
+    (north "DOOR CLOSED" "SMALL ROOM")
+    (south "DOOR OPEN" "HALLWAY")
+    (west  "DOOR CLOSED" "SILENT ROOM")
+    (up "SKY" 0 "You jump, and jump, but you still get no more than about a meter closer to the sky.")
+    (objects
+        "BUSH"       "PATH"        "WEEDS"
+        "OWLS"       "WELL"        "SKY"
+        "WIND"       "C TOWERS"    "TREE"
+        "C SOUTHWEST TOWER" "C NORTHWEST TOWER" "C SOUTHEAST TOWER"
+    )
+    ; This method is room bound. objectmethods > roommethods > globalmethods
+    (method
+        "GO DOWN"
+        "DOWN"
+        "D"
+        (if (in "CAVE" "COURTYARD")
+            (chain
+                (print "You go the the cave entrance and lower yourself into it.")
+                (set-room "CAVE")
+                (look-at-room)
+            )
+            (print "Please be more clear, or ask for 'HELP'.")
+        )
+    )
+)
+
+(Object
+  "BUSH"
+  (names
+    "Bush"
+    "Shrub"
+    "Penguin"
+    "Penguin Bush"
+    "Penguin Statue"
+    "Cultivated Green Ball")
+  (desc
+      "The gardener who cut this bush into shape must have come from far away. The bush is cut in the shape of a large, fat penguin.")
+  (counter examined-belly? 0)
+  (takeable False)
+  (method
+    "DESCRIBE %"
+    "EXAMINE %"
+    "LOOK AT %"
+    "X %"
+    (chain
+      (print (describe-o &))
+      (if (= 0 (get-counter & examined-belly?))
+          (chain
+            (print "On closer inspection, you find a locked metal door hidden in the belly.")
+            (replace-obj-desc & "penguin." "penguin. A metal door is concealed in the penguin's majestic belly.")
+            (replace-room-desc "COURTYARD" "A large bush" "The last door is positioned in a large bush, which")
+            (replace-room-desc "COURTYARD" "the doors" "most of the doors")
+            (place "METAL DOOR" "COURTYARD")
+            (set-counter & examined-belly? 1)))))
+  (method
+    "TAKE %"
+    "GET %"
+    (print "The bush does not want to move. It is happy where it is."))
+  (method
+    "HUG %"
+    (print "You try to hug the penguin bush. It is like hugging a gigantic tree: your arms simply do not reach."))
+)
+
+(Object
+  "METAL DOOR"
+  (names
+      "Metal Door"
+      "Door"
+      "Annoying Metal Portal Blocker"
+  )
+  (desc
+    "This strong metal door is concealed inside the bush."
+    (let s (gec & door-state)
+      (if (= 0 s)
+          "It is open."
+          (= 1 s)
+          "It is closed."
+          (= 2 s)
+          "It is locked."
+          "Something is terribly buggy here.")))
+  (counter door-state 2)
+  ; 0 is open, 1 is closed, 2 is locked
+  (method
+      "OPEN %"
+      (if (= 1 (get-counter "METAL DOOR" door-state))
+          (chain (set-counter "METAL DOOR" door-state 0)
+            (print "You open the door, revealing a steeply sloping tunnel behind it.")
+            (place "TUNNEL" "COURTYARD"))
+          (= 2 (get-counter "METAL DOOR" door-state))
+          (print "The door is locked.")
+          (print "But it's already open!")))
+  (method
+    "CLOSE %"
+    (if (= 0 (gec & door-state))
+        (chain (sec! & door-state 1)
+          (print "You close the door.")
+          (remove "TUNNEL" "COURTYARD"))
+        (print "It is already closed.")))
+  (method
+    "ENTER %"
+    "GO INTO %" "GO THROUGH %"
+    (if (= 0 (gec & door-state))
+        (call-obj "TUNNEL" "ENTER %")
+        (print "Before you go through a door, you have open it.")))
+)
+
+(Object
+  "TUNNEL"
+  (takeable False)
+  (desc "A long, low tunnel sloping down into the darkness.")
+  (method
+    "ENTER %" "EXPLORE %"
+    "GO INTO %"
+    "GO THROUGH %"
+    (chain
+      (print "You walk into the deeply sloping tunnel.")
+      (set-room "TUNNEL")
+      (look-at-room)
+      (tire .1)))
+)
+
+(Scenic
+  "PATH"
+  (names
+      "Path"
+      "Paths"
+      "Walkway"
+      "Walkways"
+      "Door Connection and Human Transportation Device"
+  )
+  (desc "This path is made up of many large, flat, stones. It connects the three doors to the north, south, and west, and skirts a large bush and gnarled tree. The spaces between the stones are filled with assorted plants (weeds).")
+)
+
+(Scenic
+  "TREE"
+  (names
+      "Tree"
+      "Old Tree"
+      "Weathered Tree"
+      "Wood"
+      "Branches"
+      "Burls"
+      "Bark")
+
+  (desc "This tree gives every appearance of age. It is covered in short, twisted branches, burls, and holes. The bark is scarred and weathered.")
+  (method
+    "TAKE %"
+    "GET %"
+    (print "There are many good reasons why you don't want to take the tree. 1) It is way too heavy. 2) You really don't need it. 3) You have nowhere to put it 4) That tree looks creepy. You don't want to get too close."))
+)
+
+(Scenic
+  "WEEDS"
+  (names
+    "Weeds"
+    "Plants"
+    "Green Stuff"
+    "Weed"
+    "Plant"
+    "Greenery"
+    "Greens"
+    "\"Herbs\"")
+  (desc "These thousands of plants cover the entire ground. They are everywhere! Through an especially thick clump of them, you see a hole in the ground.")
+  (counter cave-discovered? 0)
+  (method
+    "DESCRIBE %"
+    "EXAMINE %"
+    "LOOK AT %"
+    "X %"
+    (chain (print (describe-o "WEEDS"))
+      (if (= 0 (get-counter "WEEDS" cave-discovered?))
+          (chain
+            (set-counter "WEEDS" cave-discovered? 1)
+            (place "CAVE" "COURTYARD")
+            (replace-room-desc "COURTYARD" "next to it." "next to it. A cave is hidden by the side of the courtyard.")
+            (print "You found a cave!")))))
+)
+
+;; add _ "DROP $ INTO %", for poisoned bread/meat (cookies are too pure to be poisonable)
+
+(Object
+  "CAVE"
+  (names
+    "Cave" "Hole"
+    "Hole in the Ground")
+  (desc "This cave is almost hidden by the weeds. It is almost pitch black inside.")
+  (method
+    "ENTER %"
+    "EXPLORE %"
+    (chain (print "You take a deep breath, and crawl into the hole.")
+      (set-room "CAVE")
+      (look-at-room)))
+  (method
+      "TAKE %"
+      "GET %"
+      (print "Have you ever tried to take a cloud with you? It doesn't work. It's immaterial. Now try carrying a hole."))
+  (method
+    "DROP $ INTO %" "DROP $ IN %"
+    "PUT $ INTO %" "PUT $ IN %"
+    "PLACE $ INTO %" "PLACE $ IN %"
+    (if (and (gec "ENCIPHERED BOOK" actually-read?) (str= "TAINTED BREAD" $))
+        (chain
+          ;; sfunc this pattern?
+          (if (ins "TAINTED BREAD")
+              (drop "TAINTED BREAD" "You throw the distinctly orange loaf of bread into the cave.")
+              (print "You throw the distinctly orange loaf of bread into the cave."))
+          (if (in "YORGLE" "CAVE")
+              (chain (remove "TAINTED BREAD" "COURTYARD")
+                (hyper-yorgle "DANGEROUS TIMES"))
+              (move "TAINTED BREAD" "COURTYARD" "CAVE")))
+        (print "What good will that do?")))
+)
+
+(Scenic
+  "WELL"
+  (names "Well" "Old Well")
+  (desc "The well here would be perfectly usable, had it a rope and water in it.")
+  (method
+    "TAKE %"
+    "GET %"
+    (print "You grab the rim of the well, and pull. Nothing happens."))
+  ; The well here is dried out. The rope you tied to it leads all the way to the bottom.
+  ; ^ TIE ROPE TO WELL
+  ; You think the emerald landed in here.
+  (method
+      "TIE $ TO %"
+      "ATTACH $ TO %"
+      (if (in "WELL ROPE" "COURTYARD")
+          (print "A rope is already attached to the well.")
+          (if (or (str= $ "ROPES_SELF_SUB") (str= $ "ROPES_COURTYARD_SUB"))
+              (chain
+                (if (in-n "ROPES" 1 "SELF")
+                    (drop-n "ROPES_SELF" 1 "You tie a rope to the well, and knot it several times.")
+                    (print "You tie a rope to the well, and knot it several times."))
+                (remove-n "ROPES" 1 "COURTYARD")
+                (place "WELL ROPE" "COURTYARD"))
+              (or (str= $ "ROPES_SELF") (str= $ "ROPES_COURTYARD"))
+              (print "Why attach two ropes to the well? Isn't one good enough?")
+              (print "You can't do that."))))
+  (method
+    "GO DOWN %"
+    "DESCEND %"
+    "ENTER %"
+    (if (in "WELL ROPE" "COURTYARD")
+        (call-obj "WELL ROPE" "SLIDE DOWN %")
+        (print "You prefer not to fall twenty meters.")))
+)
+
+(Object
+  "WELL ROPE"
+  (names "Well Rope" "Rope" "Knot" "Crossbar")
+  (desc "A thick, strong rope, knotted onto a crossbar of the well house by yours truly.")
+  (weight 1)
+  (method
+    "TAKE %" "GET %"
+    (print "You are proud of the knot you made to tie it to the well. You don't feel like killing the knot now, so soon."))
+  (method
+    "RAPPEL %" "RAPPEL DOWN %"
+    "GO DOWN %"  "GO DOWN BY %"
+    "CLIMB DOWN %"
+    "DESCEND %" "DESCEND BY %"
+    "SLIDE DOWN %" "SLIDE ALONG %"
+    (if (str= (get-room) "COURTYARD")
+      (chain (print "You grab onto the rope and slide down. It gets dimmer as you go down, but you can still see rather well.") (set-room "WELL") (look-at-room) (tire .1))
+      (print "You are already at the bottom.")))
+  (method
+    "GO ALONG %" "GO BY %" "CLIMB ALONG %" "CLIMB %"
+    (if (str= (get-room) "COURTYARD")
+        (call-obj & "CLIMB DOWN %")
+        (call-obj & "CLIMB UP %")))
+  (method
+    "GO UP %"  "GO UP BY %"
+    "CLIMB UP %"
+    "ASCEND %" "ASCEND BY %"
+    (if (str= (get-room) "WELL")
+        (call-room "UP")
+        (print "You are already at the top.")))
+)
+
+(Object
+  "OWLS"
+  (names
+      "Owls"
+      "Owl"
+      "Flying Thing"
+      "Flying Things"
+      "Flying Creature"
+      "Flying Creatures"
+      "Feathery Beast"
+      "Feathery Beasts"
+      "Ce qui fait 'hoot'"
+  )
+  (desc (randomc
+    "These large owls flying above emanate wisdom. They hoot at you in a mildly irritating manner and fly away. One circles back and perches on upper limbs of the tree."
+    "The owl perched in the tree is a great horned owl. It stares at you with bright yellow eyes, then flies into the sky."
+    "You stare at the owls. They stare back."))
+  (method "TAKE %" "GET %"
+    (print "The owls are too far away."))
+  (method
+    "KILL %"
+    "MURDER %"
+    (print "Sensing your dubious intentions, an owl hoots, content in knowing you are so incapable you can't even escape a castle.")
+  )
+)
+
+
+(Scenic
+  "C TOWERS"
+  (names "Towers" "Tower Tops" "Tops of Towers" "Three Towers")
+  (desc "You can see the northwest, southeast, and southwest towers from here. A flag rises up from the southwest tower")
+)
+(Scenic
+  "C NORTHWEST TOWER"
+  (names "Northwest Tower" "Tower" "Slate" "Tower Top" "Cone")
+  (desc "Just the top of it is visible; a plain, conical slate roof.")
+)
+
+(Scenic
+  "C SOUTHWEST TOWER"
+  (names "Southwest Tower" "Tower" "Slate" "Tower Top" "Cone" "Flag" "Flagpole" "Black Flag")
+  (desc "You can see the flagpole on the top of this tower; it holds a black (of course!) flag that contrasts oddly with the light blue slate of the tower roof.")
+)
+(Scenic
+  "C SOUTHEAST TOWER"
+  (names "Southeast Tower" "Tower" "Slate" "Tower Top" "Pyramid")
+  (desc "Just the top of it is visible; a plain, pyramidial slate roof.")
+)
+
+(Scenic
+  "TREE"
+  (names "Tree" "Gnarled Tree" "Twisted Tree" "Scary Tree" "Leaves" "Branches" "Spooky Tree")
+  (desc "A large, gnarled tree that takes up the northeast corner of the courtyard. The sparse little leaves on the twisted branches make it look especially spooky.")
+  (method
+    "CLIMB %" "GO UP %" "ASCEND %"
+    (print "You haven't done much climbing since you were young, so you aren't surprised when you slip down after climbing a meter or so up the trunk."))
+)

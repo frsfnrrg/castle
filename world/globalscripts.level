@@ -1,0 +1,88 @@
+$baselibrary.level
+
+$help.level
+
+(globalmethod
+  "COMMIT SUICIDE"
+  (call-obj "SELF" "KILL %"))
+
+(globalmethod
+  "REACH ENLIGHTENMENT"
+  "ATTAIN ENLIGHTENMENT"
+  "MEDITATE"
+  "SAY OM"  "SAY 'OM'"  "SAY \"OM\""
+  (call-obj "SELF" "ENLIGHTEN %"))
+
+(globalmethod
+  "SMILE"
+  (print "You smile widely, content for a moment, until you remember your precarious situation."))
+
+(globalmethod
+  "FROWN"
+  (print "You frown, depressed by the weight of your unlucky life."))
+
+(globalmethod
+  "EXIT"
+  "LEAVE"
+  (print "You know that's what you want to do, right?"))
+
+(globalmethod
+  "STOP"
+  (print "You stop moving for a whole three seconds."))
+
+(globalmethod
+  "YAWN"
+  (print "You yawn. Now what?"))
+
+(globalmethod
+  "WAIT"
+  "Z"
+  (chain (print "Time passes.\n...\n You stop waiting.")
+    (tire .1)))
+
+(globalmethod
+  "SLEEP" "FALL ASLEEP"
+  (print "You want to, but fear something might notice a sleeping meal."))
+
+(globalmethod
+  "GIVE UP"
+  (print "Your resolute adventurer's spirit refuses. Your beard seconds the motion."))
+
+(globalmethod
+  "CONCENTRATE"
+  (print "You stare straight ahead, concentrating hard. Unfortunately, the wall does not disappear."))
+
+(globalmethod
+    "GO NORTH" "N" "NORTH"
+    (chain (go "NORTH") (tire .05)))
+
+(globalmethod
+    "GO SOUTH" "S" "SOUTH"
+    (chain (go "SOUTH") (tire .05)))
+
+(globalmethod
+    "GO EAST" "E" "EAST"
+    (chain (go "EAST") (tire .05)))
+
+(globalmethod
+    "GO WEST" "W" "WEST"
+    (chain (go "WEST") (tire .05)))
+
+(globalmethod
+    "GO UP" "U" "UP"
+    (chain (go "UP") (tire .15)))
+
+(globalmethod
+    "GO DOWN" "D" "DOWN"
+    (chain (go "DOWN") (tire .02)))
+
+(globalmethod
+  "QUIT" "Q"
+  (chain
+    (print "Bye!")
+    (printscore)
+    (quit)))
+
+(globalmethod
+  "SCORE"
+  (printscore))

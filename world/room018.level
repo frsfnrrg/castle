@@ -1,0 +1,230 @@
+$baselibrary.level
+
+(Room
+    "GUARD ROOM"
+    (names "Guard Room")
+    (desc "This room probably is the guard room."
+          (if (in "COT" "GUARD ROOM")
+              "A cot is rolled up by the wall, and a"
+              "A")
+          "round table is in a corner, with dim light shed on it by a window."
+          (dice-coin-part)
+          (if (in "GRATE TOP" "GUARD ROOM")
+              "Close to the table is a metal grate, embedded in the floor. It is pitch black below the grate."
+              "A hole down to the dungeon is in the floor.")
+          "The only way out is west..."
+         (if (> (random) .9) "You barely see pale shapes down below the grate...")
+         ; ^ is it pitch black???
+         (if (> (random) .7) "The wind is still blowing out there..."))
+    (west "DOOR CLOSED" "EAST GALLERY")
+    (method
+        "DOWN"
+        "D"
+        "GO DOWN"
+        (print "The grate is in the way.")
+    )
+    (objects
+        "GUARD ROOM WINDOW"
+        "SKY"
+        "FOREST"
+        "GRATE TOP"
+        ;"HOLE"
+        ;"KEY HALF"; a generic key half ;-)
+        "COT"
+        "TABLE"
+        "DICE_GUARD ROOM"
+        "COPPER COIN"
+    )
+)
+
+(Object
+  "GRATE TOP"
+  (names "Grate")
+  (desc "This thick metal grate covers the entrance to a dark pit.")
+  (method
+      "TAKE %" "GET %" "OPEN %"
+      "REMOVE %" "SHIFT %" "MOVE %"
+      (print "The grate is placed so that from above, you would need to cut quite a bit of stone to remove it."))
+  (method
+    "BREAK %"
+    "DESTROY %"
+    "SPLIT %"
+    (print "The grate is way too thick for you to achieve anything with it."))
+  (method
+    "JUMP ON %"
+    (print "You jump on the grate. Nothing happens."))
+)
+
+(Object
+    "HOLE IN FLOOR"
+    (names "Hole" "Hole in Floor" "Dungeon Entrance")
+    (desc "A crumbly, rectangular hole in the floor."
+        (if (not (get-counter "HOLE IN FLOOR" found-key?))
+            (chain (move-n "KEY HALVES" "KEY ROOM" "GUARD ROOM" 1)
+                   (set-counter "HOLE IN FLOOR"  found-key? True)
+                   "You see a key stuck in the side of the hole, where the grate was.")))
+    (counter found-key? False)
+    (method
+        "GO DOWN %"
+        "ENTER %"
+        "JUMP INTO %"
+        (chain
+            (print "You jump down into the dungeon below.")
+            (set-room "DUNGEON")
+            (look-at-room)
+            (tire .1)
+        )
+    )
+)
+
+(Object
+    "COT"
+    (names "Cot" "Mattress")
+    (desc "This small guard's cot is rolled up in a corner. You cannot imagine sleeping on this.")
+    (counter found-key? False)
+    ; counter rolled up?; then you can fail at sleeping
+    (weight 4)
+    (method
+        "LOOK BEHIND %"
+        "LOOK UNDER %"
+        "LIFT %"
+        (if (get-counter & found-key?)
+            (print "You find nothing of interest under the cot.")
+            (chain (set-counter & found-key? True)
+                   (print "You look under the cot and find a small bronze key.")
+                   (place "BRONZE KEY" "GUARD ROOM"))))
+    (method
+        "TAKE %"
+        "GET %"
+        (if (get-counter & found-key?)
+            (take & "You grab the cot.")
+            (chain (take & "You take the cot and find a bronze key under it.")
+                   (set-counter & found-key? True)
+                   (place "BRONZE KEY" "GUARD ROOM"))))
+    (method
+        "SLEEP ON %"
+        "LIE ON %"
+        (print "You'd rather not."))
+)
+
+(Object
+  "BRONZE KEY"
+  (names "Bronze Key" "Bronze" "Key" "Scratched Key")
+  (weight .05)
+  (desc "The small bronze key here is scratched from clumsy use.")
+  (key "REALLY TO" "ELSEWHERE")
+  (method
+    "UNLOCK $ WITH %"
+    "UNLOCK $ USING %"
+    (if (and (str= (get-room) "HALLWAY") (or (str= $ "KEYHOLE") (str= $ "FLOOR COMPARTMENT")) )
+        (chain
+            (if (= 2 (get-counter "FLOOR COMPARTMENT" door-state))
+                (chain
+                    (print "You unlock the compartment in the floor.")
+                    (set-counter "FLOOR COMPARTMENT" door-state 1)
+                )
+                (print "The compartment is already unlocked.")
+            )
+          )
+          (print "It doesn't work.")
+      )
+  )
+  (method
+      "LOCK $ WITH %"
+      "LOCK $ USING %"
+      (if (and (str= (get-room) "HALLWAY") (or (str= $ "KEYHOLE") (str= $ "FLOOR COMPARTMENT")))
+          (chain
+              (if (= 0 (get-counter "FLOOR COMPARTMENT" door-state))
+                  (print "You close and lock the compartment.")
+                  ; add ^ closing chain (hide objects in cupboard)
+                  (print "You lock the secret compartment.")
+              )
+              (set-counter "FLOOR COMPARTMENT" door-state 2)
+          )
+          (print "It doesn't work.")
+      )
+  )
+    ; it is a key, unlock door should recognize that, but not to a door
+    ; key to little keyhole that appears in hallway floor
+)
+
+
+(Object
+    "TABLE"
+    (names "Table" "Simple Table" "Round Table" "Semicircle")
+    (desc "A simple semicircular table attached to the wall."
+          (dice-coin-part))
+    (hidden)
+    (takeable False)
+    (method
+      "LOOK UNDER %"
+      "LOOK BEHIND %"
+      (print "Nothing. Absolutely nothing."))
+    (method
+      "LOOK ON %"
+      (print (dice-coin-part))
+    )
+    (method
+      "SIT ON %"
+      "STAND ON %"
+      (print "Your behind wonders whether or not the table could support your weight."))
+)
+
+(ques
+    (dice-coin-part)
+    (if (and (in-n "DICE" 2 "GUARD ROOM") (in "COPPER COIN" "GUARD ROOM"))
+              "A pair of dice lies on it, along with a coin."
+              (and (in-n "DICE" 1 "GUARD ROOM") (in "COPPER COIN" "GUARD ROOM"))
+              "A die lies on it, along with a coin."
+              (in-n "DICE" 2 "GUARD ROOM")
+              "A pair of dice lies on it."
+              (in-n "DICE" 1 "GUARD ROOM")
+              "A solitary die is on the table."
+              (in "COPPER COIN" "GUARD ROOM")
+              "A single copper coin is there."
+              "The table is empty."))
+
+(Object
+    "COPPER COIN"
+    (names "Copper Coin" "Coin" "Copper")
+    (desc "A dirty copper coin.")
+    (weight .008)
+    ; ^ 40 grams ;o
+)
+
+(Object
+    "DICE_GUARD ROOM"
+    (names "Dice" "Pair of Dice"  "Paradise")
+    (desc "A pair of dice, crudely made, and worn.")
+    (method
+        "ROLL %"
+        "THROW %"
+        (print (join "You roll the dice." (randomc "You get 4 and 1, to total 5." "You get 1 and 4, to total 5."))))
+    (method
+        "ROLL #"
+        "THROW #"
+        "ROLL A #"
+        "THROW A #"
+        (print (join "You roll the die." (if (> (random) .95) "You get a 3." (randomc "You get a 4." "You get a 1.")))))
+    (group 2 "DIE")
+    ;; make these ugroup or wrappers, so there is a 4 die and a 1 die? nah
+)
+
+(Object
+    "DIE"
+    (names "Die")
+    (desc "A simple wooden die, a bit lopsided.")
+    (weight .002)
+)
+
+(Object
+    "GUARD ROOM WINDOW"
+    (names "Window" "Barred Window" "Bars" "Bar")
+    (desc "A barred window overlooking the evening forest.")
+    (takeable False)
+    (hidden)
+    (method
+        "JUMP OUT %"
+        "EXIT BY %"
+        (print "The bars are in the way."))
+)

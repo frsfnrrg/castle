@@ -1,0 +1,97 @@
+$baselibrary.level
+
+(Room
+    "ARMOR STORAGE"
+    (names "Armor Storage" "Armor Store" "Attic")
+    (desc "This room is empty excepting a large, heavy chest. It is next to the stairs going downward, and also near the window. The chest is just the right size for a person to fit in it. Fortunately or unfortunately, it has no lock...")
+    (method
+        "DOWN" "GO DOWN" "D"
+        (if (in "ARMOR" "SELF")
+            (chain (print "You go down the stairs. Suddenly, they collapse, sending you to the floor in a pile of dust. Since you wore armor, you are only shocked.")
+                   (remove "WOBBLY STAIRS" "NORTHEAST STAIRWELL")
+                   (place "BROKEN STAIRS" "NORTHEAST STAIRWELL")
+                   (set-room "NORTHEAST STAIRWELL") (look-at-room)
+                   (tire 1))
+            (chain (print "You carefully descend the protesting stairs.")
+                   (set-room "NORTHEAST STAIRWELL") (look-at-room))))
+    (objects
+        "CHEST"
+        "WOBBLY STAIRS"
+    )
+)
+
+(Object
+    "CHEST"
+    (desc "This large wooden chest has no lock."
+          (if (= 0 (get-counter "CHEST" door-state))
+              (if (get-counter "CHEST" holds-armor?)
+                  "It is open, and a suit of armor rests inside it."
+                  "It is open and empty.")
+              "It is closed." ))
+    (counter door-state 1)
+    (counter holds-armor? True)
+    (takeable False)
+    (method
+        "OPEN %"
+        (if (= 1 (get-counter & door-state))
+            (chain (if (get-counter & holds-armor?)
+                       (chain (place "ARMOR" "ARMOR STORAGE")
+                              (print "You open the chest. There is a suit of armor inside."))
+                       (print "You open the chest. It is empty."))
+                   (set-counter & door-state 0))
+            (print "It is already open!")))
+    (method
+        "CLOSE %"
+        (if (= 0 (get-counter & door-state))
+            (chain (if (get-counter & holds-armor?)
+                       (remove "ARMOR" "ARMOR STORAGE"))
+                   (print "You close the chest.")
+                   (set-counter & door-state 0))
+            (print "It is already closed!")))
+    (method
+        "PUT $ IN %"
+        "PUT $ INTO $"
+        (print "Why bother? Nobody save you is here anyway. You might as well just drop it in the room.")
+    )
+    (method
+        "PUT SELF IN %"
+        "PUT SELF INTO %"
+        "ENTER %"
+        (print "The idea creeps you out...")
+    )
+    (method
+        "TAKE $ OUT OF %"
+        (if (str= $ "ARMOR")
+            (chain (set-counter & holds-armor? False)
+                   (print "You maneuvre the armor out of the chest and drop it onto the floor.")
+                   (tire .2))
+            (print "But it isn't even in there!")))
+)
+
+(Object
+    "ARMOR"
+    (desc "This suit of armor is made of a shiny, stiff metal. It is slightly larger than you.")
+    (method
+        "TAKE %"
+        "GET %"
+        (chain (print "You realize that the only way to carry the suit of armor is to wear it.")
+               (call-obj & "PUT ON %")))
+    (method
+        "PUT ON %"
+        "WEAR %"
+        (chain (if (not (in "ARMOR" "SELF"))
+                   (take & "You take the suit of armor."))
+               (if (in "ARMOR" "SELF")
+                   (chain (if (get-counter "CHEST" holds-armor?)
+                              (set-counter "CHEST" holds-armor? False))
+                          (print "You put on the suit of armor. It may protect you, but you are a lot slower now.")
+                          (dec-speed)))))
+    (weight 10)
+    (method
+        "DROP %"
+        "TAKE OFF %"
+        "UNWEAR %"
+        (chain (drop & "You take off the suit of armor and put it on the ground. You are happy to be rid of the load.")
+               (if (in "ARMOR" (get-room))
+                   (inc-speed))))
+)

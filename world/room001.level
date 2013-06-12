@@ -1,0 +1,196 @@
+$baselibrary.level
+$lightstick.level
+
+(Room
+  "GATEHOUSE"
+  (names "Gatehouse" "House of Gates")
+  (description
+      "You are in the gatehouse of this dilapidated old castle. The gate itself has locked behind you, to the south. A list of punishments is attached to the wall, while two old doors are on the north and east walls. You spot a crooked, spindly wooden chair in the corner."
+      (if (in "CANDLES_GATEHOUSE" "GATEHOUSE")
+          "On it are lying a few half used candles."
+      )
+      (randomc
+          "You hear the moat's water swirling outside..."
+          "You hear scratching noises at the gate..."
+          "The wind is barely audible, but you can still hear it blowing through the trees..."))
+  (north "DOOR CLOSED" "HALLWAY")
+  (east "DOOR LOCKED" "GATEHOUSE")
+  ; ^ well...there needs to be something on the other end :-)
+  (south "GATE")
+  ; "WALL" is default, so west isn't needed
+  (objects
+    "PUNISHMENT LIST"
+    "CROOKED CHAIR"
+    "CANDLES_GATEHOUSE"
+    "COAT HOOKS"
+    "METAL BAR"
+    "GATE"
+    "MOAT"
+
+    "GEN4WALLS" "GENCEILING" "GENFLOOR"
+  )
+)
+
+(Object
+    "PUNISHMENT LIST"
+    (names
+        "Punishment List"
+        "List of Punishments"
+        "List"
+        "Parchment"
+        "List of Crimes"
+        "Gruesome News"
+        "Muffins"
+    )
+    (description "This piece of parchment is nailed straight into the wall. It lists the various crimes and their respective punishments.")
+    (weight 0)
+    (method
+        "READ %"
+        (print "You can't make sense of the handwriting, but the pictures are enough to show you that stealing muffins has a most gruesome punishment.")
+    )
+    (counter found-shard? False)
+    (counter ripped? False)
+    (method
+        "TAKE %"
+        "GET %"
+        "GRAB %"
+        (chain (take "PUNISHMENT LIST" "You rip the list of punishments off the wall.")
+               (replace-room-desc "GATEHOUSE" "A list of punishments is attached to the wall, while t" "T")
+               (set-counter & ripped? True)
+               (replace-obj-action "PUNISHMENT LIST" "TAKE %" "['take','PUNISHMENT LIST','You take the punishment list.']")
+               (if (not (get-counter & found-shard?))
+                   (chain (place "RED-BLUE SHARD" "GATEHOUSE")
+                          (print "A glittering piece of glass is revealed behind it. It falls to the floor, but miraculously does not shatter.")
+                          (set-counter & found-shard? True)))))
+    (method
+        "DROP %"
+        (drop "PUNISHMENT LIST" "You drop the list of punishments on the floor."))
+    (method
+        "LOOK BEHIND %"
+        "INSPECT BACK OF %"
+        "LOOK UNDER %"
+        ; in process, shard falls out
+        (if (get-counter & ripped?)
+            (print "You find nothing of interest.")
+            (if (get-counter & found-shard?)
+                (print "You find a wall, as expected.")
+                (chain (set-counter & found-shard? True)
+                       (print "As you look behind the punishment list, a glittering piece of glass falls down from behind it. It miraculously does not shatter.")
+                       (place "RED-BLUE SHARD" "GATEHOUSE")))))
+)
+
+(Shard
+    "RED-BLUE SHARD"
+    (names
+        "Red-Blue Shard" "Purple Shard" "Violet Shard"
+        "Red Shard"      "Blue Sahrd"   "Shard"
+        "Broken glass"   "Glass"        "Colored Glass"
+        "Purple Glass"   "Violet Glass" "Red Glass"
+        "Blue Glass"     "Red"          "Blue"
+        "Purple"         "Violet"
+    )
+    (description "An unusual piece of glass. It looks like it was part of an arch, curve, or circle, but was broken off, as seen by the sharp edges. Its colors range from red to blue.")
+)
+
+(Object
+    "METAL BAR"
+    (names
+        "Metal Bar"
+        "Bar"
+    )
+    (description "The metal bar is embedded deep into the wall. Breaking it would never work; the bar is very thick.")
+    (takeable False)
+    (method
+        "BREAK %"
+        (print "You might as well try to lift the castle. That bar will remain, no matter what you do."))
+)
+
+(Object
+    "CROOKED CHAIR"
+    (names
+        "Crooked Chair"
+        "Chair"
+    )
+    (description "A regular wooden four-legged chair, if you'd forget that a chair leg is too short. Any sitter will meet the floor.")
+    (method
+        "SIT ON %"
+        "SIT IN %"
+        (print "Preferably not: it looks none too stable."))
+    (method
+        "TAKE %"
+        "GET %"
+        (print "It's both too unweildy and too useless. You choose not to take it."))
+    (method
+        "THROW %"
+        (print "You hurl the chair across the room. It bounces back, narrowly missing you, and returns to its original position, as if nothing had happened."))
+)
+
+(LightStickGroup
+  "CANDLES_GATEHOUSE"
+  (names "Candles" "Old Candles" "Wax" "Wax Candles")
+  (description "Some basic, wax candles, forgotten ages ago.")
+  (ugroup 5 "CANDLE")
+  (counter totalnumber 5)
+  (counter unlit 5)
+)
+
+(LightStick
+  "CANDLE"
+  (names "Candle" "Wax Candle")
+  (description
+      "This is a basic wax candle."
+      ; change if burning or not: add &, % to desc _rfmap.
+      ;; also, change the ugroup examine # to take a random specific sub-obj (pyq for r-u-sub-obj)
+  )
+  (counter turns 20)
+  (weight .2)
+  ; ^ 1 kg
+)
+
+(Object
+    "COAT HOOKS"
+
+    (names
+        "Coat hooks"
+        "Hooks"
+        "Coat Hook"
+        "Hook"
+    )
+    (hidden)
+    (description "This row of coat hooks is rusty and deprecated. There are ten hooks, but they don't seem very useful.")
+
+    (takeable False)
+
+    (method
+        "COUNT %"
+        (print "There are ten of them.")
+    )
+
+)
+
+(Object
+  "GATE"
+  (names
+      "Gate"
+      "Portal of Gloom"
+      "Big Door"
+      "Wooden Slab"
+      "Wood")
+  (description
+      "This huge, heavy mass of wood and iron blocks the entrance. Coming in, it swung as if weightless. Now it is locked and lodged fast."
+      (if (< (random) .1)
+          "Looking more closely, it turns out that the entire door is made from a single piece of wood, cut from a gigantic, ancient tree."))
+  (hidden)
+  (takeable False)
+  (method
+      "ADMIRE %"
+      (print "Egads, that door is stupendous. Whatever."))
+  (method
+    "OPEN %"
+    (print "The door is both locked and stuck."))
+  (method
+    "UNLOCK %"
+    "UNLOCK % USING $"
+    "UNLOCK % WITH $"
+    (print "You can see no way of unlocking the gate; you cannot see a keyhole."))
+)

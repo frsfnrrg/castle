@@ -1,0 +1,130 @@
+$baselibrary.level
+
+(Room
+  "TUNNEL"
+  (names "Tunnel")
+  (desc
+    "This dark tunnel going from east to west is supported by a row of wooden stakes. You can see the tips of thousands of roots in this cramped escape route. To the east lies the castle, to the west lies freedom..."
+    (let w (in "WEST CAVE-IN" "TUNNEL")
+      (let e (in "EAST CAVE-IN" "TUNNEL")
+        (if (and w e)
+            "Both exits are blocked by mounds of dirt and stone."
+            w "The way onward is blocked by a mound of dirt."
+            e "The way back is blocked by a pile of dirt and rock."))))
+
+
+  ;; tunnel is level here
+  (entryscript
+    (if (= (get-light-level) 0)
+        (chain (print "The tunnel quickly becomes way too dark for your liking. You turn around, afraid of what the darkness might hold.")
+          (set-room "COURTYARD"))
+        (not (gec "DIRT" fallen?))
+        (chain
+          (print "You enter into the dark tunnel, heading west. Suddenly, the earth shakes, and dirt piles up by the entrance and exit. You are trapped. Escape soon, lest the air runs out...")
+          (sec! "DIRT" fallen? True)
+          (place "EAST CAVE-IN" "TUNNEL")
+          (place "WEST CAVE-IN" "TUNNEL")
+          (set-room-name "Caved-in Tunnel")
+          (air-loss "CAVED")
+        )))
+  (method
+    "WEST"
+    "W"
+    "GO WEST"
+    (if (in "WEST CAVE-IN" "TUNNEL")
+        (print "The tunnel is caved-in in that direction; you'll have to clear it first.")
+        (if (daemon-exists? "VILE POISON")
+            (chain (print "You escape! Unfortunately, soon after you reach the woods again, the vial's aftereffect catches up with you. Guess what?") (die))
+            (chain
+              (print "You escaped! Hooray! You quickly make camp in a tree, wait the night, have a few more adventures, and return to civilization and cookies.")
+              (print "THE END :-)")
+              (increase-score 2)
+              (quit)))))
+  (method
+    "EAST"
+    "E"
+    "GO EAST"
+    (if (in "EAST CAVE-IN" "TUNNEL")
+        (print "The tunnel is caved-in in that direction; you'll have to clear it first.")
+        (chain
+          (print "You go east and exit via the penguin bush.")
+          (set-room "COURTYARD")
+          (look-at-room))))
+  (north 0 0 "The tunnel goes from east to west. That is neither east nor west.")
+  (south 0 0 "The tunnel goes from east to west. That is neither east nor west.")
+  (up 0 0 "You jump, but the low tunnel roof blocks the way.")
+  (down 0 0 "That way lies bedrock.")
+  (objects
+    "DIRT"
+  )
+)
+
+; Dirt: On first entry, falls; blocks east and west ends;
+; You can shovel East Dirt (h); West Dirt (h); Dirt;
+
+(daemon
+  (air-loss &)
+  (counter time 0)
+  (step
+    (if (= time 3)
+        (chain (print "You run out of air and asphyxiate. YOU ARE DEAD") (die))
+        (print "The air is getting staler every second..."))
+    (set! time (+ time 1))))
+
+(Object
+  "DIRT"
+  (names "Dirt" "Rubble" "Cave-In" "Stuff in the Way")
+  (counter fallen? False)
+  (method
+    "TAKE %" "GET %"
+    "REMOVE %"
+    "GET RID OF %"
+    "CLEAN %"
+    "SHOVEL %" "SHOVEL AWAY %"
+    "CLEAR %" "CLEAR AWAY %"
+    (if (in "EAST CAVE-IN" "TUNNEL")
+        (call-obj "EAST CAVE-IN" "REMOVE %")
+        (in "WEST CAVE-IN" "TUNNEL")
+        (call-obj "WEST CAVE-IN" "REMOVE %")
+        (print "There isn't any dirt that you want to get rid of; both the east and the west exits are clear.")))
+)
+
+(Class CaveInDirt
+  (extends Object)
+  (counter other "const string variable thingy")
+  (method
+    "TAKE %" "GET %"
+    "REMOVE %"
+    "GET RID OF %"
+    "CLEAN %"
+    "SHOVEL %" "SHOVEL AWAY %"
+    "CLEAR %" "CLEAR AWAY %"
+    (if (not (ins "SHOVEL"))
+        (print "You scoop at the dirt with all you have, but barely make any progress.")
+        (< (get-strength) 15)
+        (print "You try to shovel the dirt away, but some large rocks get in the way and you just can't remove them.")
+        (if (daemon-exists? "CAVED")
+            (chain
+              (print "You take the shovel, and frantically move everything in your way to get to some fresh air. Just as air seems to be running out, you breach the blockage and get a breath of cool night air.")
+              (remove & "TUNNEL")
+              (stop-daemon "CAVED"))
+            (chain
+              (print "You shovel the dirt and rocks away, clearing the way.")
+              (remove & "TUNNEL")))))
+  (hidden)
+)
+
+(CaveInDirt
+  "EAST CAVE-IN"
+  (names "East Cave-In" "East Dirt" "Entrance" "East Exit" "East Entrance" "Entrance Blocking Cave-In" "East Blockage")
+  (desc "A large blockage of rock and dirt and sand and whatnot. It blocks the way back east.")
+  (counter other "WEST CAVE-IN")
+)
+
+
+(CaveInDirt
+  "WEST CAVE-IN"
+  (names "West Cave-In" "West Dirt" "Exit" "West Exit" "Exit Blocking Cave-In" "West Entrance" "West Blockage")
+  (desc "A large blockage of rock and dirt and sand and whatnot. It is blocking the way out west.")
+  (counter other "EAST CAVE-IN")
+)

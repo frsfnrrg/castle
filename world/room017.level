@@ -1,0 +1,89 @@
+$baselibrary.level
+
+(Room
+    "EAST GALLERY"
+    (names
+        "East Gallery"
+        "Gallery"
+        "Portrait Room"
+    )
+    (desc "This large room contains about two dozen oil portraits along the walls. They are haphazardly scrambled around the walls, but seem to become newer as they go clockwise from northwest to south. The room is remarkably well illuminated, given the single window to the south. A door is located at the eastern edge of the north wall, leading to the balcony, and another exit is east. The western end of the gallery holds landscape paintings."
+    (randomc "Whoever drew these must be a master at perspective..."
+        "Glancing around shows you that all the names are exceedingly odd..."
+        "The wind is still blowing full force outside..."
+        "You can see large swaths of the forest from the window up here..."))
+    (objects
+        "PORTRAITS"
+        "EAST GALLERY WINDOW"
+        "SKY"
+        "FOREST"
+        "WIND"
+    )
+    (north "DOOR CLOSED" "BALCONY")
+    (east "DOOR CLOSED" "GUARD ROOM")
+    (west "FREE" "WEST GALLERY")
+)
+
+(Object
+    "EAST GALLERY WINDOW"
+    (names
+        "Window"
+        "Barred Window"
+        "Bars"
+        "Bar"
+    )
+    (hidden)
+    (takeable False)
+    (desc "A boring rectangular window cut into the wall. It is barred.")
+    (method
+        "JUMP OUT %"
+        "EXIT BY %"
+        (print "Unfortunately, the window is barred, and you aren't as small (or as smart) as you were at three."))
+)
+
+(Object
+    "PORTRAITS"
+    (names
+        "Portraits" "Portrait" "Paintings" "Painting"
+        "Black Portrait" "Names" "Black" "Black Painting"
+        "Weird Names" "Rulers")
+    (desc "These twenty or so portraits are of the rulers of this castle. The names are weird, including:"
+        (randomc "Archibald the Ugly," "Lucifer VII," "George CVI," "Edmund the Oblong,")
+        (randomc "John deLou II," "Freddy," "Nostralagio I," "Madame de Poisson,")
+        "and"
+        (randomc "Ignatius Dormund the Kestrel." "Oswald the ... Ponderous." "King K.K. King the King of Kings." "Freddy II.")
+        (if (not (get-counter "PORTRAITS" revealed?))
+            (chain (place "SILVER KEY" "EAST GALLERY") (set-counter "PORTRAITS" revealed? True) "In one picture, the silver key a person is holding looks as if it were real.")
+            (in "SILVER KEY" "EAST GALLERY")
+            "In one picture, the silver key a person is holding looks as if it were real.")
+        "The last picture is newer, and of a different style. It is totally black.")
+
+    (counter revealed? False)
+    (method
+        "TAKE %"
+        "GET %"
+        (print "They are all firmly attached to the wall."))
+    (method
+        "COUNT %"
+        (print "There are actually only eighteen of them."))
+)
+
+(Object
+    "SILVER KEY"
+    (names
+        "Silver Key"
+        "Key"
+        "Silver"
+    )
+    ; if in east gallery ...
+    (desc (if (in "SILVER KEY" "EAST GALLERY")
+            "This silver key is placed into a little pocket in one of the portraits."
+            "This key is made out of silver. Not pure silver, but still nice and shiny." ))
+    (weight .3)
+    (method
+        "DROP %"
+        (if (str= (get-room) "EAST GALLERY")
+            (drop & "You place the key back into the portrait were you found it. The place seems... fitting.")
+            (drop & "You drop the silver key.")))
+    (key "KITCHEN" "TREASURY")
+)

@@ -1,0 +1,275 @@
+$baselibrary.level
+
+(Room
+  "COOKIE WORLD"
+  (names "Cookie World")
+  (desc "Your dreams have come true.")
+  (north 0 0 "A big cookie blocks the way.")
+  (south 0 0 "A giant cookie blocks the way.")
+  (east 0 0 "A delicious cookie blocks the way.")
+  (west 0 0 "A tiny cookie blocks the way.")
+  (up 0 0 "A tasty cookie blocks the way.")
+  (down 0 0 "An amazing cookie blocks the way.")
+  (objects
+    "COOKIE DOUGH BLOBS_COOKIE WORLD"
+    "BAKING COOKIES_COOKIE WORLD"
+    "BURNT COOKIES_COOKIE WORLD"
+    "READY COOKIES_COOKIE WORLD"
+    "UNDERDONE COOKIES_COOKIE WORLD"
+    "COOLING COOKIES_COOKIE WORLD"
+    "CHOCOLATE COCONUT COOKIES_COOKIE WORLD")
+)
+
+
+;   0        2         5-9       +2            SUCCESS
+
+; BLOBS -> BAKING -> UNDERDONE; discard
+;                 -> READY -> COOLING -> CC COOKIES
+;                 -> BURNT; discard
+
+(CookieSteps
+  "COOKIE DOUGH BLOBS_COOKIE WORLD"
+  (names "Blobs of Cookie Dough" "Cookie Dough Blobs" "Cookie Dough" "Blobs" "Glumps" "Globs")
+  (desc "A dozen big, irregular, glumps of cookie dough, delivered onto a baking tray. They ask to be baked.")
+  (group 12 "COOKIE DOUGH BLOB")
+)
+
+(Object
+  "COOKIE DOUGH BLOB"
+  (names "Blob of Cookie Dough" "Cookie Dough Blob" "Cookie Dough" "Blob" "Glump" "Glob")
+  (desc "One nice fat blob of cookie dough. It screams to be baked.")
+  (weight .2)
+)
+
+(CookieSteps
+  "BAKING COOKIES_COOKIE WORLD"
+  (names "Baking Cookies" "Cookies")
+  (desc "Twelve cookies, going from formless blobs to rather formless (but delicious) round cookies.")
+  (group 12 "COOKIE DOUGH BLOB")
+)
+
+(Object
+  "BAKING COOKIE"
+  (names "Baking Cookie" "Cookie")
+  (desc "One nice fat blob of baking cookie.")
+  (weight .2)
+)
+
+(CookieSteps
+  "READY COOKIES_COOKIE WORLD"
+  (names "Ready Cookies" "Cookies" "Baked Cookies")
+  (desc "Chocolate coconut cookies, ready to see the world and cool.")
+  (group 12 "READY COOKIE")
+)
+
+(Object
+  "READY COOKIE"
+  (names "Ready Cookie" "Cookie" "Baked Cookie")
+  (desc "A chocolate coconut cookie, ready to be taken out of the oven.")
+  (weight .2)
+)
+
+(JunkCookies
+  "BURNT COOKIES_COOKIE WORLD"
+  (names "Burnt Cookies" "Charred Cookies" "Cookies" "Burnt" "Carbon")
+  (desc "Burnt, blackened, destroyed. No good.")
+  (group 5834028210948559 "BURNT COOKIE")
+)
+
+(Object
+  "BURNT COOKIE"
+  (names "Burnt Cookie" "Charred Cookie" "Cookie")
+  (desc "A poor specimen, charred beyond edibility.")
+  (weight .2)
+)
+
+(JunkCookies
+  "UNDERDONE COOKIES_COOKIE WORLD"
+  (names "Underdone Cookies" "Cookies")
+  (desc "These cookies are underdone, and that can't be fixed by putting them back in.")
+  (group 7513657228383224 "COOKIE DOUGH BLOB")
+)
+
+(Object
+  "UNDERDONE COOKIE"
+  (names "Underdone Cookie" "Cookie")
+  (desc "Alas, this cookie's path to perfection was cut cruelly short when it was taken out the oven too early. Now it can never come to anything; baking it again would turn it into a gruesome mess.")
+  (weight .2)
+)
+
+(CookieSteps
+  "COOLING COOKIES_COOKIE WORLD"
+  (names "Cooling Cookies" "Cookies" "Finished Cookies")
+  (desc "Twelve cookies, too hot to eat yet.")
+  (method "TAKE %" "GET %" (print "They are still too hot. Be patient. Relaaax."))
+  (group 12 "COOKIE DOUGH BLOB")
+)
+
+(Object
+  "COOLING COOKIE"
+  (names "Cooling Cookie" "Cookie" "Finished Cookie")
+  (desc "A chocolate coconut cookie, cooling as it waits to be edible.")
+  (method
+    "TAKE %" "GET %"
+    (print "It's still too hot."))
+  (weight .2)
+)
+
+(Cookies
+  "CHOCOLATE COCONUT COOKIES_COOKIE WORLD"
+  (group 256923577521058878088611477224235621321607 "CHOCOLATE COCONUT COOKIE")
+  (names "Chocolate Coconut Cookies"
+    "Chocolate Cookies" "Coconut Cookies"
+    "Chocolate" "Coconut" "Cookies"
+    "Morsels" "Ambrosia")
+  (desc "Delicious, self-baked chocolate coconut cookies. You wonder which celestial cookie-being sent the box of cookie dough.")
+  (method
+    "TAKE %"
+    "GET %"
+    (let oldc (count-self %)
+      (chain
+        (take & "You take the cookies.")
+        ;; if there is a difference (cookies taken) wipe the tray
+        (if (and (not (= oldc (count-self %)))
+                 (str= % (gec "TRAY" holds))
+            (chain (sec! "TRAY" holds (strtag "NOTHING")) (print "You hear applause from somewhere.")))))))
+  (method
+    "TAKE A #" "TAKE 1 #" "TAKE #"
+    "GET A #" "GET 1 #" "GET #"
+    ;; if there are only twelve cookies, and they are tray cookies, take all
+    ;; i.e., the cookies on the tray are a unit; if you take 13 cookies, and there are 15, you get 12-tray and 1 non-tray, so the tray is cleared if possible
+    (let tc (if (str= % (gec "TRAY" holds)) 12 0)
+      (let rc (- (count-room %) tc)
+        (if (>= rc 1)
+            (take-n & 1 "You take a cookie.")
+            (print "You want to unload all the cookies from the tray at once. You are just odd that way.")))))
+  (method
+    "TAKE @ %" "GET @ %"
+    (let tc (if (str= % (gec "TRAY" holds)) 12 0)
+    ;; and if YOU have the tray?
+      (let rc (- (count-room %) tc)
+        (if (> 0 @)
+            (print "Negative cookies do not exist. All cookies are positive.")
+            (> @ (+ tc rc))
+            (print "There aren't that many to take.")
+            (and (>= @ tc) (= tc 12))
+            (chain (take-n & @ (format "You take {} cookies." @)) (chain (sec! "TRAY" holds (strtag "NOTHING")) (print "You hear applause from somewhere.")))
+            (> @ rc)
+            (print "You can't do that and clear the entire tray. One chief rule of cookie-ing is to clear all or none.")
+            (take-n & @ (format "You take {} cookies." @))))))
+  (method
+    "THROW %" "HURL %"
+    "THROW @ %" "HURL @ %"
+    "THROW A #" "HURL A #"
+    "THROW 1 #" "HURL 1 #"
+    "THROW #" "HURL #"
+    (print "But that would be scandalous!"))
+)
+
+;; Class Tray-Good: BakedCookies, JunkCookies extend from its take-mechanisms?, BCs ext. Cs also?
+
+(func
+  (count-self base)
+  (let n (roomtag base "SELF")
+    (if (ins n)
+        (get-count n)
+        0)))
+
+(func
+  (count-room base)
+  (let n (roomtag base (get-room))
+    (if (inr n)
+        (get-count n)
+        0)))
+
+(Cookie
+  "CHOCOLATE COCONUT COOKIE"
+  (names "Chocolate Coconut Cookie"
+    "Chocolate Cookie" "Coconut Cookie" "Cookie"
+    "Morsel" "Ambrosia")
+  (desc "Perfection! This chocolate coconut cookie is beyond all other foods (Well, save for other cookies of like heritage.). Like all proper cookies, this thing will re-energize you fully on eating. It is very, very potent, and ought to be taken sparingly.")
+)
+
+(Class Cookies
+  (extends Object)
+  (counter typetag Cookies)
+  (method
+      "EAT @ %"
+      "EAT %"
+      (print "Now, don't be greedy."))
+  (method
+      "EAT #"
+      "EAT A #"
+      "EAT 1 #"
+      (eat-n (base &) 1 "You eat a cookie. Yum."))
+  (method
+      "THROW %"
+      "THROW AWAY %"
+      (print "These cookies are too valuable to simply throw away."))
+)
+
+(Class Cookie
+  (extends Object)
+  (counter typetag Cookie)
+  (weight .2)
+  (food 31)
+  ;; one more than the maximum possible legal strength at any time (drink vial->30)
+)
+
+(Class CookieSteps
+  (extends Object)
+  (counter typetag CookieSteps)
+  (method
+    "TAKE %"
+    "GET %"
+    (print "But they aren't ready to eat yet!"))
+  (method
+    "EAT %" "EAT #" "EAT A #" "EAT @ %" "EAT 1 #"
+    (print "Only eat cookies when they are ready. These here; these are not ready to eat yet.")))
+
+(Class JunkCookies
+  (extends Object)
+  (method
+    "EAT %" "EAT #" "EAT A #" "EAT @ %" "EAT 1 #"
+    (print "That is ... not edible."))
+
+  (method
+    "TAKE %"
+    "GET %"
+    (if (gec "OVEN" holds-tray?)
+        (print "You should take the tray out first.")
+        (let oldc (count-self %)
+          (chain
+            (take & "You take the evil cookies.")
+            ;; if there is a difference (cookies taken) wipe the tray
+            (if (and (not (= oldc (count-self %)))
+                    (str= % (gec "TRAY" holds))
+                (sec! "TRAY" holds (strtag "NOTHING"))))))))
+  (method
+    "TAKE A #" "TAKE 1 #" "TAKE #"
+    "GET A #" "GET 1 #" "GET #"
+    ;; if there are only twelve cookies, and they are tray cookies, take all
+    ;; i.e., the cookies on the tray are a unit; if you take 13 cookies, and there are 15, you get 12-tray and 1 non-tray, so the tray is cleared if possible
+    (if (gec "OVEN" holds-tray?)
+        (print "You should take the tray out first.")
+        (let tc (if (str= % (gec "TRAY" holds)) 12 0)
+          (let rc (- (count-room %) tc)
+            (if (>= rc 1)
+                (take-n & 1 "You take a bad cookie.")
+                (print "You might as well take all of them; no use leaving bad cookies on the tray."))))))
+  (method
+    "TAKE @ %" "GET @ %"
+    (if (gec "OVEN" holds-tray?)
+        (print "You should take the tray out first.")
+        (let tc (if (str= % (gec "TRAY" holds)) 12 0)
+          (let rc (- (count-room %) tc)
+          ;; negatives and non-ints are automatically pruned out by adjust(
+            (if (> @ (+ tc rc))
+                (print "There aren't that many to take.")
+                (and (>= @ tc) (= tc 12))
+                (chain (take-n & @ (format "You take {} abominations." @)) (sec! "TRAY" holds (strtag "NOTHING")))
+                (> @ rc)
+                (print "You might as well take all of them; no use leaving bad cookies on the tray.")
+                (take-n & @ (format "You take {} cookies." @)))))))
+
+  (counter typetag JunkCookies))

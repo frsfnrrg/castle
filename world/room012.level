@@ -1,0 +1,259 @@
+$baselibrary.level
+
+(Room
+    "WINE CELLAR"
+    (names "Wine Cellar" "Cellar")
+    (desc "This dim cellar smells strongly of wine. You can see a dozen barrels lined up against the walls. Judging from the smell, some of the wine is still here in the barrels. Wooden stairs go up to the eastern door, and the window on the north lets in a dim shaft of light, illuminating a tankard slightly..."
+        (if (> (random) .9) "The sloshing of water tells you that you are at the same level as the moat...")
+        (if (> (random) .9) "A rat scurries behind a barrel and disappears from view..."))
+    (east "DOOR LOCKED" "SMALL ROOM")
+    (north "BARRELS" 0 "The wine barrels block the way.")
+    (south "BARRELS" 0 "The wine barrels block the way.")
+    (west "BARRELS" 0 "The wine barrels block the way.")
+    (objects
+        "WINE BARRELS"
+        ; ^ the above object splits into wine, empty barrel(s)
+        "TANKARD"
+        "WOODEN STEPS"
+    )
+)
+
+
+;; WINE BARRELS 12
+  ;; FULL BARRELS 11
+    ;; FULL BARREL
+    ;; EMPTY BARREL
+
+;; ################ TODO FINISH THIS SECTION!! ############################
+;; then yargle, then tunnel, then beta-testers!!
+
+(Object
+  "WINE BARRELS"
+  (names "Wine Barrels" "Barrels" "Wine" "Barrels" "Wines" "Iron Bands" "Wood" "Knotted Wood")
+  (desc "These barrels are very large, and made of some heavy, knotted type of wood. The iron bands keeping them together are rusty, as the vast majority of the metal you have seen in the castle. Of the dozen barrels, only one is empty. They line the walls in a U-shape."
+    (if (not (inr "EMPTY BARREL"))
+        (chain (place "FULL WINE BARRELS_WINE CELLAR" "WINE CELLAR")
+          (place "EMPTY BARREL" "WINE CELLAR")
+          (hide &))))
+  (method
+    "TAP %" "TAP @ %"
+    (print "You have don't have the skill and experience to do anything with wine beyond stare at it. Proper removal from a barrel is inconcievable."))
+  (method
+    "BREAK %"
+    (print "You kick one, and end up hurting your own foot. These barrels were well made."))
+  (method
+    "COUNT %"
+    (chain (print "You count the barrels, knocking on each one; the west wall has two full barrels, the south wall five full ones. The center barrel on the north wall is empty, the four surrounding it full. All the barrels are the same size and look just as ancient.")
+      (place "FULL WINE BARRELS_WINE CELLAR" "WINE CELLAR")
+      (place "EMPTY BARREL" "WINE CELLAR")
+      (hide &)))
+)
+
+(Object
+  "FULL WINE BARRELS_WINE CELLAR"
+  (names "Full Wine Barrels" "Full Barrels" "Wine" "Barrels" "Wine Barrels")
+  (desc "Eleven full barrels. They smell of old wine.")
+  (group 11 "FULL WINE BARREL")
+  (method "TAKE %" "GET %" "TAKE @ %" "GET @ %"
+    (print "The barrels are huge in comparison to you; each one is one and a half times your height and at least six times your width. You can't achieve anything with them anyway."))
+  (method
+    "TAKE A #" "GET A #" "TAKE 1 #" "GET 1 #" "TAKE #" "GET #"
+    (print "Each barrel is too large to get out of the doorway. Each barrel is wedged between floor and ceiling of the room. Each barrel is too heavy to lift."))
+  (method
+    "TAP %" "TAP @ %"
+    "TAP 1 #" "TAP #" "TAP A #"
+    (print "You have don't have the skill and experience to do anything with wine beyond stare at it. Proper removal from a barrel is inconcievable."))
+  (method
+    "SMELL %"
+    "SNIFF %"
+    (print "You sniff at a barrel and notice the smell of wine. You aren't surprised."))
+  (method
+    "LOOK INTO %"
+    "PEAR INTO %"
+    "LOOK IN %" "PEER IN %"
+    (print "This barrel isn't open; anyway, there is only wine in there."))
+  (method
+    "BREAK $"
+    "OPEN %"
+    (print "You don't want to be risked getting flooded in wine. Smelling of grapes is something you definitely don't look forward to."))
+)
+
+(Object
+  "FULL WINE BARREL"
+  (names "Full Wine Barrel" "Wine Barrel" "Full Barrel" "Wine" "Barrel" "Iron Band" "Band" "Band")
+  (desc "A very large, very heavy wine barrel. It is circled by large, rusty iron bands.")
+  (takeable False)
+)
+
+(Object
+  "EMPTY BARREL"
+  (names "Empty Barrel" "Empty" "Barrel" "Cobwebs")
+  (desc "This, the only empty barrel in the entire wine cellar, is covered in cobwebs."
+    (if (gec & opened?)
+        (join "One of the boards of it is pried open, allowing you to look in."
+          (if (gec & holds-key?)
+              "A key rests inside the barrel."))))
+  (counter holds-key? True)
+  (counter opened? False)
+  (method
+    "TAKE %" "GET %"
+    (print "It is indeed too large."))
+  (method
+    "TAP %"
+    (print "There is no wine in it."))
+  (method
+    "SHAKE %" "SHOVE %"
+    "PUSH %" "ROLL %"
+    "MOVE %" "SHIFT %"
+    (if (gec & holds-key?)
+        (print "You push the side of the barrel. It rocks slightly, and then falls back. You hear something roll around inside it.")
+        (print "You shove the barrel. Nothing.")))
+  (method
+    "BREAK %"
+    "OPEN %"
+    (if (gec & opened?)
+        (print "The barrel is already open.")
+        (if (ins "CROWBAR")
+            (call-obj & "BREAK % WITH CROWBAR")
+            (print "Just kicking or punching the wood won't do anything."))))
+  (method
+    "BREAK % WITH $"
+    "BREAK % WITH $"
+    "OPEN % USING $"
+    "OPEN % USING $"
+    (if (gec & opened?)
+        (print "The barrel is already open.")
+        (if (str= $ "CROWBAR")
+            (chain (sec! & opened? True)
+              (print "You take the crowbar, and slip it into a crack in the barrel. You wiggle it a bit, then pull. A board on the barrel head cracks, bending out far enough so that you could slip in would you want to.")
+              (add-name & "Opened Barrel")
+              (add-name & "Open Barrel")
+              (add-name & "Broken Board")
+              (add-name & "Board")
+              (add-name & "Broken Barrel")
+              (print "You spy a key resting in the barrel.")
+              (place "FINAL KEY" "WINE CELLAR"))
+            (or (str= $ "SWORD") (str= $ "MAGIC SWORD"))
+            (chain (print "You stab at a creack between to boards. You make a small hole, sure, but when you try to cut through the barrel, you realize the sword is stuck. You jank, getting the sword out, put end up with an imperceptible slit in the wood.") (tire .2))
+            (or (str= (tail $) "SUB") (str= $ (tail $)))
+            (print "Using that won't open a barrel.")
+            (print "Those will not open the barrel for you."))))
+  (method
+    "LOOK INTO %"
+    "PEAR INTO %"
+    "LOOK IN %" "PEER IN %"
+    (if (gec & opened?)
+        (if (gec & holds-key?)
+            (print "You peer into the barrel, and see just that little key.")
+            (print "You see the cavernous insides of an empty barrel."))
+        (print "The barrel isn't open. Look into that one before you try again.")))
+  (method
+    "ENTER %"
+    "GO INTO %"
+    (print "You don't want to be in that smelly old barrel for any amount of time unless you have a good reason."))
+  (method
+    "PUT $ IN %" "PUT $ INTO %" "PLACE $ IN %" "PLACE $ INTO %"
+    (print "Why bother?"))
+)
+
+(Object
+  "FINAL KEY"
+  (names "Final Key" "Key" "Tiny Writing" "Writing" "The Key" "Key to Escape")
+  (weight .005)
+  ;; 25 g
+  (desc "You know that this is the last key that you will need to escape that castle. The reason is obvious; see the tiny writing on the side.")
+  (method
+    "READ %"
+    (print "On one side of the key is engraved: \"The Key - To Escape\"."))
+  (method
+    "TAKE % OUT OF $"
+    "GET % OUT OF $"
+    "TAKE % FROM $"
+    "GET % FROM $"
+    (if (str= $ "EMPTY BARREL")
+        (call-obj & "TAKE %")
+        (print "It isn't in there.")))
+  (method
+    "TAKE %" "GET %"
+    (if (gec "EMPTY BARREL" holds-key?)
+        (chain
+          (take & "You pull the board back, quickly rush over to the key, grab it, and get out of the stinking barrel. Ugh. Centuries of grapes.")
+          (if (ins &)
+              (sec! "EMPTY BARREL" holds-key? False)))
+        (take & "You take the final key.")))
+  (method
+    "SMELL %" "SNIFF %"
+    (print "It doesn't smell of anything. Not even of grapes."))
+  (method
+    "UNLOCK $ WITH %"
+    "UNLOCK $ USING %"
+    (if (and (str= (get-room) "COURTYARD") (str= $ "METAL DOOR"))
+        (if (= 2 (get-counter "METAL DOOR" door-state))
+            (chain (print "You unlock the metal door.")
+              (set-counter "METAL DOOR" door-state 1))
+            (print "The door is already unlocked."))
+        (print "It doesn't work.")))
+  (method
+    "LOCK $ WITH %"
+    "LOCK $ USING %"
+    (if (and (str= (get-room) "COURTYARD") (str= $ "METAL DOOR"))
+        (chain (set-counter "METAL DOOR" door-state 2)
+          (if (= 0 (get-counter "METAL DOOR" door-state))
+              (print "You close and lock the metal door.")
+              (print "You lock the metal door.")))
+        (print "It doesn't work.")))
+  (key "NOWHERE" "NEVER")
+)
+
+
+(Object
+  "TANKARD"
+  (names "Tankard" "Wine" "Old Tankard")
+  (desc "An old tankard."
+    (if (gec & holds-wine?) "It is filled with wine.")
+    (if (inr &) "It is lying in a corner of the room."))
+  (counter holds-wine? True)
+  (weight 1)
+  ;; drinking removes .8 of it; drinking has a +2 str now, (-.3 str * 10 t) 5 t later
+  (method
+    "DRINK %"
+    "CHUG %"
+    (if (gec & holds-wine?)
+        (chain (sec! & holds-wine? False)
+          (print "You down the wine in the tankard. Not bad, but not very good either. A bit old.")
+          (remove-name & "Wine")
+          (increase-str 3)
+          ;; + 3 inst, -5 dot
+          (set-weight & .2)
+          (if (ins &)
+              (inc-carry-capacity .8))
+          (wine-effect "DOOZY"))
+        (print "The tankard is already empty.")))
+  (method
+    "PUT $ IN %"
+    "PUT $ INTO %"
+    "PLACE $ IN %"
+    "PLACE $ INTO %"
+    (print "The tankard contains wine already."))
+)
+
+(daemon
+  (wine-effect &)
+  (counter time 0)
+  (step
+    (set! time (+ time 1))
+    (if (>= time 15)
+        (stop-daemon &)
+        (> time 5)
+        (tire .5))))
+
+(Scenic
+  "WOODEN STEPS"
+  (names "Stairs" "Steps" "Set of Stairs" "Wooden Stairs" "Wooden Steps" "Flight of Stairs" "Creaky Stairs")
+  (desc "This short set of stairs creaks loudly with every step.")
+  (method
+    "GO UP %"
+    "ASCEND %"
+    (call-global "EAST")
+  )
+)

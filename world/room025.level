@@ -1,0 +1,545 @@
+$baselibrary.level
+$wrappers.level
+
+(Room
+    "ALCHEMIST'S LABORATORY"
+    (names
+        "Alchemist's Laboratory"
+        "Alchemist's Lab"
+        "Loony Room"
+    )
+    (desc
+        "This room can be nothing other than an old laboratory. Diagrams cover the walls, with a few tacked up on the east and west doors. A stack of lead bars is in the corner, while beakers, vials, and unusual objects cover the table. A shelf stands out,"
+        (let o (in "ORANGE POTION" "ALCHEMIST'S LABORATORY")
+        (let b (in "BLUE POTION"   "ALCHEMIST'S LABORATORY")
+        (let p (in "PURPLE POTION" "ALCHEMIST'S LABORATORY")
+        (if (and o (and b p)) "for it is empty except for three potions standing there. One is a deep blue-green, another rich purple, and the last bright orange."
+            (and o p) "for it holds only two potions on the top shelf. One is rich purple, and the other bright orange."
+            (and p b) "as it is empty except for two potions standing there. One is a deep blue-green and the other, a rich purple."
+            (and b o) "for it is empty save for two potions standing there. One orange, one blue with some green in it."
+            o "for it holds only a bright orange potion."
+            b "for there is only a deep blue-green potion on the top shelf."
+            p "since only a purple potion is on the top shelf."
+            "as it is empty, unlike everything else in the room."
+        ))))
+        (randomc
+            "Strange smells waft through the room..."
+            "You can hear rustling noises above to the west..."
+            "You hear the sound of the ever-present wind outside..."
+        )
+    )
+    (west "DOOR CLOSED" "NORTHWEST STAIRWELL TOP")
+    (east "DOOR CLOSED" "FOGGY ROOM")
+    (objects
+        "POTIONS"
+        ; ^ this object exists as long as two or more potions are in this room; script on potion side
+        "BLUE POTION"
+        "PURPLE POTION"
+        "ORANGE POTION"
+        "LEAD BARS_ALCHEMIST'S LABORATORY"
+        "DIAGRAMS"
+        "CONTAINERS"
+        ; ^ beakers, vials, etc.
+        "SHELF"
+        "WIND"
+    )
+)
+
+;;Class Vial
+;;  Object
+;;    weight .1
+;;    method blah (oog)
+;;    method blah blah (oog)
+
+;; ^ that would be wonderful!
+
+(Object
+    "POTIONS"
+    ; a magical wrapper object; can be in multiple rooms simult? no. there are three vials, and this
+    ; only exists when two, three are there
+    (names
+        "Potions"
+        "Vials"
+    )
+    (desc "The potions from the shelf in the alchemist's laboratory. The clear glass vials reveal the colors of the potions.")
+    ; ^ add "Orange and Blue"
+
+;;     (counter wrapped1 "ORANGE POTION")
+;;     (counter wrapped2 "BLUE POTION")
+;;     (counter wrapped3 "PURPLE POTION")
+;;     (counter in1 True)
+;;     (counter in2 True)
+;;     (counter in3 True)
+;;     (counter number 3)
+
+    ; safe to 'REMOVE' from self; no weight issues
+    (method
+        "TAKE %"
+        "GET %"
+        ; if inventory space if enough, take all three vials; otherwise, don't
+        ; simple, right?
+        (if (in & "SELF")
+            (print "But you already have some!")
+            (let o (gec & orange?)
+            (let b (gec & blue?)
+            (let p (gec & purple?)
+            (let tw (+ (+ (if o (get-weight "ORANGE POTION") 0) (if b (get-weight "BLUE POTION") 0)) (if p (get-weight "PURPLE POTION") 0))
+                (if (>= (get-carry-capacity) tw)
+                    (chain
+                        (if o (take "ORANGE POTION" "You take the orange potion."))
+                        (if p (take "PURPLE POTION" "You take the purple potion."))
+                        (if b (take "BLUE POTION" "You take the blue potion."))
+                        (update-POTIONS)
+                    )
+                    (print "You can't carry that much.")
+                )
+            ))))
+        )
+    )
+    (method
+        "DROP %"
+        (if (in & "SELF")
+            (chain
+                (if (in "ORANGE POTION" "SELF") (drop "ORANGE POTION" "You drop the orange potion."))
+                (if (in "BLUE POTION"   "SELF") (drop "BLUE POTION"   "You drop the blue potion."  ))
+                (if (in "PURPLE POTION" "SELF") (drop "PURPLE POTION" "You drop the purple potion."))
+                (update-POTIONS)
+            )
+            (print "You do not have some potions; you cannot drop them.")
+        )
+    )
+    (method
+        "TAKE @ %"
+        "GET @ %"
+        (let num (count-Trues (gec & orange?) (gec & blue?) (gec & purple?))
+            (if (= @ num)
+                (call-obj & "TAKE %")
+                (> @ num)
+                (print "There aren't that many to take.")
+                (= @ 1)
+                (print "Singular... Plural... (anyway, the potions have specific names)")
+                (= @ 2)
+                (print "But which two?")
+                (chain
+                    (print @)
+                    (print num)
+                )
+            )
+        )
+    )
+    (method
+        "DROP @ %"
+        (let num (count-Trues (gec & orange?) (gec & blue?) (gec & purple?))
+            (if (= @ num)
+                (call-obj & "DROP %")
+                (> @ num)
+                (print "There aren't that many to drop.")
+                (= @ 1)
+                (print "Singular... Plural...")
+            )
+        )
+    )
+    (method
+        "COUNT %"
+        (if (in "POTIONS" "SELF")
+            (print (format-1 "You have {} potions." (count-Trues (gec & orange?) (gec & blue?) (gec & purple?))))
+            (print (format-1 "There are {} potions in the room" (count-Trues (gec & orange?) (gec & blue?) (gec & purple?))))
+        )
+    )
+    (method
+        "BREAK %"
+        "SMASH %"
+        "THROW %"
+        "DESTROY %"
+        (print "You'd rather not. They could be useful for something.")
+    )
+    ; whether or not red, blue, purple in same room
+    (counter orange? True)
+    (counter blue? True)
+    (counter purple? True)
+    (hidden)
+    ;; use a wrapper3!
+)
+
+(Object
+    "ORANGE POTION"
+    (names
+        "Orange Potion"
+        "Potion"
+        "Orange Vial"
+        "Vial"
+        "Orange"
+    )
+    (desc "A vial of bright orange potion.")
+    (weight .2)
+    (method
+        "READ %"
+        (print "You could swear it says \"Drink Me\" in little letters embossed on the side of the orange vial.")
+    )
+    (method
+        "SMELL %"
+        (print "The orange potion smells like soup. Melon soup, one of your favorites.")
+    )
+    (method
+        "TOUCH %"
+        (print "The orange vial is, oddly enough, still warm. There are some little letters embossed on the side.")
+    )
+    (method
+        "BREAK %"
+        "SMASH %"
+        "THROW %"
+        "DESTROY %"
+        (print "You'd rather not. It could be useful for something.")
+    )
+    (method
+        "DRINK %"
+        "CHUG %"
+        (chain
+            ;; want the (drop/print obj text)
+            (if (in & "SELF")
+                (chain
+                    (drop & "You pour the entire vial of orange potion into your mouth. The vial then disappears, but nothing else happens.")
+                    (remove & (get-room))
+                    (update-POTIONS)
+                )
+                (chain
+                    (print "You pour the entire vial of orange potion into your mouth. The vial then disappears, but nothing else happens.")
+                    ; ah, the accursed 'remove obj "SELF"' never works right (no carry capacity increase, so silent drop, etc are needed)
+                    (remove & (get-room))
+                    (update-POTIONS)
+                )
+            )
+            ;                   name     wait str
+            (orange-effect "ORANGE EFFECT" 3 20)
+        )
+    )
+    (method
+        "TAKE %"
+        "GET %"
+        (chain
+            (take & "You take the orange potion.")
+            (update-POTIONS)
+        )
+    )
+    (method
+        "DROP %"
+        (chain
+            (if (str= (get-room) "ALCHEMIST'S LABORATORY")
+                (drop & "You place the orange potion back on the shelf.")
+                (drop & "You drop the orange potion.")
+            )
+            (update-POTIONS)
+        )
+    )
+)
+
+(daemon
+    (orange-effect & wait level)
+    (counter countdown wait)
+    (step
+        (if (= 0 countdown)
+            (chain
+                (set-max-strength level)
+                (set-strength level)
+                (print "Suddenly, you feel stronger and more alive than ever before, your strength doubled.")
+                (stop-daemon &)
+            )
+            (set! countdown (- countdown 1))
+        )
+    )
+)
+
+
+(Object
+    "PURPLE POTION"
+    (names
+        "Purple Potion"
+        "Potion"
+        "Purple Vial"
+        "Vial"
+        "Purple"
+    )
+    (desc "A vial of purple potion.")
+    (weight .2)
+    (method
+        "READ %"
+        (print "You could swear it says \"Drink Me (Maybe)\" in little letters embossed on the side of the purple vial.")
+    )
+    (method
+        "SMELL %"
+        (print "The purple potion does not smell of anything.")
+    )
+    (method
+        "TOUCH %"
+        "FEEL %"
+        (print "The purple vial is freezing. Absolutely freezing. You do, however, feel some tiny embossed letters on the side.")
+    )
+    (method
+        "BREAK %"
+        "SMASH %"
+        "THROW %"
+        "DESTROY %"
+        (print "You'd rather not. It could be useful for something.")
+    )
+    (method
+        "DRINK %"
+        "CHUG %"
+        (chain
+            (print "You drink the purple potion. Suddenly, time seems to slow down. You feel cold...very cold...")
+            (die)
+        )
+    )
+    (method
+        "TAKE %"
+        "GET %"
+        (chain (take & "You take the purple potion.")
+            (update-POTIONS))
+    )
+    (method
+        "DROP %"
+        (chain (if (str= (get-room) "ALCHEMIST'S LABORATORY")
+            (drop & "You place the purple potion back on the shelf.")
+            (drop & "You drop the purple potion."))
+            (update-POTIONS))
+    )
+)
+
+(Object
+    "BLUE POTION"
+    (names
+        "Blue Potion"
+        "Blue-green Potion"
+        "Potion"
+        "Blue Vial"
+        "Blue-green Vial"
+        "Vial"
+        "Blue"
+        "Blue-green"
+    )
+    (desc "A vial of blue potion. Well, really blue with a bit of green in it.")
+    (weight .2)
+    (method
+        "READ %"
+        (print "You could swear it says \"Drink Me\" in little letters embossed on the side of the blue vial.")
+    )
+    (method
+        "SMELL %"
+        (print "The blue potion smells like sour apples.")
+    )
+    (method
+        "TOUCH %"
+        "FEEL %"
+        (print "You can feel some tiny embossed characters on the side of the blue vial.")
+    )
+    (method
+        "BREAK %"
+        "SMASH %"
+        "THROW %"
+        "DESTROY %"
+        (print "You'd rather not. It could be useful for something.")
+    )
+    (method
+        "DRINK %"
+        "CHUG %"
+        (chain
+            (print "You down the blue potion. You immediately notice your mistake as the acid burns through your body.")
+            (die)
+        )
+    )
+    (method
+        "TAKE %"
+        "GET %"
+        (chain (take & "You take the blue potion.")
+            (update-POTIONS))
+    )
+    (method
+        "DROP %"
+        (chain (if (str= (get-room) "ALCHEMIST'S LABORATORY")
+            (drop & "You place the blue potion back on the shelf.")
+            (drop & "You drop the blue potion."))
+            (update-POTIONS))
+    )
+)
+
+
+(func
+    (update-POTIONS)
+    (let room (get-room)
+    (let o-r (in "ORANGE POTION" room)
+    (let p-r (in "PURPLE POTION" room)
+    (let b-r (in "BLUE POTION" room)
+    (let o-s (in "ORANGE POTION" "SELF")
+    (let p-s (in "PURPLE POTION" "SELF")
+    (let b-s (in "BLUE POTION" "SELF")
+
+    (chain (if (in "POTIONS" room)
+            (remove "POTIONS" room)
+            (in "POTIONS" "SELF")
+            (remove "POTIONS" "SELF"))
+
+        (if (and o-r (and p-r b-r))
+            (chain (place "POTIONS" room)
+                (sec! "POTIONS" orange? True)
+                (sec! "POTIONS" blue? True)
+                (sec! "POTIONS" purple? True))
+            (and o-s (and p-s b-s))
+            (chain (place "POTIONS" "SELF")
+                (sec! "POTIONS" orange? True)
+                (sec! "POTIONS" blue? True)
+                (sec! "POTIONS" purple? True))
+
+            (and o-r p-r)
+            (chain (place "POTIONS" room)
+                (sec! "POTIONS" orange? True)
+                (sec! "POTIONS" blue? False)
+                (sec! "POTIONS" purple? True))
+            (and p-r b-r)
+            (chain (place "POTIONS" room)
+                (sec! "POTIONS" orange? False)
+                (sec! "POTIONS" blue? True)
+                (sec! "POTIONS" purple? True))
+            (and b-r o-r)
+            (chain (place "POTIONS" room)
+                (sec! "POTIONS" orange? True)
+                (sec! "POTIONS" blue? True)
+                (sec! "POTIONS" purple? False))
+
+            (and o-s p-s)
+            (chain (place "POTIONS" "SELF")
+                (sec! "POTIONS" orange? True)
+                (sec! "POTIONS" blue? False)
+                (sec! "POTIONS" purple? True))
+            (and p-s b-s)
+            (chain (place "POTIONS" "SELF")
+                (sec! "POTIONS" orange? False)
+                (sec! "POTIONS" blue? True)
+                (sec! "POTIONS" purple? True))
+            (and b-s o-s)
+            (chain (place "POTIONS" "SELF")
+                (sec! "POTIONS" orange? True)
+                (sec! "POTIONS" blue? True)
+                (sec! "POTIONS" purple? False))))
+
+    )))))))
+)
+
+(Object
+    "LEAD BARS_ALCHEMIST'S LABORATORY"
+    (names
+        "Lead Bars"
+        "Lead Ingots"
+        "Lead"
+        "Bars"
+        "Ingots"
+    )
+    (group 10 "LEAD BAR")
+    (desc "This large stack of lead bars is neatly arranged, but the bars themselves are crudely made.")
+    (counter in-original? True)
+    ; ^ on moving this is set to false; only the s
+    (method
+      "TAKE %"
+      "GET %"
+      (chain (take & "You take the lead bars.")
+        (if (in "LEAD BARS_SELF" "SELF")
+            ;that 'taken?' condition suffices
+            (if (and (gec & in-original?) (gec "LEAD BARS_SELF" in-original?))
+                (chain (sec! "LEAD BARS_SELF" in-original? False)
+                  (replace-obj-desc "LEAD BARS_SELF" "This large stack of lead bars is neatly arranged, but the bars themselves are crudely made." "Some badly formed lead bars."))))))
+    (method
+      "TAKE @ %"
+      "GET @ %"
+      (chain (take-n & @ "You take the lead bars.")
+        (if (in "LEAD BARS_SELF" "SELF")
+            (if (and (gec & in-original?) (gec "LEAD BARS_SELF" in-original?))
+                (chain (sec! "LEAD BARS_SELF" in-original? False)
+                  (replace-obj-desc "LEAD BARS_SELF" "This large stack of lead bars is neatly arranged, but the bars themselves are crudely made." "Some badly formed lead bars."))))))
+    (method
+      "TAKE A #" "TAKE #"  "TAKE 1 #"
+      "GET A #"  "GET #"   "GET 1 #"
+      (chain (take-n & 1 "You take a lead bar.")
+        (if (in "LEAD BARS_SELF" "SELF")
+            (if (and (gec & in-original?) (gec "LEAD BARS_SELF" in-original?))
+                (chain (sec! "LEAD BARS_SELF" in-original? False)
+                  (replace-obj-desc "LEAD BARS_SELF" "This large stack of lead bars is neatly arranged, but the bars themselves are crudely made." "Some badly formed lead bars."))))))
+    ; count fails?
+)
+
+
+
+(Object
+    "LEAD BAR"
+    (names
+        "Lead Bar"
+        "Lead"
+        "Bar"
+    )
+    (desc "The sizable lead bar has a trace of gold paint on it.")
+    (weight 3)
+)
+
+(Object
+    "CONTAINERS"
+    (names
+        "Containers"
+        "Beakers"
+        "Vials"
+        "Unusual Objects"
+        "Contraptions"
+        "Container"
+        "Beaker"
+        "Vial"
+        "Liquids"
+    )
+    (desc "No two of these assorted containers are alike, and all are so complicated you can't even find the opening to most of them. Green, black, yellowish, and clear liquids are predominant here.")
+    (takeable False)
+    (hidden)
+    (method
+        "BREAK %"
+        "DESTROY %"
+        (if (daemon-exist? "VILE POISON")
+            (chain (print "You smash the vials and beakers and whatnot, one after the other. The yellow and clear liquids burn little holes into the floor.") (replace-obj-desc & "No two of these assorted containers are alike, and all are so complicated you can't even find the opening to most of them. Green, black, yellowish, and clear liquids are predominant here." "All these once smooth and shiny containers of liquid now lie smashed and broken upon the table and the floor. There are puddles of green and black liquid in the depressions made by the other acids on the floor."))
+            (print "If you'd break them, you'd also have to clean the liquids and the glass up. Too much work.")
+        )
+    )
+)
+
+(Object
+    "DIAGRAMS"
+    (names
+        "Diagrams"
+        "Diagram"
+        "Symbols"
+        "Symbol"
+        "Pictures"
+        "Picture"
+        "Arcane Diagrams"
+        "Arcane Diagram"
+        "Text"
+    )
+    (desc "These diagrams cover the walls. They are filled with arcane symbols and unusual pictures.")
+    (method
+        "READ %"
+        (print "You cannot even make sense of the pictures and sketches, let alone the text.")
+    )
+    (method
+        "TAKE %"
+        "GET %"
+        (print "Firstly, you don't need them, secondly, you don't want them, and lastly, you could never understand them anyway.")
+    )
+)
+
+(Object
+  "SHELF"
+  (names  "Shelf")
+  (desc
+    (let vialcount (count-Trues (in "BLUE POTION" "ALCHEMIST'S LABORATORY") (in "PURPLE POTION" "ALCHEMIST'S LABORATORY") (in "ORANGE POTION" "ALCHEMIST'S LABORATORY"))
+      (if (= vialcount 0)
+          "This floor to ceiling shelf is wide, yet empty."
+          (= vialcount 1)
+          "This floor to ceiling shelf is wide, yet almost empty, A vial rests on the top shelf."
+          (= vialcount 2)
+          "This floor to ceiling shelf is wide, yet almost empty, A duo of vials rests on the top shelf."
+          "This floor to ceiling shelf is wide, yet almost empty, A trio of vials rests on the top shelf.")))
+  (hidden)
+  (takeable False)
+)

@@ -1,0 +1,221 @@
+$baselibrary.level
+
+(Room
+    "FIREPLACE CHAMBER"
+    (names
+        "Fireplace Chamber"
+        "Room of da Fireplace"
+    )
+    (desc "You automatically notice the main feature of this room, a huge fireplace covering an entire wall. Somehow, it seems to be burning brightly, making this one the only warm room so far. A large woodpile is stored next to the fireplace, opposite to the southern door. On the east side of the room are a table and a couple spindly chairs around it. The fire here glows very brightly, making shadows of the furniture that dance on the walls...")
+    (south "DOOR CLOSED" "MAGICIAN'S STUDY")
+    (objects
+        "FIREPLACE"
+        "WOOD STACK_FIREPLACE CHAMBER"
+        "FIREPLACE TABLE"
+        "SPINDLY CHAIRS_FIREPLACE CHAMBER"
+        "SHADOWS"
+    )
+    ; entryscript daemon that ensures you have a 5 turn limit in here, with 3 turn cooldown necessary
+    (method
+        "WEST"
+        "GO WEST"
+        "W"
+        (if (daemon-exists? "VILE POISON")
+            (chain
+                (print "Confident of your invulnerability, you walk into the fireplace and burn up.")
+                (die)
+            )
+            (print "You prefer not to enter the fireplace")
+        )
+    )
+)
+
+(Object
+    "SHADOWS"
+    (names
+        "Shadows"
+        "Shadow"
+    )
+    (takeable False)
+    (hidden)
+    (desc "Everything in here casts funky, dancing shadows, thanks to the fireplace. You could stare at them forever.")
+)
+
+(Object
+    "FIREPLACE"
+    (names
+        "Fireplace"
+        "Fire"
+        "Hearth"
+        "Flames"
+        "Brick Fireplace"
+        "West Wall"
+    )
+    (desc "This gigantic brick fireplace dominates the center of the west wall. It is still burning brightly, heating up the room so much that it is becoming unbearable. How it still burns after centuries you neither know ... nor want to know.")
+    (method
+        "TAKE %"
+        "GET %"
+        (print "You must be crazy. Absolutely crazy.")
+    )
+    (method
+        "ENTER %"
+        ; redirecting
+        (call-room "GO WEST")
+    )
+    ;; method throw into; works for 'bad' cookies as well
+    (method
+      "PUT $ IN %"
+      "PLACE $ IN %"
+      (if (str= $ "GOLD BAR")
+          (call-obj "GOLD BAR" "PUT % IN FIREPLACE")
+          (str= $ "BURNT COOKIES_SELF")
+          (chain (drop "BURNT COOKIES_SELF" "You throw the evil cookies into the fireplace.")
+            (remove "BURNT COOKIES_FIREPLACE CHAMBER" "FIREPLACE CHAMBER"))
+          (str= $ "BURNT COOKIES_SELF_SUB")
+          (chain (drop-n "BURNT COOKIES_SELF" 1 "You throw the burnt cookie into the fireplace.")
+            (remove-n "BURNT COOKIES" 1 "FIREPLACE CHAMBER"))
+          (str= $ "BURNT COOKIES_FIREPLACE CHAMBER")
+          (chain (print "You throw the blackened cookies into the fireplace.")
+            (remove "BURNT COOKIES_FIREPLACE CHAMBER" "FIREPLACE CHAMBER"))
+          (str= $ "BURNT COOKIES_FIREPLACE CHAMBER_SUB")
+          (chain (print "You throw the charred cookie into the fireplace.")
+            (remove-n "BURNT COOKIES" 1 "FIREPLACE CHAMBER"))
+          (print "You never know when you might need that.")))
+)
+
+; groupify? so everyone can make their little own stack o' wood? the description would need to be wiped though...
+(Object
+    "WOOD STACK_FIREPLACE CHAMBER"
+    (names
+        "Logs"
+        "Wood Stack" "Stack"
+        "Woodpile" "Pile"
+        "Wood"
+        "Cut Wood"
+    )
+    (desc (if (in & "FIREPLACE CHAMBER")
+              "This stack of cut wood is neatly arranged. Weirdly enough, all the wood pieces look almost identical, and have not decayed in the slightest amount. Looking over the woodpile, you estimate that there are about one thousand two hundred pieces of wood."
+              "A stack of neatly cut, perfectly preserved wood. Amazing."))
+    (group 1273 "CUT LOG")
+    (method
+        "COUNT %"
+        (if (in & "FIREPLACE CHAMBER")
+          (chain (print (format "You painstakingly tally the cut logs. Finally, you finish. {} logs." (get-count &)))
+            (tire .1))
+          (print-g-count "WOOD STACK")))
+
+    (method
+        "TAKE %"
+        "GET %"
+        (chain (if (> (get-count &) 100)
+                   (print "You know it is ... well, a lot of wood, but you proceed anyway."))
+          (take & "You take the pile of wood.")))
+    ;; WELL; actually, you DO want to take a piece. FOR kitchen. just change estimates by range in the desc. but then an altering desc, || lead bars would be needed.
+
+)
+
+(Object
+  "CUT LOG"
+  (names "Cut Log" "Wood" "Cut Wood" "Fireplace Food" "Log" "Piece of Cut Wood" "Quarter Log" "Chopped Wood")
+  (desc "A nicely shaped quarter log. Well dried and ready to burn.")
+  (weight 2)
+  ;; these guys are heavy. (woe to the fool who tries to move them all)
+)
+
+(Object
+    "FIREPLACE TABLE"
+    (names
+        "Fireplace Table"
+        "Table"
+        "Wooden Table"
+    )
+    (desc "This small wooden three legged table is placed right in front of the fireplace, in the center of the room. Its dark wooden surface is worn and scratched.")
+)
+
+(Object
+    "SPINDLY CHAIRS_FIREPLACE CHAMBER"
+    (names
+        "Spindly Chairs"
+        "Chairs"
+        "Fragile Seats"
+    )
+    (desc
+      "A set of three fragile wooden chairs."
+      (let c (gec "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken)
+      (if (= 0 c) "Amazingly enough, they are not broken yet."
+          (= 1 c) "One is broken already."
+          (= 2 c) "Two of them are broken."
+          (= 3 c) "They are all broken.")))
+    (group 3 "SPINDLY CHAIR")
+    (counter broken 0)
+    (method
+      "TAKE A #"
+      "TAKE #"
+      "TAKE @ %"
+      "GET A #"
+      "GET #"
+      "GET @ %"
+      (print (format
+        "You really don't want any of these useless things anyway. {}"
+        (if (= 3 (get-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken))
+            "They are all broken anyway."
+            "They'll just break on you."))))
+    (method
+        "SIT ON #"
+        "SIT ON A #"
+        (if (> 3 (get-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken))
+            (chain
+                (print "You select a chair that isn't broken yet. It promptly breaks and you hit the floor.")
+                (set-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken (+ 1 (get-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken)))
+            )
+            (print "All the remaining chairs are destroyed. You can't sit on any.")
+        )
+    )
+    (method
+        "BREAK #"
+        "BREAK A #"
+        (let scb (get-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken)
+            (if (= 0 scb)
+                (chain
+                    (print "You jump onto one of the chairs, and it shatters under your feet.")
+                    (set-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken 1)
+                )
+                (< scb 3)
+                (chain
+                    (print "You kick a surviving chair. It splits into its constituent parts.")
+                    (set-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken (+ 1 scb))
+                )
+                (print "All the remaining chairs are destroyed. You can't sit on any.")
+            )
+        )
+    )
+    (method
+        "BREAK %"
+        (chain
+            (print "You smash all the chairs, revelling secretly in the destruction.")
+            (set-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken 3)
+        )
+    )
+;;     (method
+;;         "THROW # INTO $"
+;;     )
+;; Now...If you could throw a broken chair into the fire....)
+)
+
+(Object
+    "SPINDLY CHAIR"
+    (names
+        "Spindly Chair"
+        "Fragile Chair"
+        "Chair"
+        "Chair that would want to be broken."
+    )
+    (desc (if
+        (>
+            (random)
+            (/ (get-counter "SPINDLY CHAIRS_FIREPLACE CHAMBER" broken) 3)
+        )
+        "A very fragile, small four-legged chair. Try sitting on that thing."
+        "A broken chair; when you sat on it, the chair just snapped, as you behind remembers."
+    ))
+)

@@ -1,0 +1,373 @@
+$baselibrary.level
+$lightstick.level
+; ^ wand uses 2 funcs
+
+(Room
+    "WEST GALLERY"
+    (names
+        "West Gallery"
+        "Gallery"
+        "Picture Gallery"
+    )
+    (desc "Every wall here has multiple pictures on it, pictures of the sky, of lakes, of trees, of birds, and so on. They cover up so much of the paneled walls that space is barely available for a small western door. In the middle of the room is a sculpture of a snowy owl. It faces toward the eastern half of the gallery, which is full of portraits displaying the people who once lived here..."
+        (if (> (random) .7)
+          (randomc "The marble sculpture's large eyes seem to follow you around the room..."
+              "You hear hooting noises coming from somewhere...")))
+
+    (east "FREE" "EAST GALLERY")
+    (west "DOOR CLOSED" "BATHROOM")
+    (objects
+        "PICTURES"
+        "SCULPTURE"
+        "PANELS")
+)
+
+(Object
+  "LOOSE PANEL"
+  (names
+      "Loose Panel"
+      "Panel"
+  )
+  (desc (if (get-counter "LOOSE PANEL" removed?)
+      "This reddish wooden panel once covered a secret compartment."
+      "The panel here on the wall is loose."))
+  (counter removed? False)
+  (method
+      "KNOCK ON %"
+      "BANG ON %"
+      "TEST %"
+      (print "You knock against the wood. Hollow."))
+  (method
+    "REMOVE %"
+    (if (gec & removed?)
+        (print "You already took it out of the wall.")
+        (chain
+          (print "You grab the panel by a protruding edge, and rip it from the wall. It falls off so easily you let go of it, surprised. The panel comes to rest on the floor on the opposite side of the room. Behind the panel is a secret compartment, with some parchment inside.")
+          (set-counter & removed? True)
+          (place "SECRET COMPARTMENT" "WEST GALLERY")
+          (place "SCRAP OF PARCHMENT" "WEST GALLERY")
+          (place "BACKING" "WEST GALLERY"))))
+  (method
+    "TAKE %"
+    "GET %"
+    (chain (if (not (gec & removed?)) (call-obj & "REMOVE %"))
+      (take "LOOSE PANEL" "You take the panel from the floor.")))
+)
+
+(Object
+    "PANELS"
+    (hidden)
+    (names "Panels" "Paneling" "Paneled Walls" "Walls" "Wall")
+    (desc "The paneling here on the wall, or what is visible of it, is made of a deep reddish wood."
+        (if (not (get-counter "LOOSE PANEL" removed?))
+            (chain
+                (if (not (in "LOOSE PANEL" "WEST GALLERY")) (place "LOOSE PANEL" "WEST GALLERY"))
+                "One of the panels is loose.")))
+    (method
+        "TAKE %"
+        "GET %"
+        (print "You cannot take the panelling. It is part of the wall."))
+    (method
+      "COUNT %"
+      (print "Umm. Why..?"))
+)
+
+(Object
+    "PICTURES"
+    (names "Pictures" "Drawings"  "Paintings"  "Picture" "Drawing"
+           "Painting" "Landscape" "Landscapes" "Skies"   "Trees"
+           "Lakes"    "Mountains" "Valleys"    "Plains"  "Rivers")
+    (desc "This group of about fourty pictures displays various landscapes. Included are drawings and paintings of mountains, valleys, plains, rivers, and so on. A night scene is particularly captivating."
+        (if (not (in "NIGHT SCENE" "WEST GALLERY"))
+            (place "NIGHT SCENE" "WEST GALLERY")))
+    (takeable False)
+    (method
+        "COUNT %"
+        (print "There must be at least fourty."))
+)
+
+(Object
+    "SCULPTURE"
+    (names
+        "Sculpture" "Owl" "Statue" "Owl Statue" "Owl Sculpture")
+    (desc "This sculpture of a snowy owl is amazingly lifelike, even though it is many times larger than real life. The eyes seem to follow you around."
+        (if (get-counter "SCULPTURE" readable?)
+            "Faint writing is seen all over the owl."))
+    (counter readable? False)
+    (method
+        "TAKE %"
+        "GET %"
+        (print "The owl, being made of marble, is several times heavier than you. It is probably also anchored to the floor. Let's just say it won't budge."))
+    (method
+        "READ %"
+        (if (get-counter & readable?)
+            (chain
+                (print "You pick out some of the many phrases on the owl.")
+                (wise-OWL-words 0 (randomr 2 5) "NONE" "NONE" "NONE" "NONE" "NONE")
+                )
+            (print "What could be there to read on a sculpture? Seriously.")))
+)
+
+(func (wise-OWL-words cur final a b c d e)
+    (let chosen (choose-unique-OWL a b c d e)
+        (chain (print chosen)
+            (if (= cur (- final 1))
+                (pass)
+                (= cur 0)
+                (wise-OWL-words (+ cur 1) final chosen b c d e)
+                (= cur 1)
+                (wise-OWL-words (+ cur 1) final a chosen c d e)
+                (= cur 2)
+                (wise-OWL-words (+ cur 1) final a b chosen d e)
+                (= cur 3)
+                (wise-OWL-words (+ cur 1) final a b c chosen e)
+                (wise-OWL-words (+ cur 1) final a b c d chosen)))))
+
+; Yes, there is a chance that this exceeds runtime depth of _rfmap and crashes. A chance :-)
+; well.. depth increases by 1 per function call, can search up to two inward... so after about 990 failures (at max prob of 1/4**990, with 5 asked for), a chance of about 1 in 10**595 (or just 10**200? 3-calls/level?)
+
+(ques (choose-unique-OWL a b c d e)
+    (let trial (randomc
+        "'Some enemies must be defeated by magic and strength.'"
+        "'Bats are not greedy, only mischievous.'"
+        "'The higher you go, the better things are, but the lower you go, the better the exits get.'"
+        "'Communication is the key to success.'"
+        "'If one wants to be good at something, research is wonderful.'"
+        "'If you search you find....but sometimes not what you'd expect.'"
+        "'Success means not giving up.'"
+        "'Owls hoot.'"
+        "'Truncating a sphere will take forever.'"
+        "'Not everyone is your enemy.'"
+        "'Every dangerous creature can be defeated.'"
+        "'You are not the only one who likes cookies.'"
+        "'Fear of the dark is useful in places you have never been before.'"
+        "'Tired targets are easy targets.'"
+        "'Friendship is a way to light.'"
+        "'When success is near, mistakes arrive.'"
+        "'Bananas are the perfect snack.'"
+        "'Before opening mouth, turn on brain.'"
+        "'Some things make a difference, but only later.'"
+        "'Learn from mistakes.'")
+        (if (str= trial a)
+            (choose-unique-OWL a b c d e)
+            (str= trial b)
+            (choose-unique-OWL a b c d e)
+            (str= trial c)
+            (choose-unique-OWL a b c d e)
+            (str= trial d)
+            (choose-unique-OWL a b c d e)
+            (str= trial e)
+            (choose-unique-OWL a b c d e)
+            trial)))
+
+(Object
+    "NIGHT SCENE"
+    (hidden)
+    (takeable False)
+    (names
+        "Night Scene"
+        "Night Picture"
+        "Spring Night"
+        "Drawing of a Spring Night"
+        "Text"
+        "Line of Text")
+    (desc "This drawing of a spring night must have been made by a master. You see a line of text at the bottom.")
+    (method
+        "READ %"
+        (chain (print "You read the text: \"The owl has words of wisdom\".")
+               (set-counter "SCULPTURE" readable? True)))
+)
+
+(Object
+  "SECRET COMPARTMENT"
+  (names "Secret Compartment" "Compartment")
+  (takeable False)
+  (desc "This secret compartment, tiny despite the width of the walls in this place, was hidden behind a wooden panel."
+    (if (get-counter "SCRAP OF PARCHMENT" in-compartment?)
+        "There is a piece of parchment in it.")
+    (if (in "BACKING" "WEST GALLERY")
+        "The backing of the compartment is made of a light colored wood, which contrasts to the panels of the room."
+        "The backing of the compartment has been destroyed, revealing another compartment behind this one."))
+  (method
+    "PUT $ IN %"
+    "PLACE $ IN %"
+    (print "Why do that? You have nobody to hide anything from."))
+)
+
+(Object
+    "SUBCOMPARTMENT"
+    (names
+        "Sub-Compartment" "Subcompartment" "Secret Compartment" "Very Secret Compartment" "Compartment" "Secret Sub-Compartment" "Stone Compartment" "Secret Subcompartment")
+    (takeable False)
+    (desc "The second secret compartment is smaller than the first, but this time, has stone behind it. Unfortunately, this means there will not be a third one.")
+    (method
+        "PUT $ IN %"
+        "PLACE $ IN %"
+        (print "Why do that? You have nobody to hide anything from."))
+)
+;; the backing to the secret compartment: tear, remove, punch through, to get sub-compartment. Fortunately, the Wand of Replenishment is not needed for any quests. (but it is nice, sometimes)
+(Object
+    "BACKING"
+    (names
+        "Back of Secret Compartment"
+        "Backing")
+    (hidden)
+    (method
+      "TAKE %"
+      "GET %"
+      (print "Unfortunately, the edges of the backing offers no purchase.")
+    )
+    (counter removed? False)
+    (desc "This light wood looks quite out of place in the room. Then again, it is in a secret compartment. But still, no style.")
+    (method
+        "KNOCK ON %"
+        "BANG ON %"
+        "TEST"
+        (print "You knock against the wood. Hollow."))
+    (method
+        "REMOVE %"
+        "DESTROY %"
+        "KICK %"
+        "BREAK %"
+        (chain
+            (print "You kick the backing. It splinters, revealing yet another secret compartment. This one has some type of wand in it.")
+            (remove & "WEST GALLERY")
+            (place "WAND OF REPLENISHMENT" "WEST GALLERY")
+            (place "SUBCOMPARTMENT" "WEST GALLERY")))
+)
+
+(Object
+    "SCRAP OF PARCHMENT"
+    (weight .1)
+    (names
+        "Piece of Parchment"
+        "Scrap of Parchment"
+        "Piece of Paper"
+        "Scrap of Paper"
+        "Scrap"
+        "Parchment"
+        "Diagrams"
+        "Writing"
+        "Text")
+    (desc "A plain scrap of parchment, with erratic diagrams and writing all over it.")
+    (counter in-compartment? True)
+    (method
+        "TAKE %"
+        "GET %"
+        (chain
+            (take & "You take the piece of parchment.")
+            (if (and (in & "SELF") (get-counter & in-compartment?))
+                (set-counter & in-compartment? False))))
+    (method
+        "READ %"
+        (chain (print "You read all the text you can find and understand.")
+        (print "'Somebody will read this.'")
+        (print "'The north star is never in conjunction with a south star. Why??'")
+        (print "'Note to self: Just because some liquids are yellow and smell bad does NOT mean gold will come.'")
+        (print "'Finding gold sucks. Observing stars gives better results, and takes less time.'")
+        (print "'Poisoning myself is dumb. And I do it anyway.'")
+        (print "'Cookies are great food.'")
+        (print "'Orange potions are always safe to drink, but blue stuff corrodes. Very quickly. My new shoes already have a hole, after two days.'")
+        (print " 'I just remembered why I am writing this. And I forgot again.'")
+        (print "'I, being so erratic, forgot where I one the shelf that I placed my wonderful strength potion.'")
+        (print "'Must find curse for blacksmith.'")
+        (print "'Find Magician's Code Sheet. He will give two gigantic slugs. If I find it.'"))
+    )
+)
+
+(Object
+  "WAND OF REPLENISHMENT"
+  (names "Wand Of Replenishment" "Wand" "Wand Text" "Text")
+  (desc "The use of quickly becomes obvious. It says, 'Wand Of Replenishment and Restoration for Food, Fire, and Osmium Parakeets.'")
+  (method
+      "READ %"
+      (print "It says, 'Wand of Replenishment and Restoration for Food, Fire, and Osmium Parakeets.'"))
+  (weight .2)
+  ;; replenishment methods are the function of the replenisher
+  ;; remember, 1 weight = 5 kg
+  (method
+    "RENEW OSMIUM PARAKEET WITH %"
+    "RENEW OSMIUM PARAKEET USING %"
+    "RENEW PARAKEET WITH %"
+    "RENEW PARAKEET WITH %"
+    (print "Alas, there are no osmium parakeets in sight. Good try, though."))
+  (method
+    "RENEW $ WITH %" "RENEW $ USING %" "USING % RENEW $" "WITH % RENEW $"
+    "ENCHANT $ WITH %" "ENCHANT $ USING %" "WITH % ENCHANT $" "USING % ENCHANT $"
+    "WAVE % AT $" "WAVE % TOWARD $"
+    (if (str=g "STALE BREAD" $)
+        (let c (get-count $)
+          (let oldt (tail $)
+              (chain
+                (move-n "STALE BREAD" oldt "BREAD ROOM" c)
+                (move-n "FRESH BREAD" "BREAD ROOM" oldt c)
+                (print "Poof! A cloud of blue smoke rises up from the bread. It looks freshly baked now."))))
+
+        (str=s "STALE BREAD" $)
+        ; I think this fails
+        (let oldt (tail (de-subtag $))
+            (chain
+              (move-n "STALE BREAD" oldt "BREAD ROOM" 1)
+              (move-n "FRESH BREAD" "BREAD ROOM" oldt 1)
+              (print "Poof! A cloud of blue smoke rises up from the bread. It looks freshly baked now.")))
+        ;; fresh bread cases!!
+
+        (str=g/s "FRESH BREAD" $)
+        (print "That bread is already in good condition. No blue smoke needed.")
+
+        (str=s "TORCHES" $)
+        (chain (print "Poof! A cloud of blue smoke rises up from the torch. The grime and whatnot disappear, and the torch looks like new (and will probably burn like it too).")
+          (_renew-one-light-stick (de-subtag $)))
+        ;; if it refers to one torch
+        (str=g "TORCHES" $)
+        (chain (print "Poof! A cloud of blue smoke rises up, and the torches are rejuvenated.")
+          (_renew-light-sticks $))
+        ;; if it refers to several
+
+        (str=s "CANDLES" $)
+        (chain (print "Poof! A cloud of blue smoke rises up from the candle. The candle looks new, tall, and shiny.")
+          (_renew-one-light-stick (de-subtag $)))
+        (str=g "CANDLES" $)
+        (chain (print "Poof! A cloud of blue smoke rises up, and the candles are like new.")
+          (_renew-light-sticks $))
+        (str= $ "SELF")
+        (print "Poof! A cloud of green smoke rises up, and the scent of foul eggs fills the air. You try again, and with a \"Poof!\" you get a cloud of blue smoke. You don't seem different though.")
+        (print "You might want to read the text on the wand.")))
+  (method
+    "WAVE %"
+    (print "You wave the wand, slowly, dramatically. Blue sparks fly from the tip, but nothing else happens."))
+)
+
+(Room
+  "BREAD ROOM"
+  (names "Bread Room")
+  (desc "A room,"
+    (if (in "FRESH BREAD_BREAD ROOM" "BREAD ROOM")
+        "empty save for fresh bread."
+        (in "STALE BREAD_BREAD ROOM" "BREAD ROOM")
+        "empty save for stale, old bread."
+        "empty. It used to hold bread, but a crazy debugger came along and took it all."))
+  (objects "FRESH BREAD_BREAD ROOM")
+)
+
+(Object
+  "FRESH BREAD_BREAD ROOM"
+  (group 10 "FRESH PIECE OF BREAD")
+  (names "Loaves of Fresh Bread" "Fresh Bread" "Loaves of Bread" "Fresh Loaves of Bread" "Fresh Loaves" "Loaves" "Bread")
+  (desc "Some fresh loaves of bread. Not top-class, but they don't look bad.")
+  (method
+    "EAT @ %"
+    "EAT %"
+    (eat-n % @ (format "You eat {} loaves." @)))
+  (method
+    "EAT #"
+    "EAT A #"
+    (eat-n % 1 "You eat a loaf."))
+)
+(Object
+  "FRESH PIECE OF BREAD"
+  (names "Fresh Piece of Bread" "Piece of Fresh Bread" "Fresh Bread" "New Bread" "Good Bread" "Edible Bread" "Bread" "Loaf" "Fresh Loaf" "Loaf of Fresh Bread" "New Loaf" "Edible Loaf" "Good Loaf")
+  (desc "A fresh loaves of bread. You guess it is still edible; being renewed with blue smoke is always a good sign.")
+  (weight .5)
+  (food 5)
+)

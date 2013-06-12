@@ -1,0 +1,45 @@
+(Class Walls
+  (extends Scenic)
+  (desc "Some walls. So?")
+  (names "Walls")
+  (method
+    "PAINT #"
+    "PAINT %"
+    "PAINT @ %"
+    (print "Silly adventurer. You don't have paint.")))
+
+(Walls
+  "GEN4WALLS"
+  (group 4 "GENWALL")
+  (method
+    "COUNT %"
+    (if (> (random) .9) (print "Umm... Why?") (print "You see 4 walls. The room is square, after all."))
+  )
+)
+
+(Walls
+  "GEN3WALLS"
+  (group 3 "GENWALL")
+  (method
+    "COUNT %"
+    (if (> (random) .8) (print "Umm... Why?") (print "Only three of this rooms sides count as walls."))
+  )
+)
+
+(Scenic
+  "GENWALL"
+  (desc "It's a wall.")
+  (names "Wall")
+)
+
+(Scenic
+  "GENCEILING"
+  (names "Ceiling")
+  (desc "The ceiling.")
+)
+
+(Scenic
+  "GENFLOOR"
+  (names "Floor")
+  (desc "The floor. Woah, exciting stuff.")
+)

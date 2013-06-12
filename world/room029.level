@@ -1,0 +1,133 @@
+$baselibrary.level
+
+(Room
+    "BATTY ATTIC"
+    (names "Batty Attic")
+    (desc "The ceiling here appears dark at first, but when it starts to move, you realize that it consists of thousands of bats... They fly around on your entry, obscuring the room. However, they do not go down to the stairwell below."
+          (if (in "BLUE-YELLOW SHARD" "BATTY ATTIC")
+              "Through the swarm, you manage to see a glimpse a colorful shard in stuck in the roof.")
+          "Hopefully they will not attack...")
+    (entryscript
+        (bat-squad "SIMPLY BATTY"))
+    (down "FREE" "NORTHWEST STAIRWELL TOP" "You go down.")
+    (objects
+        "BAT SWARM"
+        "BAT"
+        "STONE STAIRCASE 3"
+        "BLUE-YELLOW SHARD"
+    )
+)
+
+; each turn, they have a (10-str)/10 chance of ... owning you.
+; thing dropped in ... randomc: gatehouse; west gallery; armor storage; small room
+; you wake up again in the northwest stairwell top
+
+(daemon
+    (bat-squad &)
+    (step
+        (if (str= (get-room) "BATTY ATTIC")
+            (if (<= (random) (/ (- 10 (get-strength)) 10))
+                (let choice (get-random-item "SELF")
+                  (let want-choice (and (not (str= choice "NONE")) (not (is-tricky-obj choice)))
+                    (chain
+                      (if want-choice
+                          (let destination (randomc "GATEHOUSE" "WEST GALLERY" "ARMOR STORAGE" "SMALL ROOM")
+                          (let nname (if (group? choice) (roomtag (base choice) "BATTY ATTIC") choice)
+                                (chain
+                                  (drop choice "The bats suddenly swirl up into a tight group, and fly toward you...")
+                                  ;; objects to avoid?
+                                  (if (ugroup? nname)
+                                      (move-u-n nname "BATTY ATTIC" destination (get-count nname))
+                                      (group? nname)
+                                      (move-n nname "BATTY ATTIC" destination (get-count nname))
+                                      (move nname "BATTY ATTIC" destination)))))
+                          (print "The bats suddenly swirl up into a tight group, and fly toward you..."))
+                      (set-room "NORTHWEST STAIRWELL BOTTOM")
+                      (look-at-room)
+                      (print "You wake up again, disoriented...")
+                      (if want-choice
+                          (print "You are missing something."))
+                      (stop-daemon &)))))
+            (stop-daemon &))))
+
+
+;; Is the object one such that stealing via drop would avoid needed side effects?
+(func
+  (is-tricky-obj c)
+  (or (not (visible? c))
+      (str= c "ARMOR")
+      (str= c "RUBY")
+      (str= c "SAPPHIRE")
+      (str= c "EMERALD")
+      (str= c "BUCKET")
+      (str= c "RED-BLUE SHARD")
+      (str= c "BLUE-YELLOW SHARD")
+      (str= c "YELLOW-RED SHARD")
+      (str= c "ORANGE POTION")
+      (str= c "BLUE POTION")
+      (str= c "PURPLE POTION")
+      (str= c "ORB OF SPEED")
+      (str= c "OMNIKEY")
+      ;; ^ debuggers are safe ;-)
+      (str= c "BRIGHT SCEPTER")))
+
+(Object
+    "STONE STAIRCASE 3"
+    (names
+        "Stone Staircase"
+        "Stairs"
+        "Staircase"
+        "Stairway"
+        "Stair"
+        "Stone Staircase"
+        "Stone Stairway"
+        "Stone Stair"
+    )
+    (takeable False)
+    (desc "These angular stone stairs end here, in the attic.")
+    (method
+        "DESCEND %"
+        "GO DOWN %"
+        (call-room "GO DOWN")
+    )
+    (method
+        "ASCEND %"
+        "GO UP %"
+        (print "You are already at the top of the staircase.")
+    )
+)
+
+(Object
+    "BAT SWARM"
+    (names "Bats" "Bat Swarm" "Swarm" "Black Flying Things" "Flying Bats" "Crazy Bats" "Giant Bats" "Large Bats" "Big Bats")
+    (takeable False)
+    (desc "This huge swarm of bats swirls around on the ceiling. You notice that they seem unusually large.")
+    (method
+        "COUNT %"
+        (print "There are too many too count, and they're flying around crazily anyways.")
+    )
+    (method
+        "TAKE %"
+        "GET %"
+        (print "Um.. They're alive... And there are many of them...")
+    )
+    (method
+        "DROP %"
+        (print "You'd have to take them first.")
+    )
+)
+
+(Object
+    "BAT"
+    (names "Bat" "Black Flying Thing" "Flying Bat" "Crazy Bat" "Giant Bat" "Big Bat" "Large Bat")
+    (hidden)
+    (takeable False)
+    (desc "A large bat, one of myriads. You quickly lose sight of it again.")
+)
+
+(Shard
+    "BLUE-YELLOW SHARD"
+    (names "Blue-Yellow Shard" "Shard" "Blue Shard" "Yellow Shard" "Glass" "Piece of Glass" "Arc" "Green Shard" "Blue Glass" "Green Glass" "Yellow Glass" "Blue" "Yellow" "Green")
+    (desc "This shard looks like it was part of some circular piece of glass. Its hue changes from blue to yellow.")
+    (counter not-found? True)
+)

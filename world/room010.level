@@ -1,0 +1,319 @@
+$baselibrary.level
+
+(Room
+    "BLACKSMITH'S FORGE"
+    (names
+        "Blacksmith's Forge"
+    )
+    (desc "A forge is in the far corner of this room, close to the south exit. Nobody has been here for some time, as is shown by the dusty bellows, and the various forgotten nails, horseshoes, and chain links lying around haphazardly. A stack of coals rests next to the forge. The armory is just north of here...")
+    (north "DOOR LOCKED" "WEAPON STORAGE")
+    (south "DOOR OPEN" "ROCKS MEET HEAD ROOM")
+    ;; to make the game easier, there is a proposed e/w door. Yargle key finding needs to be expanded/clarified
+    (objects
+      "GOLD BAR"   "TONGS"
+      "FORGE"      "BELLOWS"
+      "COAL"       "NAILS"
+      "HORSESHOES" "CHAINS"
+      "BUCKET")
+)
+
+(Object
+    "GOLD BAR"
+    (names
+        "Gold Bar"
+        "Gold"
+        "Ingot"
+        "Gold Ingot"
+        "Bar"
+        "Small Gold Bar"
+    )
+    (desc "A small gold bar. It is rather heavy, and is so probably pure gold. This is the most valuable thing you have found at the blacksmiths.")
+    (weight 2.7)
+    (method
+        "TEST %"
+        (print "Odd... gold is supposed to be soft. This thing is as hard as iron.")
+    )
+    (method
+        "CUT % WITH %"
+        (if (str= $ "SWORD")
+            (print "Even a sword can't cut this.")))
+    (method
+      "MELT %"
+      (if (roomc? "FIREPLACE CHAMBER")
+          (call-obj & "MELT % IN $")
+          (print "You see nothing hot enough to melt metal in.")))
+    (method
+      "MELT % IN $"
+      "PUT % IN $"
+      "PLACE % IN $"
+      (if (str= $ "FIREPLACE")
+          (if (or (ins "TONGS") (inr "TONGS"))
+              (call-obj & "MELT % IN FIREPLACE USING TONGS"))
+          (str= $ "KITCHEN FIREPLACE")
+          (print "It doesn't look like that fireplace is hot enough.")
+          (print "Why would you want to do that?")))
+    (method
+      "MELT % IN $ WITH $2"
+      "MELT % IN $ USING $2"
+      "PUT % IN $ USING $2"
+      "PUT % IN $ WITH $2"
+      "PLACE % IN $ USING $2"
+      "PLACE % IN $ WITH $2"
+      "GRAB % WITH $2 THEN PUT % IN $"
+      "GRAB % WITH $2, PUT % IN $"
+      (if (str= $ "FIREPLACE")
+          (if (str= $2 "TONGS")
+              (chain (place "CIPHER SHEET" "FIREPLACE CHAMBER")
+                (drop "GOLD BAR" "You grasp the gold bar with the tongs and reach it into the flames. Half a minute later, the metal is drooping. It starts to drip into the fireplace, and the droplets vaporise. After two full minutes, the metal is gone, leaving something behind. You pull the tongs out of the fire and drop a steaming sheet of parchment on the ground. Somehow, it managed to survive the flames. The heat is rather unbearable, so you retreat to the magician's study as the mysterious object cools.")
+                (remove "GOLD BAR" "FIREPLACE CHAMBER")
+                (set-room "MAGICIAN'S STUDY")
+                (look-at-room)))
+          (print "That is nowhere near hot enough to melt metal.")))
+)
+
+(Object
+    "CIPHER SHEET"
+    (names
+        "Cipher Sheet"
+        "Decoder"
+        "Sheet"
+        "Parchment"
+    )
+    (desc "An old, crinkled sheet of parchment, treated with some type of oil to make it heat resistant. It explains the steps to deciphering a complex code.")
+    (weight 0)
+    (method
+        "READ %"
+        (print "You read through the text, but quickly realize that you forgot half of it anyway. You'll never be able to learn the code unless you have something to try it on.")
+    )
+)
+
+(Object
+    "TONGS"
+    (names
+        "Tongs"
+    )
+    (desc "A heavy set of tongs for a long-dead blacksmith. The ends are curved oddly, as if said smith had left them in a very hot fire.")
+    (weight 1)
+)
+
+(Object
+    "COAL"
+    (names
+        "Coal"
+        "Peat"
+        "Black stuff"
+        "Coals"
+        "Stack of Coals"
+        "Mound of Coal"
+        "Mound of Coals"
+    )
+    (desc "This large mound is made of low quality coal, and some peat is also visible. Whoever uses these will be breathing fumes, and not getting a good fire.")
+    (takeable False "You don't want that.")
+    (method
+      "LIGHT %"
+      "LIGHT % WITH $"
+      "LIGHT % USING $"
+      (print "You don't want to risk the fumes this junk will make."))
+)
+
+(Object
+    (hidden)
+    "FORGE"
+    (names
+        "Forge"
+        "Stone"
+        "Dirt"
+        "Stone Forge"
+        "Dirty Forge"
+        "Dirty Stone Forge"
+        "Simple Dirty Stone Forge"
+        "Simple Stone Forge"
+        "Simply Dirty Forge"
+        ; etc.etc.etc.
+    )
+    (takeable False)
+    (desc "A simple stone forge, covered in dirt.")
+)
+
+(Object
+    "BELLOWS"
+    (names
+        "Bellows"
+        "Leather Bellows"
+        "Leather"
+        "Dusty Bellows"
+    )
+    (desc "A perfect set of leather bellows, were they not all ripped and torn.")
+    (takeable False)
+)
+
+
+(func
+    (bucket-DESC text c)
+    (let a (get-counter "BUCKET" c)
+        (if (not (str= "NONE" a))
+            (nformat text a)
+            None)))
+
+;; bucket holds a liquid
+; a container obj class could be nice, but whatever
+(Object
+  "BUCKET"
+  (names "Bucket" "Tin Bucket")
+  (weight .6)
+  ; ^ 3 kg.
+  (desc "A simple tin bucket. No holes!"
+        (bucket-DESC "It contains {}." fluid))
+  (counter fluid "NONE")
+;; ^ NOTE: fluids are neccessarily partitive and stateless, so one water object would always work.
+  (counter weight 0)
+  (method
+    "PUT $ IN %"
+    "PUT $ INTO %"
+    (let f (get-counter & fluid)
+      (if (not (str= f "NONE"))
+          (if (str= $ f)
+              (print (nformat "The {} is already in the bucket. You don't need more of it." f))
+              (print (nformat "The bucket is already full with {}." f)))
+
+          (or (str= $ "WATER") (str= $ "GREEN WATER"))
+          (if (> (get-carry-capacity) (get-weight $))
+              (chain (print (nformat "You dip the bucket into the {}. It is now full." $))
+                (set-counter & fluid (strtag $))
+                (set-counter & weight (+ (get-weight $) (get-counter & weight)))
+                (if (in & "SELF")
+                    (place $ "SELF")
+                    ; on removing/taking _, only one copy of the hidden water will be used
+                    (place $ (get-room))))
+              (print "You don't think you'll be able to carry that much."))
+
+          (or (str= (tail $) "SUB") (takeable? $))
+          (print "You don't need a bucket to carry just that!")
+          (print "You can't do that!"))))
+
+  (method
+    "DIP % INTO $"
+    "DIP % IN $"
+    (if (str= $ "POOL OF WATER")
+        (call-obj & "PUT WATER IN %")
+        (str= $ "BASIN OF WATER")
+        (call-obj & "PUT GREEN WATER IN %")
+        (print "That won't work.")))
+
+  (method
+    "TAKE $ OUT OF %"
+    "REMOVE $ FROM %"
+    (let f (gec & fluid)
+      (if (str= f $)
+          (call-obj & "POUR OUT %")
+          (print "That isn't in the bucket."))))
+
+  (method
+    "EMPTY %"
+    (if (str= (gec & fluid) "NONE")
+        (print "There is nothing in there!")
+        (call-obj "POUR OUT %")))
+
+  (method
+    "POUR OUT %"
+    ; liquid case
+    (let f (get-counter & fluid)
+      (if (str= f "NONE")
+          (print "There are no liquids in the bucket for you to pour out!")
+          (chain (print (nformat "You pour the {} out of the bucket. It falls to the floor and seeps away somewhere." f))
+            (set-counter & fluid (strtag "NONE"))
+            (set-counter & weight (- (get-counter & weight) (get-weight f)))))))
+      ; all the fluid is to be poured out
+  ; pour out bucket onto bread;
+  ; ^ use (strtag $)
+  ; taking has own function; taking, dropping bucket moves contents as well
+  (method
+    "TAKE %"
+    "GET %"
+    (if (>= (get-carry-capacity) (+ (get-weight &) (get-counter & weight)))
+        (chain (take & "You take the bucket.")
+          (let f (get-counter & fluid)
+            (if (not (str= "NONE" f))
+                (take f (nformat "You also take some {} (in the bucket)."  f)))))
+        (print "You can't carry that much")))
+  (method
+    "DROP %"
+    (if (inr &)
+        (chain (drop & "You drop the bucket.")
+          (let f (get-counter & fluid)
+            (if (not (str= "NONE" f))
+                (drop f (nformat "You also drop some {} (in the bucket)."  f)))))
+        (print "You do not have the bucket.")))
+)
+
+(func
+    (get-total-weight &)
+    (if (group? &)
+        (* (get-count &) (get-weight (sub &)))
+        (get-weight &)))
+
+(Object
+  "NAILS"
+  (names
+    "Nails" "Bent Nails" "Badly Made Nails" "Rusted Nails")
+  (desc "Some nails, scattered around the room. Badly made, some bent, others rusted. Useless.")
+  (group 78 "NAIL")
+  (method
+    "TAKE %"
+    "GET %"
+    (print "You really don't want them. They are good for nothing."))
+  (method
+    "TAKE A #"      "GET A #"
+    "TAKE #"      "GET #"
+    "TAKE 1 #"      "GET 1 #"
+    "TAKE @ %"      "GET @ %"
+    (print "There is not a nail in this room that you could use."))
+)
+
+(Object
+  "NAIL"
+  (names
+      "NAIL")
+  (desc (randomc
+    "A crudely made nail. It is rusted."
+    "A bent nail."
+    "You can't tell which end is which."
+    "Half of a nail. The other end seems to have been snapped off."
+    "A rusted nail."))
+)
+
+(Object
+  "HORSESHOES"
+  (names
+    "Horseshoes"
+    "Horseshoe"
+    "Shoes for Horses"
+    "Shoe for a Horse"
+    "Rings to Toss")
+  (desc "These horseshoes are either very large or very small. None could lie flat on a table. (In other words, the blacksmith who made these must have been a complete failure.)")
+  (method
+    "TAKE %"
+    "GET %"
+    (print "You really have no use for horseshoes."))
+)
+
+(Object
+    "CHAINS"
+    (names
+        "Chains"
+        "Chain"
+        "Heavy Chains"
+        "Heavy Chain"
+    )
+    (desc "The only passable things made here are the chains. They are, unfortunately, all chained together, and so heavy nobody could lift them.")
+    (weight 22.5)
+    (method
+        "TAKE %"
+        "GET %"
+        "LIFT %"
+        (if (daemon-exists? "VILE POISON")
+            (take & "You somehow manage to take the chains, even though they are several times heavier than you.")
+            (print "Those chains by far too heavy for anyone to carry.")
+        )
+    )
+)

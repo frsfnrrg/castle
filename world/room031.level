@@ -1,0 +1,265 @@
+$baselibrary.level
+
+(Room
+  "CAVE"
+  (names
+      "Cave"
+      "Little Cave"
+      "Cavern"
+      "Hole"
+      "Hole in the Ground"
+  )
+  (desc
+    (if (in "YORGLE" "CAVE")
+        "A cave lit dimly by mysteriously glowing moss. You have no time to notice anything else: a Yorgle is here, and wants to kill you."
+        "This small sandstone cave, once the home of the yorgle, leads upward toward the garden, and continues, narrowing into a dark tunnel, to the east. A shallow pool of water lies in the center of the cave, with many small bugs crawling around it. A type of moss lines the sides of the cave and provides a faint yellow light..."))
+  (up "FREE" "COURTYARD" "You get out of the dim cave into ... the dim courtyard, lit by the evening sky.")
+  ; going west, into the dungeon: you need light (CANDLE + ), because otherwise you fall into one of many specially prepared pits.
+  (method
+    "EAST" "E" "GO EAST"
+    (if (in "YORGLE" "CAVE")
+        (chain (print (randomc "You go deeper into the cave. The yorgle follows and eats you." "You run into the cave, trying to avoid the yorgle. You fall into a deep pit instead.")) (die))
+        (if (> (get-light-level) 0)
+            (chain (print "You go east, avoiding a few very large and very deep pits in the ground.")
+              (set-room "DUNGEON")
+              (look-at-room))
+            (chain (print "You walk deeper into the cave, hesitant in the near pitch-darkness. You still fall into a pit.") (die)))))
+  (method
+    "UP" "U" "GO UP"
+    (if (in "YORGLE" "CAVE")
+        (chain (if (<= (get-speed) 2)
+                    (chain (print "You try to escape, but are too slow. The yorgle gets you.")
+                      (die))
+                    (chain (print "You sprint up and out of the cave. The yorgle doesn't even have time to attack.")
+                      (tire .1)
+                      (set-room "COURTYARD")
+                      (look-at-room))))
+        (chain (print "You get out of the dim cave into ... the dim courtyard, lit by the evening sky.") (set-room "COURTYARD") (look-at-room))))
+  (method
+      "FLEE" "ESCAPE"
+      "RUN AWAY"
+      "CHICKEN OUT"
+      (call-room "UP"))
+  (entryscript
+    (if (in "YORGLE" "CAVE")
+        (if (not (daemon-exists? "DANGEROUS TIMES"))
+            (if (= (get-speed) 1)
+                (chain (print "You enter the cave, and promptly lose your head at the claw of a Yorgle.") (die))
+                (= (get-speed) 2)
+                (chain (print "You enter the cave, and seeing a Yorgle jump toward you, narrowly escape its claws. This looks like a fight to the death...") (yorgle-fight "BIG MONSTER" (get-speed)))
+                ; speed 3
+                (chain (print "You enter the cave, automatically avoiding the yorgle that pops out of the darkness. Now all you need to do is defeat the large, ferocious beast...") (yorgle-fight "BIG MONSTER" (get-speed))))
+            (chain (print "Before you can do anything, a crazed Yorgle rams into you and crushes you against the side of the cave.") (die)))))
+  (objects
+      "YORGLE"
+      "BUGS"
+      "MOSS"
+      "POOL OF WATER"
+      "WATER"
+      "SANDSTONE"
+  )
+)
+
+(Scenic
+  "SANDSTONE"
+  (names "Sandstone" "Rocks" "Sand" "Cave Walls")
+  (desc "A clean, white sandstone with luminescent moss growing over it in patches.")
+)
+
+
+(Object
+    "YORGLE"
+    (names "Yorgle" "Monster" "Beast" "Claws")
+    (desc "This ferocious beast is double your your size, and has many long claws." (if (> (random) .5) "Its eyes glow in the darkness of the cave."))
+
+    ; Requirements:
+    ; Min: Read Yorgle Book; A sword; Light!( Candle++)
+    ; Case-1: Speedy:   No armor; currstr 15+; Speed3
+    ; If speedy:
+    ; Case-2: Balanced: Armor:    currstr 18+; Speed2
+    ;
+    ;
+    (method
+        "TAKE %"
+        "GET %"
+        (print "You have to kill it first."))
+    (method
+        "ATTACK %"
+        "KILL %"
+        "DESTROY %"
+        (if (in "MAGIC SWORD" "SELF")
+            (call-obj & "ATTACK % WITH MAGIC SWORD")
+            (in "SWORD" "SELF")
+            (call-obj & "ATTACK % WITH SWORD")
+            (in "BOW" "SELF")
+            (call-obj & "ATTACK % WITH BOW")
+            (chain (print "You attack the yorgle. It easily blocks your attack and rips your guts out.")
+                   (die))))
+    (method
+        "ATTACK % WITH $"
+        "ATTACK % USING $"
+        "KILL % WITH $"
+        "KILL % USING $"
+        "DESTROY % WITH $"
+        "DESTROY % USING $"
+        ; if you use the right thing, you live; if not, the yorgle uses the advantage to kill you ;-)
+        (if (or (str= $ "MAGIC SWORD") (str= $ "SWORD"))
+            (if (= 3 (get-speed))
+                (chain (print "You attack the Yorgle with your sword. Before it can react, you kill it.")
+                       (remove "YORGLE" "CAVE")
+                       (place "DEAD YORGLE" "CAVE")
+                       (tire 1)
+                       (stop-daemon "BIG MONSTER")
+                       (increase-score 1))
+                (if (in "ARMOR" "SELF")
+                    (chain (print "You attack the yorgle with your sword. You manage to stab it and kill it, but as you do so, on of its claws brushes against you. Fortunately, you are wearing armor, so nothing bad happens.")
+                       (remove "YORGLE" "CAVE")
+                       (place "DEAD YORGLE" "CAVE")
+                       (tire 2)
+                       (stop-daemon "BIG MONSTER")
+                       (increase-score 1))
+                    (chain (print "You attack the yorgle with your sword. You manage to stab it and kill it, but as you do so, on of its claws brushes against you and cuts you deeply. Grieviously wounded, you perish within a minute.") (die))))
+            (str= $ "BOW")
+            (if (in "ARROWS_SELF" "SELF")
+                (chain (print "You swing your bow up to shoot the yorgle. It seems to have experience with archers, and just dives for you. You have no time to get a shot loose and are crushed against the rocky wall by the monster.") (die))
+                (chain (print "You swing your bow up and realize you have no arrows. Too late. The yorgle jumps, and bites your head off.") (die)))
+
+            ; ; add more specific weapon cases here!: mace, broken daggers, etc. cookie...
+            ; ; throw acid ?
+            ; ; throwing VIAL just  makes it hyper
+
+            (str= (tail $) "SUB")
+            (chain (print (format-1 "You try to attack it with a {}. You fail, and the yorgle kills you." (lowercase (name (de-subtag $)))))
+                   (die))
+            (chain (print (format-1 "You try to attack it with the {}. You fail abysmally. The yorgle succeeds." (lowercase (name $)))) (die)))
+    )
+
+)
+
+(daemon
+    (yorgle-fight & speed)
+    (counter time-left speed)
+    ; you have 2 turns if med, 3 turns if fast; if you are fast, you have a 50% chance of surviving the attack
+    ; if you have no armor as med, your attack fails, because ... death spasms?
+    ; if you are fast,
+    (step
+        (if (not (str= (get-room) "CAVE"))
+            (stop-daemon &)
+            ; if you leave successfully (fast)
+            (chain (set! time-left (- time-left 1))
+                (if (= time-left 2)
+                    (print "The yorgle turns around to face you.")
+                    (= time-left 1)
+                    (print "The yorgle waits, staring at you, preparing to spring...")
+                    (if (and (> (random) .5) (= 3 speed))
+                        (chain (print "The yorgle launches itself at you. You dart to the side and, luckily, come out unscathed behind the yorgle.") (set! time-left speed))
+                        (chain (if (in "ARMOR" "SELF")
+                                   (print "The yorgle attacks, swinging its giant clawed paws at you. They tear through your armor and through you." )
+                                   (print "The yorgle attacks, and one of its claws hits you."))
+                               (die))))))))
+
+(daemon
+  (hyper-yorgle &)
+  (counter time 0)
+  (step
+    (set! time (+ time 1))
+    (if (and (str= (get-room) "COURTYARD") (> (random) .9))
+        (print "The ground trembles below you."))
+    (if (and (str= (get-room) "COURTYARD") (> (random) .9))
+        (print "You hear a loud roar coming from somewhere below you."))
+    (if (= time 15)
+        (chain
+          ;; you don't get a point; poison is cruel trickery
+          (remove "YORGLE" "CAVE")
+          (place "DEAD YORGLE" "CAVE")
+          (stop-daemon &)))))
+
+(Object
+    "DEAD YORGLE"
+    (names
+        "Dead Yorgle" "Monster" "Beast" "Claws"
+        "Yorgle" " Dead Monster" "Dead Beast")
+    (desc "The dead yorgle. It is huge, has very sharp claws, and was really, really scary when it was alive.")
+    (method
+        "TAKE %" "GET %"
+        (print "You can't carry such a large, heavy thing. It's dead anyway."))
+)
+
+(Object
+    "BUGS"
+    (names "Bugs" "Insects")
+    (desc "These tiny white bugs crawl across the floor to and from a pool of water by the cave side.")
+    (group 125 "BUG")
+    (method
+        "DEBUG %"
+        "FIX %"
+        "DEBUG @ %"
+        "FIX @ %"
+        (chain (print "The bugs suddenly grow to a gigantic size and eat you up. Try debugging that one.")
+               (die)))
+    (method
+        "DEBUG #"
+        "FIX #"
+        "DEBUG A #"
+        "FIX A #"
+        (chain (print "You take the bug and try to eradicate it. It suddenly explodes with the power of a supernova and annihilates the Earth.")
+               (die)))
+    (method
+        "DESCRIBE #"
+        "EXAMINE #"
+        "LOOK AT #"
+        "X #"
+        (print (join (describe-o #) (if (in % "CAVE") "It, like its fellow insects, is by the pool of water."))))
+    (method
+        "KILL %"
+        "SQUASH %"
+        "KILL @ %"
+        "SQUASH @ %"
+        "KILL A #"
+        "KILL #"
+        "SQUASH A #"
+        "SQUASH #"
+        (print "They're only bugs...")
+    )
+)
+
+(Object
+    "BUG"
+    (names "Bug" "Insect")
+    (desc "A little white bug crawling around slowly.")
+    (weight .01)
+)
+
+(Object
+    "MOSS"
+    (names "Moss" "Glowing Moss" "Luminescent Moss" "Green Moss" "Yellow Moss" "Green Stuff")
+    (hidden)
+    (takeable False)
+    (desc "Just some bits of luminescent green-yellow moss.")
+)
+
+(Object
+    "POOL OF WATER"
+    (names "Pool" "Little Pool" "Pool of Water" "Water")
+    (desc "The water in this little pool is perfectly transparent. There is more than you would expect in a cave.")
+    (takeable False)
+    (method
+        "DRINK %"
+        (call-obj "WATER" "DRINK %"))
+)
+
+(Object
+    "WATER"
+    (names "Water" "H2O" "Drinkable Pure Liquid")
+    (desc "This water looks drinkable.")
+    (takeable False)
+    ; ^ with the single, solitary, bucket
+    (method
+        "DRINK %"
+        (print "You scoop some of the water up with your hands and drink it. Seems fine.")
+    )
+    (hidden)
+    (weight 1.5)
+    ;^ bucket volume
+    ;(infinite-continuous-partitive-fluid)
+)

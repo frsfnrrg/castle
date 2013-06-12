@@ -1,0 +1,73 @@
+$baselibrary.level
+
+(Room
+    "SMALL ROOM"
+    (names
+        "Small Room"
+        "Tiny Room"
+    )
+    (desc
+        "This room is small. Really small. There is barely enough space to fit three doors and a bunch of boards propped against the north wall. The low ceiling intensifies your feelings of crampedness..."
+        (if (< (random) .1) "Good thing you aren't claustrophobic.")
+    )
+    (objects
+        "BOARDS"
+    )
+    (south "DOOR CLOSED" "COURTYARD")
+    (west "DOOR LOCKED" "WINE CELLAR")
+    (east "DOOR OPEN" "WEAPON STORAGE")
+)
+
+(Object
+    "BOARDS"
+    (names
+        "Boards" "Board"
+        "Planks" "Plank"
+        "Wood" "Wooden Boards"
+        "Wooden Board")
+    (desc "These wooden boards are plain, thin, rectangles of wood. They are leaning against the wall.")
+    (counter shifted? 0)
+    (method
+        "TAKE %"
+        "GET %"
+        (print "These boards are just the right length that you can't even manuever out of the room, let alone take them.")
+    )
+    (method "DROP %" (print "You do not have the boards."))
+    (method
+        "BREAK %"
+        "KICK %"
+        "DESTROY %"
+        "KILL %"
+        (print "You karate-kick one of the boards. You end up with a bruised foot.")
+    )
+    (method
+        "LOOK UNDER %"
+        "LOOK BEHIND %"
+        "MOVE %" "SHIFT %"
+        "REARRANGE %"
+        "PUSH %" "PULL %"
+        "LEVEL %" "UNLEAN %"
+        (if (= 0 (get-counter & shifted?))
+            (chain
+                (print "You shift the boards around to reveal the space behind them. You find a key lying behind one of them.")
+                (place "SPARKLING KEY" "SMALL ROOM")
+                (set-counter & shifted? 1)
+            )
+            (print "You shift the boards around to reveal the space behind them. You find nothing of interest.")
+        )
+    )
+)
+
+(Object
+  "SPARKLING KEY"
+  (names
+    "Sparkling Key"
+    "Shiny Key"
+    "Key")
+  (desc
+    (if (< (random) .001)
+        "Shiny!"
+        "This key is made so that is sparkles in the light. A lot."))
+  (weight 0)
+  (key "HALLWAY" "MAGICIAN'S STUDY")
+)

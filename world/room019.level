@@ -1,0 +1,779 @@
+$baselibrary.level
+$cookieworld.level
+
+(Room
+    "KITCHEN"
+    (names "Kitchen" "Food Preparation Room")
+    (desc "You are in a long, narrow room, unmistakably the kitchen. A large oven, for baking bread, is centered on the west wall, with a low fireplace under it. Near it is a basin, half filled with water and gunk. A low table occupies the middle of the room, nearly blocking the northern door."
+      (if (in "SMOKE" "KITCHEN")
+          "A cloud of smoke hangs in the kitchen, evidence of bad baking.")
+      (if (or (in "STALE BREAD_KITCHEN" "KITCHEN") (in "FRESH BREAD_KITCHEN" "KITCHEN"))
+          "Loaves of bread are on the table, along with bowls, pots, plates, and various kitchen utensils."
+          "Bowls, pots, plates, and various kitchen utensils lie on the table.")
+          "The western door leads to the balcony....")
+    (east "DOOR CLOSED" "BALCONY")
+    (north "DOOR LOCKED" "TREASURY")
+    (entryscript
+        (if (not (daemon-exists? "SPIRIT OF THE CHEF"))
+            (kitchen-control "SPIRIT OF THE CHEF")))
+    (objects
+        "OVEN"
+;;         ; well, _ is under the oven, so if you give it something to burn (> 20, "WOOD","COAL"); then you can use the oven for cookies...., Should make an oven burning, heating up daemon
+        "KITCHEN FIREPLACE"
+        "KITCHEN UTENSILS"
+;;         ; ^ wrapper
+;;         ; the kitcheneers have jinxed them all; you cannot leave a room while carrying one
+        "POTS_KITCHEN"
+        "PLATES_KITCHEN"
+        "BOWLS_KITCHEN"
+        "SPOONS_KITCHEN"
+        "KNIVES_KITCHEN"
+        "FORKS_KITCHEN"
+        "LADLE"
+        "TRAY"
+
+        "STALE BREAD_KITCHEN"
+        "BASIN OF WATER"
+        "GREEN WATER"
+        "LONG TABLE"
+    )
+)
+
+(Object
+  "STALE BREAD_KITCHEN"
+  (names "Stale Bread" "Loaves of Bread" "Stale Loaves of Bread" "Stale Loaves" "Rock-hard Bread" "Loaves of Rock" "Bad Food" "Intercompartemental Bread Missiles" "Loaves" "Bread")
+  (desc (if (str= (get-room) "KITCHEN") "Some loaves of bread piled on the table.")
+    "These may not be moldy, but the definately are as hard as rock!")
+  (group 10 "STALE PIECE OF BREAD")
+  (method
+    "EAT %"
+    "EAT A #"
+    "EAT SOME #"
+    "EAT ALL #"
+    "EAT 1 #"
+    "EAT #"
+    "EAT @ %"
+    (print "When you have an urgent need to lose your teeth, you will."))
+  ;; pour water on bread ("The bread is so stale and hard that even water rolls off it, without even soaking in.")
+)
+
+(Object
+  "STALE PIECE OF BREAD"
+  (names "Stale Piece of Bread" "Piece of Stale Bread" "Stale Bread" "Old Bread" "Rock Hard Bread" "Rock-hard Bread" "Bread" "Load of Stale Bread" "Stale Loaf of Bread" "Stale Loaf" "Stale Bread" "Loaf")
+  (desc "This stale piece of bread is anything but edible.")
+  (weight .5)
+  ;; 2.5 kg/piece
+)
+
+
+(Object
+    "BASIN OF WATER"
+    (names "Basin of Water" "Basin")
+    (takeable False)
+    (desc "This stone basin contains water. Green water.")
+)
+
+(Object
+    "GREEN WATER"
+    (names "Green Water" "Water")
+    (desc "The water here is a perfect shade of green. You suspect that it glows in the dark.")
+    (hidden)
+    (weight 2)
+    ; ^ weight of one bucket-unit?
+    (method
+        "TAKE %"
+        "GET %"
+        (if (in "BUCKET" "SELF")
+            (call-obj "BUCKET" "PUT GREEN WATER IN %")
+            (print "You can't take the water; you have nothing to carry it in.")
+        )
+    )
+    ; put in pot/bowl: their dirty work.
+)
+
+(Object
+    "KITCHEN UTENSILS"
+    (names "Kitchen Utensils" "Kitchen Tools" "Utensils" "Chef's Tools")
+    (desc "These kitchen utensils are old, but a few are still functional. You see some pots, plates, and bowls, not to mention spoons, knives, forks, and a big soup ladle. The best thing here is a tray.")
+    (method
+        "TAKE %"
+        "GET %"
+        (print "Which ones of myriads do you want to take?"))
+    (hidden)
+)
+
+(Class KitchenUtensil (extends Object)
+  (counter typetag KitchenUtensil)
+  (counter spiritlink "permanent variable")
+  ; (Body)
+  (method
+    "TAKE %" "GET %"
+    (chain (take & (nformat "You take the {}." &))
+      (if (in & "SELF")
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter & spiritlink) True))))
+  (method
+    "DROP %"
+    (chain (drop & (nformat "You drop the {}." &))
+      (if (not (in & "SELF"))
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter & spiritlink) False)))))
+
+(Class KitchenUtensilGroup (extends KitchenUtensil)
+
+  (counter typetag KitchenUtensilGroup)
+  (method
+    "TAKE A #"
+    "TAKE 1 #"
+    "GET 1 #"
+    "TAKE #"
+    "GET A #"
+    "GET #"
+    (chain (take-n & 1 (nformat "You take a {0}." #))
+      (if (in (roomtag (base &) "SELF") "SELF")
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter (roomtag (base &) "SELF") spiritlink) True))))
+  (method
+    "TAKE @ %"
+    "GET @ %"
+    (chain (take-n & @ (format-2 "You take {0} {1}." @ (lowercase (name &))))
+      (if (in (roomtag (base &) "SELF") "SELF")
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter (roomtag (base &) "SELF") spiritlink) True))))
+  (method
+    "TAKE %" "GET %"
+    (chain (take & (nformat "You take the {0}." &))
+      (if (in (roomtag (base &) "SELF") "SELF")
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter (roomtag (base &) "SELF") spiritlink) True))))
+
+  (method
+    "DROP %"
+    (chain (drop & (nformat "You drop the {0}." &))
+      (if (not (in (roomtag (base &) "SELF") "SELF"))
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter (roomtag (base &) (get-room)) spiritlink) False))))
+  (method
+    "DROP A #"
+    "DROP 1 #"
+    "DROP #"
+    (chain (drop-n & 1 (nformat "You drop a {0}." #))
+      (if (not (in (roomtag (base &) "SELF") "SELF"))
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter (roomtag (base &) (get-room)) spiritlink) False))))
+  (method
+    "DROP @ %"
+    (chain (drop-n & @ (format-2 "You drop {0} {1}." @ (lowercase (name &))))
+      (if (not (in (roomtag (base &) "SELF") "SELF"))
+          (set-dcounter "SPIRIT OF THE CHEF" (get-counter (roomtag (base &) (get-room)) spiritlink) False)))))
+
+(KitchenUtensilGroup
+  "POTS_KITCHEN"
+  (names "Pots" "Small Pots" "Iron Pots" "Small Iron Pots" "Gunk")
+  (desc "This is a group of small iron pots.")
+  (group 7 "POT")
+  (counter spiritlink pot?)
+  (method
+    "PUT $ INTO #"
+    "PUT $ IN #"
+    "PUT $ INTO A #"
+    "PUT $ IN A #"
+    (if (and (str= $ "GREEN WATER") (or (in "BUCKET" "SELF") (in "BUCKET" (get-room))) (str= "GREEN WATER" (get-counter "BUCKET" fluid)  ))
+        (chain (print "Implement this.."))
+        (print "Why would you do that?")))
+  (method
+    "POUR $ INTO #"
+    "POUR $ IN #"
+    "POUR $ INTO A #"
+    "POUR $ IN A #"
+  )
+  (method
+    "DIP # IN $"
+    "DIP A # IN $"
+    "DIP # INTO $"
+    "DIP A # INTO $"
+    (if (or (str= $ "BASIN OF WATER") (str= $ "GREEN WATER"))
+        (print "You dip the pot into the greenish water. The gunk at the bottom of the pot starts sizzling, and the water evaporates. The gunk cools down again.")
+        (and (str= $ "BUCKET") (str= (get-counter "BUCKET" fluid) "WATER"))
+        (print "You dip the pot into the bucket of water. The water in the pot just trickles out.")
+        (and (str= $ "BUCKET") (str= (get-counter "BUCKET" fluid) "GREEN WATER"))
+        (print "The gunk at the bottom sizzles, and the green water turns into steam.")
+        (print "Why would you want to do that?")))
+)
+
+(Object
+  "POT"
+  (names "Pot" "Small Pot" "Iron Pot" "Small Iron Pot" "Gunk")
+  (desc "This well aged pot has some gunk at the bottom.")
+  (weight 1)
+  ; ^ 5 kg
+)
+
+(KitchenUtensilGroup
+  "PLATES_KITCHEN"
+  (group 20 "PLATE")
+  (desc "These wooden plates are starting to decay.")
+  (names "Plates" "Wooden Plates" "PLatters" "Moldly Plates")
+  (counter spiritlink plate?)
+)
+
+(Object
+  "PLATE"
+  (names "Plate" "Wooden Plate" "PLatter" "Moldly Plate")
+  (desc "This moldly wooden plate does not even deserve the name.")
+  (weight .5)
+)
+
+(KitchenUtensilGroup
+  "BOWLS_KITCHEN"
+  (names "Bowls" "Gunk")
+  (desc "The bowls here, like the pots, have gunk at the bottom.")
+  (group 20 "BOWL")
+  (counter spiritlink bowl?)
+)
+
+(Object
+  "BOWL"
+  (names "Bowl" "Gunk")
+  (desc "This wooden bowl has been very badly made." (randomc "There is a crack in it." "There is strange gunk at the bottom, probably never cleaned-out food."))
+  (weight .5)
+)
+
+(KitchenUtensilGroup
+  "SPOONS_KITCHEN"
+  (counter spiritlink spoon?)
+  (names "Spoons" "Silver" "Silverware" "Silver Spoons" "Tarnished Spoons")
+  (desc "A set of silver spoons, rare, only for the most important people.")
+  (group 5 "SPOON" )
+)
+
+(Object
+  "SPOON"
+  (names "Spoon" "Silver Spoon" "Tarnished Spoon")
+  (desc "This tarnished spoon is bend somewhat, but otherwise, in good shape.")
+  ; can be used to move cookie dough from box to tray
+  (weight .05)
+)
+
+(KitchenUtensilGroup
+  "KNIVES_KITCHEN"
+  (names "Knives" "Blunt Choppers" "Dull Knives")
+  (desc "The most common things in the kitchen are the knives.")
+  (group 30 "KNIFE")
+  (counter spiritlink knife?)
+)
+
+(Object
+  "KNIFE"
+  (names "Knife" "Dull Knife")
+  (desc "A dull knife. Whatever.")
+  (weight .1)
+)
+
+(KitchenUtensilGroup
+  "FORKS_KITCHEN"
+  (names "Forks" "Bad Forks" "Broken Forks")
+  (desc "These forks look like they are in bad shape; some have been snapped, most likely in the frustration of having to use such abysmally bad utensils.")
+  (counter spiritlink fork?)
+  (group 15 "FORK")
+)
+
+(Object
+  "FORK"
+  (weight .1)
+  (names "Fork" "Broken Fork")
+  (desc (randomc
+    "A dull, scratched fork."
+    "This blunt fork is missing half the prongs."
+    "This is a partial fork."))
+)
+
+(KitchenUtensil
+  "LADLE"
+  (names "Ladle" "Soup Ladle")
+  ; usable for transfer of cookie dough!
+  (desc "Just a big soup ladle. It is clean!")
+  (weight .6)
+  (counter spiritlink ladle?)
+)
+
+; below: cannot be KU, as the take will be overridden anyway. ...
+(KitchenUtensil
+  "TRAY"
+  (names "Tray" "Cookie Tray" "Fine Writing" "Baking Tray" "Writing")
+  (desc "This baking tray has fine writing on it."
+        (if (gec "OVEN" holds-tray?) "It is currently in the oven.")
+        (let h (get-counter & holds)
+          (if (str= (base h) "COOKIE DOUGH BLOBS")
+              "There are blobs of cookie dough on it."
+              (str= (base h) "BAKING COOKIES")
+              "There are baking cookies on it."
+              (str= (base h) "UNDERDONE COOKIES")
+              "There are poor underdone cookies on it."
+              (str= (base h) "READY COOKIES")
+              "There are cookies on it, ready to remove."
+              (str= (base h) "BURNT COOKIES")
+              "There are blackened chunks of cookie on it."
+              (str= (base h) "COOLING COOKIES")
+              "There are cooling, wonderfully smelling cookies on it."
+              (str= (base h) "CHOCOLATE COCONUT COOKIES")
+              "There are chocolate coconut cookies on it. Yum!")))
+  (method
+    "READ %"
+    (print "You read: 'Where there is a cookie tray, there is cookie dough.'."))
+  (weight 1)
+  (counter spiritlink tray?)
+  (counter holds "NOTHING")
+  (method
+    "PUT $1 ON % WITH $2"
+    "PUT $1 ON % USING $2"
+    "PLACE $1 ON % WITH $2"
+    "PLACE $1 ON % USING $2"
+    "PUT $1 ONTO % WITH $2"
+    "PUT $1 ONTO % USING $2"
+    "PLACE $1 ONTO % WITH $2"
+    "PLACE $1 ONTO % USING $2"
+    "$2 $1 ON %"
+    "$2 $1 ONTO %"
+    (if (str= (get-counter & holds) "NOTHING")
+        (if (str= $1 "COOKIE DOUGH")
+            (if (str= $2 "LADLE")
+                (chain (if (ins &) (drop & "You put the tray on the table."))
+                  (print "You ladle globs of cookie dough onto the tray. The box of cookie dough magically refills itself.")
+                  (move-n "COOKIE DOUGH BLOBS" "COOKIE WORLD" "KITCHEN" 12)
+                  (set-weight & 3.4)
+                  (set-counter & holds (strtag "COOKIE DOUGH BLOBS")))
+                (str=g/s "SPOONS" $2)
+                (chain (if (ins &) (drop & "You first drop the tray on the table."))
+                  (print "You take a spoon and transfer glumps of cookie dough onto the tray. The box of cookie dough automatically refills itself.")
+                  (move-n "COOKIE DOUGH BLOBS" "COOKIE WORLD" "KITCHEN" 12)
+                  (set-weight & 3.4)
+                  (set-counter & holds (strtag "COOKIE DOUGH BLOBS")))
+                (str=g/s "BOWLS" $2)
+                (print "You want to avoid tarnishing the perfection.")
+                (print "That won't work to move cookie dough."))
+            (print "Why ever would you want to do that?"))
+        (print (nformat "The {0} are already on the tray. You shouldn't put anything else on it." (roomtag (get-counter & holds) (if (ins &) "SELF" "KITCHEN"))))))
+  (method
+    "PUT $ ON %"
+    "PLACE $ ON %"
+    (if (str= $ "COOKIE DOUGH")
+        (if (in "LADLE" "SELF")
+            (call-obj & "PLACE COOKIE DOUGH ON % USING LADLE")
+            (in "SPOONS_SELF" "SELF")
+            (call-obj & "PLACE COOKIE DOUGH ON % USING SPOON")
+            (print "What, with you bare hands? Your mother always told you never to touch dough with you hands. You might even get it dirty!"))
+      (print "Why ever would you want to do that?")))
+  ;; take/drop do not rename, nor need to
+  (method
+    "TAKE %"
+    "GET %"
+    (if (daemon-exists? "LET 'EM WAIT")
+        (print "The tray is still very hot. Might as well wait.")
+        (chain (take & "You take the baking tray.")
+          (let h (gec & holds)
+            (if (and (ins &) (gec "OVEN" holds-tray?))
+                (chain (sed! "COOKIE MAKER" stop-call? True)
+                  (sec! "OVEN" holds-tray? False)
+                  (if (str= h "READY COOKIES")
+                      (chain (print "Perfect! Now you just need to let the cookies cool.")
+                        (move-n "READY COOKIES" "KITCHEN" "COOKIE WORLD" 12)
+                        (sec! "TRAY" holds (strtag "COOLING COOKIES"))
+                        (move-n "COOLING COOKIES" "COOKIE WORLD" "KITCHEN" 12)
+                        (cooling-cookies "LET 'EM WAIT")
+                        (drop & "Since the tray is hot, you quickly drop it again."))
+                      (str= h "BURNT COOKIES")
+                      (chain (print "Alas, the cookies were burnt.")
+                        (drop & "Since the tray is hot, you quickly drop it again."))
+                      (str= h "BAKING COOKIES")
+                      (chain (print "Alas, you took them out too early. You cannot re-bake them now.")
+                        (move-n "BAKING COOKIES" "KITCHEN" "COOKIE WORLD" 12)
+                        (sec! "TRAY" holds (strtag "UNDERDONE COOKIES"))
+                        (move-n "UNDERDONE COOKIES" "COOKIE WORLD" "KITCHEN" 12)
+                        (drop & "Since the tray is hot, you quickly drop it again."))
+                      (str= h "COOKIE DOUGH BLOBS")
+                      (chain
+                        (move-n "COOKIE DOUGH BLOBS" "KITCHEN" "SELF" 12)
+                        (print "At least you aborted the attempt before anything could go wrong."))
+                      (str= h "NOTHING")
+                      (drop & "Since the tray is hot, you quickly drop it again.")))
+                (and (ins &) (not (str= h "NOTHING")))
+                (move-n h "KITCHEN" "SELF" 12))))))
+  (method
+    "DROP %"
+    (if (ins &)
+        (chain (drop & "You drop the tray.")
+          (let h (gec & holds)
+            (if (not (str= h "NOTHING"))
+                (move-n h "SELF" "KITCHEN")))
+        (print "You do not have the tray."))))
+)
+
+(daemon
+  (cooling-cookies &)
+  (counter timer 3)
+  (step
+      (set! timer (- timer 1))
+      (if (= timer 0)
+          (chain
+            (move-n "COOLING COOKIES" "KITCHEN" "COOKIE WORLD" 12)
+            (sec! "TRAY" holds (strtag "CHOCOLATE COCONUT COOKIES"))
+            (move-n "CHOCOLATE COCONUT COOKIES" "COOKIE WORLD" "KITCHEN" 12)
+            (stop-daemon &)))))
+
+
+; put coal/wood in fireplace
+; light fireplace with candle/torch
+; wait until oven is hot (about 5 turns, daemon)
+; put cookie dough on tray with spoon, ladle
+; while oven window is open, (5 turns after lighting fireplace, until fuel runs out and oven is cool)
+;      put tray into oven
+;      wait 5 to 10 turns: if too much, you burn the cookies, if too little, repeat;
+;           at 5 you smell cookies, at 9 you smell smoke, at 10 cookies are burnt
+;      take tray out (wearing oven gloves or armor, you don't burn yourself,
+;           otherwise, you can't take them out
+;      let tray cool (drop tray w/i 2 turns, else you let it fall), 3 turns
+;      take finished cookies off tray/take cookies
+;            (hear applause from chef spirit) << TODO!
+
+
+
+; note: these are chocolate coconut cookies, not the plain chocolate cookies you had
+
+; oven-gloves!! (or armor)
+
+(Object
+  "OVEN"
+  (names "Oven" "Brick" "Brick Oven" "Cookie Baking Machine")
+  (desc
+    "A brick oven, built into the wall."
+    (if (gec "KITCHEN FIREPLACE" lit?)
+        (if (gec & warm?)
+            "It is heated by the fireplace below, and is nice and hot."
+            "It is still being heated by the fireplace below.")
+        (if (gec & warm?)
+            "The fireplace below is not burning, and the oven is slowly cooling."
+            "The oven is cold."))
+    (if (gec & holds-tray?) "It holds a baking tray.")
+    ;; if has cookie tray; etc...
+  )
+  ; put cookie dough in oven, out tray in oven, put self in oven ... put tray with cookies in oven...
+  (method
+    "TAKE %"
+    "GET %"
+    (print "It is a bit too large for you. Anyway, it's part of the wall!"))
+  (counter warm? False)
+  (counter holds-tray? False)
+  (method
+    "PUT $ IN %"
+    "PLACE $ IN %"
+    "PUT $ INTO %"
+    "PLACE $ INTO %"
+    (if (inr "SMOKE")
+        (print "You should wait until the smoke is gone.")
+        (if (or (str= $ "TRAY") (str= $ "COOKIE DOUGH BLOBS"))
+            (let h (gec "TRAY" holds)
+              (if (str= h "COOKIE DOUGH BLOBS")
+                  (chain (sec! & holds-tray? True)
+                    (transform-cookies "COOKIE MAKER")
+                    (if (ins "TRAY")
+                        (chain (drop "TRAY" "You put the tray into the oven.")
+                          (move-n "COOKIE DOUGH BLOBS" "SELF" "KITCHEN" 12))
+                        (print "You put the tray into the oven.")))
+                  (or (str= h "BURNT COOKIE") (str= h "UNDERDONE COOKIE"))
+                  (print "You can't fix your crime by baking them again.")
+                  (or (str= h "COOLING COOKIE") (str= h "CHOCOLATE COCONUT COOKIES"))
+                  (print "They have already been baked correctly. Double-baking is for amateurs and loonies.")
+                  (str= h "NOTHING")
+                  (print "The tray is empty. You don't bake empty trays.")
+                  (print "ERROR: SOMETHING GOT ON THE TRAY THAT SHOULDN'T HAVE.")))
+
+            (str= $ "BOX OF COOKIE DOUGH")
+            (print "Don't you know that you can't just bake cookie dough in the box?")
+            (str=g/s "COOKIES" $)
+            (print "The cookies are already baked. Doing it again would ruin them.")
+            (or (str= (tail $) "SUB") (not (group? $)))
+            (print "That doesn't need to be baked.")
+            (print "Those don't need to be baked."))))
+  ;; taking tray out of oven is tray's responsibility
+)
+
+(daemon
+  (transform-cookies &)
+  (counter baking-time 0)
+  ;; exterior pausing mech; (TAKE TRAY) while oven is burning
+  (counter stop-call? False)
+  (counter smoke-time 0)
+  ;; the baking time is length of time cookies have been heated.
+  (step
+    (if (and (gec "OVEN" warm?) (not stop-call?))
+        (chain
+          (set! baking-time (+ 1 baking-time))
+          (if (= baking-time 2)
+              (chain
+                (move-n "COOKIE DOUGH BLOBS" "KITCHEN" "COOKIE WORLD" 12)
+                (sec! "TRAY" holds (strtag "BAKING COOKIES"))
+                (move-n "BAKING COOKIES" "COOKIE WORLD" "KITCHEN" 12))
+
+              (= baking-time 5)
+              (chain
+                (if (str= (get-room) "KITCHEN")
+                  (print "The scent of hot cookies wafts through the air."))
+                (move-n "BAKING COOKIES" "KITCHEN" "COOKIE WORLD" 12)
+                (sec! "TRAY" holds (strtag "READY COOKIES"))
+                (move-n "READY COOKIES" "COOKIE WORLD" "KITCHEN" 12))
+
+              (= baking-time 9)
+              (chain
+                (move-n "READY COOKIES" "KITCHEN" "COOKIE WORLD" 12)
+                (sec! "TRAY" holds (strtag "BURNT COOKIES"))
+                (move-n "BURNT COOKIES" "COOKIE WORLD" "KITCHEN" 12)
+                (place "SMOKE" "KITCHEN")
+                (set! smoke-time 5)
+                (if (str= (get-room) "KITCHEN")
+                    (print "The smell of smoke starts to fill the air.")))
+
+              (> baking-time 10)
+              (chain
+                (set! smoke-time (+ smoke-time 4)
+                (if (str= (get-room) "KITCHEN")
+                    (print "You see and smell and almost taste smoke."))
+                )))))
+    (if (> smoke-time 20)
+        (if (str= (get-room) "KITCHEN")
+            (chain (print "Alas, you succumb to the thick smoke and perish at the effects of your own bad baking.") (die)))
+        (> smoke-time 1)
+        (set! smoke-time (- smoke-time 1))
+        (= smoke-time 1)
+        (chain (set! smoke-time 0)
+          (remove "SMOKE" "KITCHEN")))
+    ;; stop if asked to and smoke clears
+    (if (and (<= smoke-time 0) (not (not stop-call?))) (stop-daemon &))))
+
+;; (Wrapper2 "OVEN GLOVES")
+;; (Object "RIGHT GLOVE") (Object "LEFT GLOVE")
+
+(Scenic
+  "SMOKE"
+  (names "Smoke" "Cookie Smoke")
+  (desc "A thick, noxious smoke."
+    (if (> (random) .8) "There is a hint of roasting coconut and melting chocolate.")
+    (if (> (random) .8) "It seems to be coming from the oven."))
+  (method
+    "SMELL %"
+    (print (describe-o &)))
+  (method
+    "CLEAR %"
+    "REMOVE %"
+    (chain (print "You wave your arms like crazy, but the smoke won't go away.") (tire .1)))
+)
+
+(Object
+  "KITCHEN FIREPLACE"
+  (names "Fireplace" "Kitchen Fireplace")
+  ; v add-name, remove-name obj "Name"
+  (desc
+  (if (gec & lit?)
+    "This fireplace is lit, and merrily consuming its fuel."
+    "The fireplace here is named incorrectly--there is no fire.")
+  "The fireplace is under the oven, and meant to heat it.")
+  ;; ^ do some rough measure; 'there is enough wood to keep this burning for quite a while' 'There is almost nothing in it'
+
+  ; place coals/wood into fireplace; take coals/wood
+  ; make coals partitive
+  ; etc...
+  (takeable False)
+  (counter fuel-left 0)
+  ;; wood has value 10 units, coal is just 4 (worse efficiency & weight ratio)
+  ;; one piece of wood: ten turns
+  ;; one piece of coal: four turns
+  (counter lit? False)
+  (method
+    "LIGHT % WITH $" "LIGHT % WITH A $"
+    "LIGHT % USING $" "LIGHT % USING A $"
+    "LIGHT % FROM $" "LIGHT % FROM A $"
+    (if (gec & lit?)
+        (print "The fireplace is already lit.")
+        (if (or (str= $ "TORCHES_SELF_SUB") (str= $ "TORCHES_KITCHEN_SUB") (str= $ "CANDLES_SELF_SUB") (str= $ "CANDLES_KITCHEN_SUB"))
+            (let n (de-subtag $)
+                (chain
+                  (if (and (str= "KITCHEN" (tail n)) (not (ins (roomtag (base n) "SELF") )))
+                      (take-n n 1 (nformat "First, you take the {}." (sub n))))
+                  (let k (roomtag (base n) "SELF")
+                    (if (ins k)
+                        (if (> (gec & fuel-left) 0)
+                            (chain (print "You light the fireplace.")
+                              (sec! & lit? True)
+                              (burn-fireplace "HOT!")
+                              (add-name & "Fire") (add-name & "Flames") (add-name & "Hot Fireplace") (add-name & "Lit Fireplace"))
+                            (print "You try, but the fireplace is as good as empty and nothing will burn."))))))
+            (print "That can't start a fire."))))
+    ;; Torch; Candle: sets lit? true. It uses its own burning-daemon, and cuts the cooling-daemon
+    ;; and, reset own name appropriately!
+
+  (method
+    "LIGHT %"
+    (print "What with?"))
+
+  (method
+    "PUT A # IN %"
+    (if (str= $ "WOOD STACK_SELF_SUB")
+        (call-obj & "PUT CUT LOG IN %")
+        (print "Why??"))
+  )
+  (method
+    "DUMP $ INTO %"
+    "DUMP $ IN %"
+    "PUT $ IN %"
+    "PUT $ INTO %"
+    (if (str= $ "WOOD STACK_SELF_SUB")
+        (chain (print "You put a piece of wood in the fireplace.")
+          (remove-n "WOOD STACK" 1 "SELF")
+          (dec-carry-capacity (get-weight "CUT LOG"))
+          (sec! & fuel-left (+ 10 (gec & fuel-left))))
+        (str= $ "WOOD STACK_SELF")
+        (chain (sec! & fuel-left (+ (* 10 (get-count "WOOD STACK_SELF")) (gec & fuel-left)))
+          (drop "WOOD STACK_SELF" "You dump the logs in the fireplace.")
+          (remove "WOOD STACK_KITCHEN" "KITCHEN"))
+        (print "Why bother doing that??")))
+    ;; ^ accepts CUT WOOD, maybe COAL (discrete, 1)
+  (method
+    "PUT @ $ IN %"
+    (if (str= $ "WOOD STACK_SELF")
+        (if (> @ (get-count "WOOD STACK_SELF"))
+            (print "You don't have that many to drop.")
+            (= @ 1)
+            (print "Then why use plural!?")
+            (<= @ 0)
+            (print "That doesn't make sense...")
+            (chain
+              (print "You put some wood in the fireplace.")
+              (remove-n "WOOD STACK" @ "SELF")
+              (dec-carry-capacity (* @ (get-weight "CUT LOG")))
+              (sec! & fuel-left (+ (* @ 10) (gec & fuel-left)))))
+        (print "Why bother doing that??")))
+    ;; put @ thingies in %: takes wood, coal?
+)
+
+(daemon
+  (burn-fireplace &)
+  ;; this sets the warm? flag of the oven correspondingly
+  (counter on? True)
+  (counter timeleft 5)
+  (counter heattime 0)
+  (step
+;;     (print on?)
+;;     (print timeleft)
+;;     (print heattime)
+;;     (print (gec "KITCHEN FIREPLACE" fuel-left))
+    (if (not on?)
+      (if (= timeleft 0)
+          (chain
+            (sec! "OVEN" warm? False)
+            ;; and reset names!!
+            (remove-name "KITCHEN FIREPLACE" "Cool Fireplace")
+            (remove-name "KITCHEN FIREPLACE" "Cooling Fireplace")
+            (remove-name "KITCHEN FIREPLACE" "Dying Fireplace")
+            (stop-daemon &))
+          (set! timeleft (- timeleft 1)))
+      (let fl (gec "KITCHEN FIREPLACE" fuel-left)
+        (if (= fl 0)
+            (chain
+              (if (str= (get-room) "KITCHEN")
+                  (print "The fireplace burns out."))
+              (sec! "KITCHEN FIREPLACE" lit? False)
+              (remove-name "KITCHEN FIREPLACE" "Fire")
+              (remove-name "KITCHEN FIREPLACE" "Flames")
+              (remove-name "KITCHEN FIREPLACE" "Hot Fireplace")
+              (remove-name "KITCHEN FIREPLACE" "Lit Fireplace")
+              (add-name "KITCHEN FIREPLACE" "Cool Fireplace")
+              (add-name "KITCHEN FIREPLACE" "Cooling Fireplace")
+              (add-name "KITCHEN FIREPLACE" "Dying Fireplace")
+              (set! on? False))
+            (chain (sec! "KITCHEN FIREPLACE" fuel-left (- fl 1))
+              (if (< heattime 5)
+                  (set! heattime (+ heattime 1))
+                  (= heattime 5)
+                  (sec! "OVEN" warm? True))))))))
+
+
+(Object
+    "LONG TABLE"
+    (names "Table" "Long Table" "Rectangular Table" "Low Table" "Long, low, old table.")
+    (desc "A long, low, old table. There are many various kitchen utensils on it.")
+    (counter found-dough? False)
+    (hidden)
+    (method
+        "TAKE %"
+        "GET %"
+        (print "The table is too heavy, and there is a lot of stuff on it as well."))
+    (method
+        "LOOK UNDER %"
+        "LOOK BELOW %"
+        (if (get-counter & found-dough?)
+            (print "You already found the cookie dough. There is nothing new.")
+            (chain (set-counter & found-dough? True)
+                   (print "You look under the table and discover a box of cookie dough!")
+                   (place "BOX OF COOKIE DOUGH" "KITCHEN")
+                   (place "COOKIE DOUGH" "KITCHEN"))))
+)
+
+; standardization: the cookies made are CHOCOLATE COCONUT COOKIES
+; you arrive with: plain, chocolate chip COOKIES
+; (2 cookie types) ; make yargle cookie point for giving CCC, not just plain C?
+
+; cannot be a kitchen utensil due to baggage; there is no good combo group
+(Object
+    "BOX OF COOKIE DOUGH"
+    (names "Box of Cookie Dough" "Box" "Box of Chocolate Coconut Cookie Dough")
+    (desc "This box of cookie dough must be magic--the chocolate coconut cookie dough is still in perfect condition!")
+    (weight 3)
+    ; ^ 15 kg!
+    (method
+        "EAT %"
+        (print "The box is probably not delicious. Anyway, cookie dough is to be baked, not eaten.")
+    )
+    (method
+        "READ %"
+        (print "On one side of the box, in fine script: \"Chocolate Coconut Cookie Dough\". The reverse has, in the same cursive, \"The Chef\"."))
+    (method
+        "TAKE %"
+        "GET %"
+        (chain (take & "You take the box of cookie dough.")
+               ; should just abolish func/ques distinction save for pyf and pyq. (which could
+               ; be (exec (format "string" arg1 arg2 arg3 ...)). Then take could return success/not
+               (if (in "BOX OF COOKIE DOUGH" "SELF")
+                   (chain (set-dcounter "SPIRIT OF THE CHEF" box? True)
+                          (move "COOKIE DOUGH" (get-room) "SELF")))))
+    (method
+        "DROP %"
+        (chain (drop & "You drop the box of cookie dough.")
+               (move "COOKIE DOUGH" "SELF" (get-room))
+               (set-dcounter "SPIRIT OF THE CHEF" box? False)))
+)
+
+(Object
+    "COOKIE DOUGH"
+    (names "Cookie Dough" "Dough")
+    (desc "Some wonderful chocolate coconut cookie dough.")
+    (hidden)
+    (weight 0)
+    (method
+        "TAKE %"
+        "GET %"
+        (call-obj & "EAT %")
+    )
+    ; put on tray; put on tray with spoon
+    (method
+        "EAT %"
+        (print "Raw cookie dough is not safe to eat."))
+)
+
+(daemon
+  (kitchen-control &)
+  (counter pot?    False) (counter plate?  False) (counter bowl? False)
+  (counter spoon?  False) (counter knife?  False) (counter fork? False)
+  (counter ladle?  False) (counter tray?   False) (counter box?  False)
+  (counter lglove? False) (counter rglove? False)
+  ;; left and right gloves, implement
+  (step
+    ; if you leave with any kitchen utensil, even cookie dough box ( the bread is fine), a spirit (with a chef's hat) comes out of the kitchen and pulls you back in.
+    (if (not (str= (get-room) "KITCHEN"))
+        (if (or pot? plate? bowl? spoon? knife? fork? ladle? tray? box? lglove? rglove?)
+            (chain (print "A pearly white spirit with a chef's hat floats out of the kitchen and pulls you back in. \'Leave my tools alone!\'")
+              (set-room "KITCHEN")
+              (look-at-room))
+            (stop-daemon &)))))

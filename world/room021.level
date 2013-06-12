@@ -1,0 +1,115 @@
+$baselibrary.level
+
+(Room
+    "CAVED IN ROOM"
+    (names "Caved In Room")
+    (desc "This room is covered in stones. It seems the ceiling caved in long ago, covering everything in here with rubble. Doors lead west and north, and you can't go up, east, or south because of the unstable rocks. You can, however, see the evening sky very well from here...")
+    (objects
+        "RUBBLE"
+        "STONES"
+        "SKY"
+    )
+    (west "DOOR OPEN" "BALCONY")
+    (north "DOOR CLOSED" "HERB STORE")
+    (east "RUBBLE" 0 "You don't want to risk climbing up the mound of rubble.")
+    (south "RUBBLE" 0 "You don't want to risk climbing up the mound of rubble.")
+    (up "SKY" 0 "You jump up and down, but you still don't reach the stars.")
+)
+
+(Object
+    "RUBBLE"
+    (names "Rubble" "Debris" "Weeds" "Weed" "Stuff" "Moss" "Other Stuff")
+    (desc "Just some rubble from what once was the roof, primarily stone, with some other stuff mixed in. Some weeds grow among the rocks."
+      (if (gec "STONES" not-looked?)
+          (chain (sec! "STONES" not-looked? False)
+            (place "ROUND STONE" "CAVED IN ROOM")
+            "One of the stones stands out; it is perfectly round.")))
+    (hidden)
+    (takeable False)
+)
+
+(Object
+    "STONES"
+    (names "Stones" "Stone" "Rock" "Rocks" "Mound" "Mounds")
+    (desc "These stones once made up the roof."
+      (if (gec "STONES" not-looked?)
+          (chain (sec! "STONES" not-looked? False)
+            (place "ROUND STONE" "CAVED IN ROOM")
+            "One of the stones stands out; it is perfectly round.")))
+    (hidden)
+    (takeable False)
+    (counter not-looked? True)
+    (method
+        "COUNT %"
+        (print "There must be thousands of rocks of all shapes and sizes.")
+    )
+)
+
+(Object
+    "ROUND STONE"
+    (names "Round Stone" "Stone" "Sphere" "Gunk" "Hardened Gunk")
+    (weight .3)
+    ; ^ 1.5 kg
+    (desc "This unusually round stone is made of some hard, rough material type. There seems to be a layer of hardened gunk on it.")
+    (method
+      "POUR $ ON %"
+      ; water in bucket; blue potion; vial; green water in bucket;
+      (if (str= $ "BLUE POTION")
+          (let text "You set the stone down and pour the blue potion over the stone, keeping your fingers well away from the liquid. The surface of the stone sizzles as the liquid touches it, and a cloud of steam rises up. The vial disappears into thin air as soon as it is empty."
+          (let text2 "When the steam dissipates, you see a bright yellow orb in its place."
+          (let room (get-room)
+            (chain (if (in "BLUE POTION" "SELF")
+                      (drop "BLUE POTION" text)
+                      (print text))
+                  (remove "BLUE POTION" room)
+                  (if (in "ROUND STONE" "SELF")
+                      (drop "ROUND STONE" text2)
+                      (print text2))
+                  (remove "ROUND STONE" room)
+                  (place "ORB OF SPEED" room)))))
+          (print "That won't do anything.")))
+    (method
+        "CLEAN %"
+        (if (insc "WATER")
+            (call-obj & "CLEAN % IN WATER")
+            (insc "GREEN WATER")
+            (call-obj & "CLEAN % IN GREEN WATER")
+            (print "You rub the rock against a wall. That doesn't seem to work.")))
+    (method
+        "PUT % IN $"
+        "PLACE % IN $"
+        "DUNK % IN $"
+        "WASH % IN $"
+        "CLEAN % IN $"
+        "WASH % WITH $"
+        "CLEAN % WITH $"
+        "WASH % USING $"
+        "CLEAN % USING $"
+        ; Basin of water; pool of water; bucket of green water; bucket of water
+        (if (or (str= $ "POOL OF WATER") (str= $ "BASIN OF WATER") (str= $ "GREEN WATER") (str= $ "WATER"))
+            (let loc (if (ins &) "SELF" (get-room))
+              (chain
+                (print "You put the stone in the water and swirl it around. The surface of the stone slowly crumbles off, leaving a bright yellow orb behind.")
+                (place "ORB OF SPEED" loc)
+                (remove & loc)
+                (if (str= loc "SELF")
+                    (chain (inc-speed) (print "As you take the orb out of the water, you suddenly feel a lot more awake.")))))
+            (print "The stone won't get any cleaner if you do that.")))
+)
+
+(Object
+  "ORB OF SPEED"
+  (names "Orb of Speed" "Orb")
+  (desc "A bright yellow orb, with strange characters along the side.")
+  (method
+    "TAKE %"
+    "GET %"
+    (chain (take & "As you pick up the orb, you feel as if you had just poured a load of sugar into your bloodstream; you feel alert and very active.")
+      (if (in "ORB OF SPEED" "SELF")
+          (inc-speed))))
+  (method
+    "DROP %"
+    (chain (drop & "You drop the orb. Suddenly, you move much more slowly than before.")
+      (dec-speed)))
+  (weight .3)
+)

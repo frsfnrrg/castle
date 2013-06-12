@@ -1,0 +1,71 @@
+$baselibrary.level
+
+(Room
+    "NORTHEAST STAIRWELL"
+    (names "Northeast Stairwell" "Stairwell")
+    (desc
+      (if (in "WOBBLY STAIRS" "NORTHEAST STAIRWELL")
+          "This short stairwell is empty, excepting the wooden stairs going up the the room above. The fragile old stairs start at the southern entrance, and curve up past the window. They do not look like they would take much weight without breaking...."
+          "This stairwell is empty save for the remains of a wooden staircase. The wreckage lies by the east wall where the way up once was. At least they do not block the window or the doorway to the south, so you can enjoy the view of a boring empty room....")
+      (if (> (random) .7)
+          "You can hear the wind swirling around outside..."))
+    (method
+        "UP" "GO UP" "U"
+        (if (in "WOBBLY STAIRS" "NORTHEAST STAIRWELL")
+            (call-obj "WOBBLY STAIRS" "GO UP %")
+            (print "The stairs to go up do not exist any more. They lie, destroyed, on the floor.")))
+    (south "FREE" "HERB STORE")
+    (objects
+        "WOBBLY STAIRS"
+        "NORTHEAST STAIRWELL WINDOW"
+        "FOREST"
+        "SKY"
+        "WIND")
+        ; "BROKEN STAIRS"
+        ; "RED-YELLOW SHARD"
+)
+
+(Object
+    "NORTHEAST STAIRWELL WINDOW"
+    (names "Window" "Barred Window" "Bars" "Bar")
+    (desc "A barred window overlooking the evening forest.")
+    (takeable False)
+    (hidden)
+    (method
+        "JUMP OUT %"
+        "EXIT BY %"
+        (print "The bars are in the way."))
+)
+
+(Object
+    "WOBBLY STAIRS"
+    (names "Wooden Stairs" "Wood" "Stairs" "Stair" "Wobbly Stairs" "Old Stairs" "Fragile Stairs" "Fragile Old Stairs")
+    (takeable False)
+    (hidden)
+    (desc "These stairs do not look as if they could support much weight.")
+    (method
+        "GO UP %"
+        "ASCEND %"
+        "CLIMB %"
+        (chain (print "You go up the wooden stairs. They creak loudly.") (set-room "ARMOR STORAGE") (look-at-room))
+    )
+)
+
+(Shard
+    "YELLOW-RED SHARD"
+    (names "Yellow-Red Shard" "Shard" "Yellow Shard" "Red Shard" "Glass" "Piece of Glass" "Arc" "Orange Shard" "Orange Glass" "Yellow Glass" "Red Glass" "Orange" "Yellow" "Red")
+    (desc "This shard looks like it was part of some circular piece of glass. Its hue changes from yellow to red.")
+    (counter not-found? True)
+)
+
+(Object
+    "BROKEN STAIRS"
+    (method "TAKE %" "GET %" (print "You don't need any wreckage."))
+    (names "Wreckage" "Broken Stairs" "Wood" "Wood" "Stairs" "Stair" "Broken Staircase" "Broken Wood" "Junk" "Stuff")
+    (desc "This broken staircase shows why you should never trust any creaky old object."
+          (if (or (get-counter "YELLOW-RED SHARD" not-found?) (in "YELLOW-RED SHARD" "NORTHEAST STAIRWELL"))
+              (chain (set-counter "YELLOW-RED SHARD" not-found? False)
+                     (if (not (in "YELLOW-RED SHARD" "NORTHEAST STAIRWELL"))
+                         (place "YELLOW-RED SHARD" "NORTHEAST STAIRWELL"))
+                     "You see a bright orange piece of glass in the rubble.")))
+)

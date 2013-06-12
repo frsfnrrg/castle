@@ -1,0 +1,135 @@
+$baselibrary.level
+
+(Room
+  "WEAPON STORAGE"
+  (names
+    "Weapon Storage"
+    "Armory")
+  (south "DOOR LOCKED" "BLACKSMITH'S FORGE")
+  (west "DOOR OPEN" "SMALL ROOM")
+  (desc "This room appears to store all the weapons. A rack is attached to the northeast corner of the room, and it holds various weapons."
+    (RACK-contents)
+    "The doors are on the south and west walls.")
+  (entryscript
+    (if (in "ORB" "SELF")
+        (print "A fine mist starts to materialize around you. The orb you carry suddenly heats up, and the mist vanishes again.")
+        (in "ORB" "WEAPON STORAGE")
+        (print "A fine mist starts to materialize around you. The orb in the center of the room is glows brightly, then dims as the mist vanishes.")
+        (chain
+          (look-at-room)
+          (print "A fine mist starts to materialize around you. It stirs around, taking shape into the forms of a multitude of ghosts. You feel yourself drifting out of your body, and are powerless to stop it. You have just become a ghost.")
+          (die))))
+  (objects
+    "WEAPONRY RACK"
+    "BOW"
+    "SWORD"
+    "DAGGER"
+    "MACE"
+    "WEAPONS")
+)
+
+(func
+  (RACK-contents)
+  (let b (inr "BOW")
+    (let d (inr "DAGGER")
+      (let m (inr "MACE")
+        (let s (inr "SWORD")
+          (if (and b d m s) "Four things catch your eye: a bow, a sword, a dagger, and a mace."
+              (and d m s) "Three things catch your eye: a sword, a dagger, and a mace."
+              (and b m s) "Three things catch your eye: a bow, a sword, and a mace."
+              (and b d s) "Three things catch your eye: a bow, a dagger, and a mace."
+              (and b d m) "Three things catch your eye: a bow, a sword, and a dagger."
+              (and b d) "Two things catch your eye: a bow and a dagger."
+              (and b m) "Two things catch your eye: a bow and a mace."
+              (and b s) "Two things catch your eye: a bow and a sword."
+              (and d m) "Two things catch your eye: a dagger and a mace."
+              (and d s) "Two things catch your eye: a dagger and a sword."
+              (and m s) "Two things catch your eye: a mace and a sword."
+              b "A bow stands out."
+              d "A dagger stands out."
+              m "You can see a mace."
+              s "A sword is visible."
+              "You see no interesting weapons on the rack."))))))
+
+(Scenic
+  "WEAPONS"
+  (names "Weaponry" "Weapons" "Tools of Death" "Things")
+  (desc "Assorted and odd weapons of war for iron-clad suicidal guys. They litter the room.")
+  (method
+    "TAKE %" "GET %"
+    (print "They seem to require some technical knowledge to use. You don't have any, and you don't fancy swinging anything for a few hours just to learn a new tool."))
+  (method
+    "COUNT %"
+    (print "There are quite a lot of them, so you'd probably miscount."))
+)
+
+(Object
+    "WEAPONRY RACK"
+    (names
+        "Weaponry Rack"
+        "Weapon Holder"
+        "Rack"
+        "Board"
+    )
+    (desc "The wooden weaponry rack is worn, but still functional. It is bolted into the wall at the room's corner." (RACK-contents))
+    (takeable False)
+)
+
+(Object
+    "DAGGER"
+    (names
+        "Dagger"
+        "Rusty Dagger"
+        "Rusted Dagger"
+        "Pointy Thing"
+        "Rust"
+        "Blade"
+        "Handle"
+    )
+    (desc "Balanced, a beautiful handle, but completely useless. The blade is nothing but rust.")
+    (method
+        "THROW %"
+        "HURL %"
+        (print "You throw the dagger. The blade gets another notch, with nothing achieved.")
+    )
+    (weight .5)
+)
+
+(Object
+    "BOW"
+    (names
+        "Bow"
+    )
+    (desc "A good bow, just the right size to be usable."
+          (if (in "ARROWS" "SELF")
+              "Fortunately, you have some arrows for it."
+              "It is unmarred, and would be a great weapon, were there some arrows..."))
+    (weight 2)
+    (method
+      "SHOOT %"
+      ;; ------------------------ TEST AND EXPAND THIS!! ----------------------------------------------------
+      (if (inr "SHADOW")
+          (call-obj "SHADOW" "SHOOT % WITH BOW")
+          (inr "CROW")
+          (call-obj "CROW" "SHOOT % WITH BOW")
+          (print "There's nothing to shoot an arrow at.")))
+)
+
+(Object
+    "SWORD"
+    (names
+        "Sword"
+    )
+    (desc "A plain sword, not too good, and not too bad. It is sharp, though.")
+    (weight 2.5)
+)
+
+(Object
+    "MACE"
+    (names
+        "Mace"
+        "Spiky Ball on a Leash"
+    )
+    (desc "This mace is so heavy that anyone using it would be tired in a few seconds.")
+)
+
