@@ -1,0 +1,915 @@
+Name: Castle Escape by Me
+Sky: getting dark, full moon on horizon,
+is windy
+
+
+*****SELF*******
+maximum strength is 10 originally
+start out with chocolate COOKIES (5), each gives 20 strength, or up to max, whcvr lower.
+has a flashlight
+strength starts at 8, decreases 1 per 20 turns, lower limit at 3
+strength says carrying ability
+speed is NORMAL, with SPEED+ AMULET is FAST, with ARMOR and no AMULET, is SLOW
+           2                            3                                   1
+strength max is += 10 by STRENGTH POTION (orange)
+
+*****Map*****
+
+    Floor 0
+
+    031 Cave - ENTER from Courtyard, EXITS north(Courtyard), south(Dungeon)
+    032 Underground Tunnel - ENTER in Courtyard, hidden in bush, EXITS east(Courtyard), west(WIN!!)
+    033 Well(up(Courtyard))
+
+    Floor 1
+
+    +-----------+-----------+-----------+-----------+
+    | Northwest |    Wine   |   Small   |   Weapon  |
+    | U  011    |    012    $    013         014    |
+    | Stairwell |  Cellars  |   Room    |  Storage  |
+    +----   ----+-----------+----   ----+----$$$----+
+    |Silent     |                       |Blacksmiths|
+    |    009                            |    010    |
+    |       Room|       Courtyard       |   Forge   |
+    +-----------+          007          +----   ----+
+    | Fireplace |                       |Rocks Meets|
+    |    006    |                       |    008    |
+    |  Chamber  |                       |Head Room  |
+    +----   ----+----   ----+-----------+-----------+
+    |Magician's |  Hallway  |  Garden   |  Dungeon  |
+    |    002    $    003         004    |    005    |
+    |  Study    |           |   Store   |           |
+    +-----------+----   ----+-----------+-----------+
+                |           |
+                |    001    $
+                | Gatehouse |
+                +----$$$----+
+
+    Floor 2
+
+    +-----------+-----------+-----------+-----------+
+    | Northwest |Alchemist's|Foggy Room | Northeast |
+    | U  024  D      025         026    |    027    |
+    | Stairwell | Laboratory|           | Stairwell |
+    +-----------+-----------+----   ----+----   ----+
+    |  Treasury |                       |Herb Store |
+    |    022    |                       |    023    |
+    |           |        Balcony        |           |
+    +----$$$----+          020    D     +----   ----+
+    | Kitchen   |                       |Caved In   |
+    |    019                                 021    |
+    |           |                       |  Room     |
+    +-----------+-----------+----   ----+-----------+
+    | Bathroom  |   West    |   East    |Guard Room |
+    |    015 U       016         017         018    |
+    |           |  Gallery  |   Gallery |           |
+    +-----------+-----------+-----------+-----------+
+
+    Floor 3
+
+    +-----------+  +-----------+
+    |  Batty    |  |   Armor   |
+    |    029  D |  |    030  D |
+    |    Attic  |  |  Storage  |
+    +-----------+  +-----------+
+    +-----------+
+    | Assassin's|
+    |    028  D |
+    |  Hideout  |
+    +-----------+
+
+    Roof
+
+    034 - roof to Assassin's Hideout, exit down
+    - other roofs have no hold
+
+****ROOMS****
+
+001 Gatehouse
+        You are in the gatehouse of this dilapidated old castle. The gate itself has locked behind you, to the south. A list of punishments is attached to the wall, while two old doors are on the north and east walls. You spot a crooked, spindly wooden chair in the corner. On it are lying a few half used candles.
+            [PICK ONE]
+            You can hear the moat's water swirling outside...
+            You hear a scratching noises at the gate...
+            The wind is barely audible, but you can still hear it blowing through the trees...
+    PUNISHMENT LIST (PASSIVE)
+    CROOKED CHAIR (PASSIVE)
+    CANDLES (5)
+    COAT HOOKS (PASSIVE)
+    METAL BAR (PASSIVE, is stuck in wall)
+    SHARD (colored glass, put in treasury circle, goes from blue to red, behind PUNISHMENT LIST)
+
+002 Magician's Study
+        This small room is full of queer contraptions, books, and other objects. An entire wall is covered by a bookshelf, and the north and east walls have doors. A table rests in the middle of the room. Your attention is drawn to three things; a glowing crystal orb, a vial of noxious liquid, and a mysterious book resting in the middle of the room. You can sense heat emanating from the north...
+    ORB (WEAPON)
+    BOOK (ENCIPHERED)
+    VIAL (POISON)
+    BOOKSHELF (PASSIVE)
+    TABLE (PASSIVE)
+
+003 Hallway [wooden floor]
+        The hallway's low ceiling goes just above your head. Torch holders line the walls, and there are still some nearly unused torches lying in them. The wooden floor is dirty, probably because of the door on the north, which is open, and lets some of the elements in. The door back to the gatehouse is to the south, while two doors are opposite each other east and west of you.
+            [PICK ONE]
+            You hear the soft hooting of owls to the north...
+            The wind is still audible, coming from the space north of here...
+            You wonder why you ever came to this place...
+    TORCHES (8) (UNLIGHTED)
+    TORCH HOLDERS (12) (PASSIVE)
+    COMPARTMENT (holds arrows + staff)
+    KEYHOLE (hidden in floor, on circle completion find)
+    STAFF (wooden, looks normal, has ruby head on examine)
+    ARROWS (for bow)
+    RUBY (staff head, disguised)
+
+004 Garden Store
+        This seems to be the place for garden tools. A few bags of seed are in the corner, along with a few coils of rope. A shovel stands by the wall, with a pair of shears next to it. It seems a garden should be nearby. The door on the west leads back to the hallway, and from there it is one step to the garden...
+    SHOVEL (needed for cave in)
+    SHEARS (1, for bushes, etc.)
+    CROWBAR (hidden in BAGS OF SEED, open them)
+    BAGS OF SEED (3)
+    ROPEs (2, 1 for well, 1 for grappling hook)
+
+005 Dungeon
+        This dark, dismal room is the castle dungeon. The prisoners seem to have been forgotten, as shown by the skeletons lying around. Some of the bones have been snapped open for marrow, and others look queerly disfigured. You can spot some chains anchored to the walls, illuminated by the dim light shining through the grate above. Already depressed by the skeletons, you turn to view a set of long, deep scratches in the stone. They do not look like they were made by something human...
+            [1/4 chance each]
+            A spider crawls through the eye sockets of the lone skull that rests in a corner...
+            You shiver... It is colder here than expected, and the stains on the chains do not help your mood...
+    SKELETONS (2)
+    SKULL (extra 1) (PASSIVE)
+    BONES (distorted, or snapped for marrow) (PASSIVE)
+    CHAINS (PASSIVE)
+    SCRATCHES (wall, deep, many)
+
+006 Fireplace Chamber
+        You automatically notice the main feature of this room, a huge fireplace covering an entire wall. Somehow, it seems to be burning brightly, making this one the only warm room so far. A large woodpile is stored next to the fireplace, opposite to the southern door. On the east side of the room are a table and a couple spindly chairs around it. The fire here glows very brightly, making shadows of the furniture that dance on the walls...
+    WOOD STACK (c. 1200)
+    FIREPLACE (HUGE, always burning)
+    TABLE (PASSIVE)
+    CHAIRs (SPINDLY, breaks) (3)
+
+007 Courtyard
+        The courtyard of the castle has been dominated by weeds. The stone paths here connect [all][most of] the doors, and pass the well in the southwest part of the courtyard. [The last door is positioned in a large bush, which] [A large bush] controls the northwest part, while a gnarled tree is next to it. [A cave is hidden by the side of the courtyard.] You can see the balcony on the second floor, and the tops of a few towers higher up.
+            [PICK 1]
+            You see an owl fly to the tree. It turns around to look at you, while hooting quietly...
+            A crow is circling high above you...
+            You can still hear the sound of the wind...
+    BUSH conceals DOOR
+    PATH connects all floor 1 exits (PASSIVE)
+    TREE (hosts OWLS)
+    CAVE (covered in weeds, search to find)
+    WEEDS (PASSIVE) (They are EVERYWHERE!!)
+    DOOR (locked, underground passage)
+    WELL (jump in, crash, die, or have rope, attach, go down to Well(033))
+    OWLS (appear every few turns, stare at you, hoot, be wise) (PASSIVE)
+
+008 Rocks Meet Head Room [KILLER ROOM]
+        You enter the room, and immediately notice some writing on the wall. It reads, 'YOU ARE DEAD.' A huge rock falls on your head, swiftly making the scrawled characters truth.
+
+009 Silent Room
+        This plain room is totally silent. Not a sound, even with all the weather. There should be noises coming from the exits to the east and north, but there are none...
+            [IF STONE]
+            Your attention is drawn to a huge block of stone, placed in the center of the room.
+    ROCK (appears when treasury circle is completed)
+    SAPPHIRE (appears on lever pull in FOGGY ROOM)
+    ROCK CORNER (Splits off to reveal SAPPHIRE on lever pull)
+
+010 Blacksmith's Forge
+        A forge is in the far corner of this room, close to the south exit. Nobody has been here for some time, as is shown by the dusty bellows, and the various forgotten nails, horseshoes, and chain links lying around haphazardly. A stack of coals rests next to the forge. The weaponry is stored just north of here...
+    GOLD BAR (melt to reveal code cipher)
+    CIPHER SHEET(allows deciphering of ENCODED BOOK (002))
+    FORGE (PASSIVE)
+    BELLOWS (PASSIVE)
+    COAL (PASSIVE)
+    NAILS (PASSIVE)
+    HORSESHOES (PASSIVE)
+    CHAINS (PASSIVE)
+
+011 Northwest Stairwell
+        A well used stone staircase wraps around the edge of the stairwell. You spot a yargle opposite the southern door. It stares around, protecting whatever is behind it. Fluttering noises come from two stories up...
+    YARGLE - Guards key, can be frightened with sword, but not killed, Likes to follow you around if you give it food, and it gives you a BRIGHT SCEPTER
+    IRON KEY (to blacksmith's)
+    BRIGHT SCEPTER (can shine through fog) (yargle's gift)
+    STAIRS (cold, stone, angular, sharp)
+
+012 Wine Cellar
+        This dim cellar smells strongly of wine. You can see a dozen barrels lined up against the walls. Judging from the smell, some of the wine is still here in the barrels. Wooden stairs go up to the eastern door, and the window on the north lets in a dim shaft of light, illuminating a tankard slightly...
+        [IF CHANCE > .9 EACH]
+            The sloshing of water tells you that you are at the same level as the moat...
+            A rat scurries behind a barrel and disappears from view...
+    BARRELS (~12, examining notes one is empty)
+    WINE (in 11 BARRELS)
+    EMPTY BARREL, is found on examining barrels, on entering with CROWBAR find FINAL KEY
+    FINAL KEY (^) (works on DOOR in Courtyard)
+    STAIRS (wooden, straight)
+    TANKARD (used for drinking wine, and for purify w/ orb of replenishment (drinking from barrels may be unsafe))
+
+013 Small Room
+        This room is small. Really small. There is barely enough space to fit three doors and a bunch of boards propped against the north wall. The low ceiling intensifies your feelings of crampedness...
+        [IF CHANCE < .1, no same in 5 look]
+            Good thing you aren't claustrophobic...
+    SPARKLING KEY (under boards) (magicians)
+    BOARDS
+
+014 Weapon Storage [CONDITIONAL KILLER]
+        This room appears to store all the weapons. A rack is attached to the northeast corner of the room, and it holds various weapons. Four things catch your eye; a bow; a sword; a dagger; and a mace. Both doors are on the south and west walls.
+        [WITHOUT ORB]
+            A fine mist starts to materialize around you. It stirs around, taking shape into the forms of a multitude of ghosts. You feel yourself drifting out of your body, and are powerless to stop it. You realize that you have become a ghost. YOU ARE DEAD
+    WEAPONRY RACK
+    BOW (No arrows)
+    SWORD (works, on all non-ghosts)
+    DAGGER (rusty, fails)
+    MACE (bad weapon, too heavy, not style)
+
+015 Bathroom [CONDITIONAL KILLER]
+        The bathroom is a bare room with a row of toilets near the western window. Toilets is not a very good term--they are more like holes in a stone bench that drop waste down into the moat.
+        [1ST ENTRY, IF LEVER ABOVE IN PULLED STATE]
+            You hear a swishing noise, and turn, startled.
+            [SPEED=FAST]
+            You dodge the pendulum that swipes down from above to door. Had you stayed there, you would have been knocked out the window.
+            [ELSE]
+            SLAM! The pendulum hits you with massive force, killing you instantly. Your crumpled body flies out the window, splashing down into the moat. YOU ARE DEAD
+        The only door is to the west, but there is a trapdoor above you...
+    TOILETS (PASSIVE)
+    WINDOW (PASSIVE)
+    PENDULUM (swings down, knocks you out window if you are SPEED NORMAL or SLOW)
+    TRAPDOOR (go up)
+
+016 West Gallery
+        Every wall here has multiple pictures on it, the sky, lakes, trees, birds, and so on. They cover up so much of the paneled walls that space is barely available for a small western door. In the middle of the room is a sculpture of a snowy owl. It faces toward the eastern half of the gallery, which is full of portraits displaying the people who once lived here...
+            [CHANCE >.8 PICK ONE, skip min 2 turns, 3 for each]
+            The marble sculpture's large eyes seem to follow you around the room...
+            You here hooting noises coming from somewhere...
+    PICTUREs (~20 (PASSIVE)
+    SCULPTURE (SNOWY OWL, covered in words of wisdom)
+    PANEL (wall)
+    SECRET COMPARTMENT (hidden under panel)
+    SUB-COMPARTMENT (under SECRET COMPARTMENT)
+    SCRAP OF PARCHMENT (in SECRET COMPARTMENT, tells about potions in Alchemist's Lab, and alchemy/astrology stuff)
+    WAND OF REPLENISHMENT  (in SUB-COMPARTMENT, fixes foods, and keeps light burning if used at right time)
+
+017 East Gallery
+        This large room contains about two dozen oil portraits along the walls. They are haphazardly scrambled around the walls, but seem to become newer as they go clockwise from north to south. A door is located at the eastern edge of the north wall, leading to the balcony.
+        [PICK ONE]
+        Whoever drew these must be a master at perspective...
+        Glancing around shows you that all the names are exceedingly odd...
+        The wind is still blowing full force outside...
+        You can see large swaths of the forest from the window up here...
+    PORTRAITS (~20) (quirky names) (PASSIVE)
+    SILVER KEY (to Treasury) (examine portraits, hidden in one of the pictures)
+    WINDOW (PASSIVE)
+
+018 Guard Room
+        This room probably is the guard room. A cot is rolled up by the wall, and a round table is in a corner. Close to the table is a metal grate, embedded in the floor. It is pitch black below the grate. A pair of dice lies on the table, along with a copper coin. The only way out is west...
+        [IF CHANCE >.9]
+            You see pale shapes down below the grate...
+        [IF CHANCE >.7]
+            The wind is still blowing out there...
+    GRATE (can only be removed from below)
+    HOLE (what is left if grate is gone)
+    COT (remove, find bronze key)
+    BRONZE KEY (- hidden under cot, to KEYHOLE in Hallway)
+    TABLE (PASSIVE)
+    DICE (PASSIVE)
+    KEY HALF (hidden under grate, only found if grate gone)
+    COPPER COIN (PASSIVE)
+
+019 Kitchen
+        You are in a long, narrow room, unmistakably the kitchen. A large oven, for baking bread, is centered on the west wall. Near it is a basin, half filled with water and gunk. A low table occupies the middle of the room, nearly blocking the northern door. Loaves of bread are on the table, along with bowls, pots, plates, and various kitchen utensils. A fireplace is on the south wall, close to the eastern door, which leads to the balcony....
+    KITCHEN UTENSILS (PASSIVE)
+    POTS (PASSIVE)
+    PLATES (PASSIVE)
+    BOWLS (PASSIVE)
+    OVEN (PASSIVE)
+    FIREPLACE (PASSIVE) (no fire)
+    BREAD (STALE, inedible)
+    BASIN OF WATER
+    WATER (^) (GREEN)
+    TABLE
+
+020 Balcony [TIMER KILL]
+        This balcony overlooks the garden below, while doors face all four main directions. A railing goes along the edge of the balcony, but it is rusted, bent in places, and thin. Looking up, you can see the tops of the four towers, one per corner of the castle. A crow flies around overhead, and you hear rustling noises in the garden below.
+            [IF SHADOW LIVES]
+                [TURN 1]
+                    You see a rippling shadow gliding around the edge of the balcony...
+                [TURN 2]
+                    The shadow comes ever closer...
+                [TURN 3]
+                    The shadow is almost here...
+                [TURN 4]
+                    Suddenly, you are dealt a massive blow to the head. You tumble over the railing, and your head meets stone. YOU ARE DEAD The shadow glides onward...
+            [ELSE PICK 1]
+                You can see the stars up in the sky, slowly coming into view....
+                A owl flutters downward to the tree in the garden...
+    RAILING (PASSIVE)
+    SHADOW (can kill you, destroy it with magic sword)
+    CROW (can be shot with BOW with ARROWS, drops the EMERALD into the WELL)
+
+    [jumping down removes 2 strength, only 1 with armor]
+    [each entry of room, if shadow lives, restart timer..]
+    [running (no dir) timer -= 1, else timer += 1]
+
+021 Caved In Room
+        This room is covered in stones. It seems the ceiling caved in long ago, covering everything in hear. Doors lead west and north, and the way up is inaccessible, because of some the unstable group of rocks. You can, however, see the evening sky very well from here...
+    STONES (PASSIVE)
+    ROUND STONE (wash in Kitchen, becomes an amulet (SPEED), (examine stones to find))
+    ORB OF SPEED (what the above becomes)
+
+022 Treasury
+        This small room barely holds anything. A diamond lies on the floor, forgotten by whoever cleared this treasury out. The southern door is heavily reinforced, to keep thieves out. A circle is engraved on the wall...
+            [1 SHARD]
+            A third of the circle has been filled with a colored piece of glass...
+            [2 SHARDS]
+            The majority of the circle is filled up with shards of colored glass...
+            [3 SHARDS]
+            The circle on the wall is complete, displaying all the colors of the spectrum...
+    DIAMOND (explodes on touch, kills)
+    CIRCLE (indent in wall, circular, place SHARDs in it, hear rumble, keyhole appears in hallway, lever appears in foggy room)
+    [ON COMPLETION OF CIRCLE 'The shards shine brightly as you hear a rumbling noise somewhere below you.']
+
+023 Herb Store
+        This storage chamber contains all sorts of various herbs. A cupboard by the wall probably contains some more. Through the southern exit you can see a caved in room, and you can see a staircase in the room to the north...
+    HERBS (lots)
+    CUPBOARD (locked with COPPER KEY)
+    JARS (of HERBS) (in cupboard)
+    GRAPPLING HOOK (behind jars) (attach to a ROPE, use on towers, have UP for balcony, can go to 034, get sword)
+
+024 Northwest Stairwell
+        The stairwell here is quite plain. Stone steps leading around along the walls, a couple windows, and the usual stone walls. The stairs go from a story down to a level up, and the solitary door leads east. One thing is remarkable--there is some writing on the stairs...
+    STAIRS (stone)
+    WINDOWS (3)
+    INSCRIPTION ('only bright lights dispel fog')
+
+025 Alchemist's Laboratory
+        This room can be nothing other than an old laboratory. Diagrams cover the walls, with a few tacked up on the east and west doors. A stack of lead bars is in the corner, while beakers, vials, and unusual objects cover the table. A shelf stands out, for it is empty except for three potions standing on the shelf. One is a deep blueish green, another rich purple, and the last bright orange.
+            [PICK ONE]
+            Strange smells waft through the room...
+            You can hear rustling noises above to the west...
+            The sound of wind, as usual, is there...
+    BLUE POTION (KILLS)
+    PURPLE POTION (KILLS)
+    ORANGE POTION (MAX STRENGTH UP 10)
+    LEAD BARS (PASSIVE)
+    DIAGRAMS (read, see garble) (PASSIVE)
+    TABLE (PASSIVE)
+    CONTAINERS (on table) (PASSIVE)
+    SHELF (holds potions) (PASSIVE)
+
+026 Foggy Room
+        [LIGHT < 5 CANDLE/NOTHING]
+            The fog in this room is so thick, you cannot see through it. All you see of note is the exit south of you. Going anywhere in this room may be exceedingly dangerous...
+        [LIGHT = 5 TORCH]
+            The thick, white, fog here seems to be localized.  You can only barely make out the outline of the western door, but fortunately you can still see the exit south. The fog swirls around slowly...
+        [LIGHT = 50 SCEPTER]
+            The white fog is no match for the scepter. The strong light breaks through it and clearly illuminates the room. Doors are to the south and west, the former leading to the balcony.
+            [IF CIRCLE COMPLETE]
+                A lever is positioned in the center of the room...
+            [ELSE]
+                The room is bare otherwise...
+    FOG (white, confuses you based on light)
+    LEVER (appears only on circle completion)
+    COPPER KEY (to herb store cupboard) (appears only on circle completion)
+    [IF LIGHT < 5, 'You try to go DIR, but the fog confuses you, and you walk into a wall.']
+
+027 Northeast Stairwell
+        This short stairwell is empty, excepting the wooden stairs going up the the room above. The fragile old stairs start at the southern entrance, and curve up past the window. They do not look like they would take much weight without breaking...
+    WOODEN STAIRS (break on you if you carry armor with you)
+    WINDOW (PASSIVE)
+    SHARD (colored glass, put in treasury circle, goes from red to yellow, in wreckage of STAIRS)
+
+028 Assassin's Hideout
+        This small room at the top of the southwest tower is filled with deadly items. A dagger is stuck in the wall, and a lever is attached to the floor. The trapdoor down is small, and the same texture as the wooden floor. You can see the sky through a crack in the ceiling...
+        [IF CHANCE > .7 PICK ONE]
+            A spider swings through the crack...
+            The wind sounds loud up here...
+    DAGGER (blade is bent, useless)
+    LEVER (says PENDULUM, pull to bring up, push to put down, do pull, push, pull, it breaks, reveals KEY HALF, the PENDULUM below breaks off)
+    KEY HALF (^)
+
+029 Batty Attic
+        The ceiling here appears dark at first, but when it starts to move, you realize that it consists of thousands of bats. They fly around on your entry, obscuring the room. However, they do not go down to the stairwell below. [Through the swarm, you manage to see a glimpse a colorful shard in stuck in the roof.] Hopefully they will not attack...
+        [IF STRENGTH < 7 and HAVE 1+ OBJECTS]
+            But they do. You are knocked out, and when you regain consciousness, you realize that something is missing...
+    BATS (you enter, they steal something if strength below 6, then they wander around randomly, moving relative to your speed, or staying still
+         for 3 turns, if they come across you, they could attack, steal 1 item, and hide it in a findable place (connected safe room))
+    SHARD (colored glass, put in treasury circle, goes from yellow to blue)
+
+030 Armor Storage
+        This room is empty excepting a large, heavy chest. It is next to the stairs going downward, and also near the window. The chest is just the right size for a person to fit in it. Fortunately or unfortunately, it has no lock...
+    CHEST
+    SUIT OF ARMOR (wear, speed decreases to NORMAL or SLOW)
+    WINDOW (PASSIVE)
+
+031 Cave
+        [IF YORGLE ON]
+            [SLOW]
+            You enter the cave, and you lose your head at the claw of a Yorgle. YOU ARE DEAD
+            [MEDIUM]
+            You enter the cave, and seeing a Yorgle jump toward you, narrowly escape its claws. This looks like a fight to the death...
+            [FAST]
+            You enter the cave, automatically avoiding the Yorgle. Now all you need to do is defeat the large, ferocious beast...
+        [ELSE]
+            This small sandstone cave, once the home of the Yorgle, leads upward toward the garden, and continues to a room south of here. A shallow pool of water lies in the center of the cave, with many small bugs crawling around it. A type of moss lines the sides of the cave...
+    YORGLE (large monster, kills you auto if speed low, you can flee if speed fast, you if speed normal, you must fight, and need a SWORD + ARMOR and + strength + read BOOK to beat YORGLE)
+    BUGS (crawl around) (PASSIVE)
+
+032 Underground Tunnel [CONDITIONAL KILLER]
+        [FIRST ENTRY]
+        You enter into the dark tunnel, heading west. Suddenly, the earth shakes, and dirt piles up by the entrance and exit. You are trapped. Escape soon, lest the air runs out...
+        [ELSE]
+        This dark tunnel going from east to west is supported by a row of wooden stakes. You can see the tips of thousands of roots in this cramped escape route. To the west lies the castle, to the east lies freedom...
+            [IF BLOCKED]
+                Both exits are blocked by mounds of dirt...
+            [TURN 1 + 2]
+                The air is getting staler every second...
+            [TURN 3]
+                You run out of air and asphyxiate. YOU ARE DEAD
+    {in there caves in once, need shovel and str 15 to escape}
+    DIRT (PASSIVE)
+
+033 Well
+        You are in the bottom of the castle well, which dried out long ago. [An emerald lies on the ground next to you, and a] [A] rope hangs down from the top of the well, the only way to leave...
+    EMERALD (dropped in by shot CROW)
+    ROPE (needed for ascent + descent, cannot be removed from below)
+
+034 Tower Roof
+        The tower roof is the most dangerous part of the castle, as well as the most beautiful. You can see the entire forest for miles and miles. [A glowing sword has been stuck in the flagpole socket, and the][The] room below is partially viewable through a crack in the roof. In the crack is a grappling hook, which is attached to a rope leading down to the balcony. The footing is precarious, made more so by the powerful winds that blow toward you...
+    MAGIC SWORD (can kill SHADOW)
+
+****OBJECTS****
+WALLS, CEILINGS, FLOORS, DOORS
+    [ADD DESCRIPTION SETS] [Room1:(Floor2:Wall1:Wall2:Door3:Door1:Ceiling5)] Wall1-The wall....
+ROOMS
+    001
+        PUNISHMENT LIST This piece of parchment is nailed straight into the wall. It lists the various crimes and their respective punishments.
+        CROOKED CHAIR A regular wooden four-legged chair, if you forget that a chair leg is too short. Any sitter will meet the floor.
+        COAT HOOKS This row of coat hooks is rusty and deprecated. There are ten hooks, but they don't seem very useful.
+        METAL BAR The metal bar is embedded deep into the wall. Breaking it would never work; the bar is very thick.
+        CANDLES 5 GROUP
+            CANDLE This is a basic wax candle. [It is partially used.] [It is nearly gone.] [It is burning brightly.] FLAMMABLE 20 BRIGHTNESS 2
+        SHARD An unusual piece of glass. It looks like it was part of an arch, curve, or circle, but was broken off, as seen by the sharp edges. Its colors range from red to blue.
+    002
+        BOOKSHELF This simple floor-to-ceiling bookshelf is crowded with books. You look at a random book. ['Principles of Sorcery']['Art of Nothingness']['Fifth Element']['How to Square Circle, Trisect Angles, and Cube Segments']['101 Ways Make Stuff Explode']['Mind Reamer Ed. 8']['Illusions']['Fire and Water']['Ghosts, Specters, and Demons']['Curses for Imbeciles']['Poisons and How To Use Them']['The Fine Art of Cookie Making'] (reading any book title, 'The bookshelf holds so many books, you cannot find BOOK.')
+        TABLE The plain rectangular table has a pentadecagram carved into the smooth surface.
+        ORB The glowing white orb has swirling shades of gray in its depths. WEAPON GHOSTS
+        ENCIPHERED BOOK The hefty tome is written in a strange alphabet. Some type of code, perhaps. The pages are yellow and crinkled at the edges. Reading this is definitely out of the question. ENCIPHERED
+        DECIPHERED BOOK This large book has is written in a strange alphabet, but you know how to decode that now. The cover is bright blue. READ [HOW TO DEFEAT MONSTER TYPES (YORGLE(Need extreme strength, protection, yorgle is dumb(poison bread?)), YARGLE(undefeatable, speed up to [c]), YONGLE(Arrows only), YURGLE(Need two people, front + back attack, to defeat, can whup single person), BONGLE(eat enough fruit, float up, fly away, deflate to other land), GHOST(magical item), SHADOW(nobody has lived))]
+        VIAL This small container holds a bubbling liquid. It does not look safe. POISON POWERFUL
+    003
+        TORCH HOLDERS 12 GROUP
+            TORCH HOLDER This metal torch holder [holds an unlit torch][is empty][holds a lit torch]. It is bolted into the wall.
+        TORCHES 8 GROUP
+            TORCH A plain torch, made of wood, and covered on one end in a flammable substance. It [is burning brightly] [is starting to dim] [has gone out] [is unused]. FLAMMABLE 30 BRIGHTNESS 5
+        COMPARTMENT This secret compartment in the floor holds [a lot of arrows] [some arrows] [and] [a staff] [nothing]. CONTAINER ARROWS STAFF
+        KEYHOLE This narrow keyhole is almost imperceptible. You are sure it was not here when you arrived. UNLOCK ABLE BRONZE KEY [APPEARS ON COMPLETING CIRCLE]
+        STAFF This long wooden staff has a dull red stone on one end.
+        ARROWS 20 GROUP
+            ARROW This arrow is made of a long, straight, unidentifiable wood. It is tipped with an iron point, and ended with black feathers.
+        RUBY This ruby is obviously quite valuable. [FOUND ON PUTTING STAFF IN LIGHT]
+    004
+        SHEARS These long shears were most probably used for trimming bushes. Unfortunately, there are blunt and rusted.
+        BAGS OF SEED 3 GROUP OBJECT
+            These three seed bags all contain vast amounts of assorted seeds. [You can see a piece of metal in one of them.]
+        SHOVEL The plain shovel is sturdy, but chipped and worn from years of use. However, it appears to be usable.
+        CROWBAR A plain crowbar, simply made, but very strong. It appears close to its original condition. [HIDDEN IN BAGS OF SEED, OPEN THEM]
+        ROPES 2 GROUP Two long ropes, made out of some unidentifiable material. The ends are frayed.    (1 for well, 1 for grappling hook)
+            ROPE This lengthy piece of rope is thick enough to support quite a lot of weight. LENGTH 2 SMALL ROOMS, 1 LARGE
+
+    005
+        BONES As you look over the bones lying around, you notice that many are deformed or snapped from marrow.
+        SKELETONS These two skeletons would be in good shape, were they not missing a few body parts.
+        SKULL The lone skull rests in a corner. Only a few teeth are left.
+        CHAINS A few chains hanging from the south wall. The locks on the ends are well built, while the other ends of the chains are stuck deep in the stone wall.
+        SCRATCHES These long grooved furrows are all over the stone walls. They are quite deep, and must have needed inhuman strength to make...
+        GRATE (ALSO IN 018)
+    006
+        WOOD STACK This stack of cut wood is neatly arranged. Weirdly enough, all the wood pieces look almost identical, and have not decayed in the slightest amount. Looking over the woodpile, you estimate that there are about one thousand two hundred pieces of wood.
+        FIREPLACE This gigantic brick fireplace dominates the center of the west wall. It is still burning brightly, heating up the room considerably. BURNING
+        TABLE This small wooden three legged table is placed right in front of the fireplace, in the center of the room. Its dark wooden surface is worn and scratched.
+        CHAIRS 3 A set of three fragile wooden chairs. [They are all broken.] [Amazingly enough, they are not broken yet.] [One is broken.] [Two of them are broken.]
+            CHAIR This spindly chair is made of a light, bendable wood.
+            BROKEN CHAIR These are the remnants of a chair you sat on. What a genius.
+    007
+        BUSH The gardener who cut this bush into shape must have come from far away. The bush is cut in the shape of a large, fat penguin. [On closer inspection, you find a locked metal door hidden in the belly.]
+        PATH This path is made up of many large, flat, stones. It connects the three doors to the north, south, and west, and skirts a large bush and gnarled tree. The spaces between the stones are filled with assorted plants.
+        TREE This tree gives every appearance of age. It is covered in short, twisted branches, burls, and holes. The bark is scarred and weathered.
+        CAVE This cave is almost hidden by the weeds. It is pitch black inside.
+        WEEDS These thousands of plants cover the entire ground. Through an especially thick clump of them, you see a hole in the ground.
+        DOOR This strong metal door is concealed inside the bush. [It is locked.][It is open.][It is closed.]
+        WELL [The well here is perfectly usable, had it a rope and water in it.] [The well here is dried out. The rope you tied to it leads all the way to the bottom.] [You think the emerald landed in here.]
+        OWLS [These large owls flying above emanate wisdom. They hoot at you in a mildly irritating manner and fly away.][The owl in the tree is a great horned owl. It stares at you with bright yellow eyes.]
+    009
+        ROCK The large hunk of marble is almost the same color as the walls. It is a [perfect] rectangular prism [with a corner chipped off], slightly taller than you and polished so that it reflects everything in the room. [APPEARS WHEN TREASURY CIRCLE IS COMPLETED]
+        SAPPHIRE This large sapphire is cut in the shape of a dodecahedron. (APPEARS ON LEVER PULL IN FOGGY ROOM)
+        ROCK CORNER This corner of the large rock is still very heavy. (SPLITS OFF TO REVEAL SAPPHIRE ON LEVER PULL)
+    010
+        GOLD BAR A small gold bar. It has weight, but is probably pure gold. This is the most valuable thing you have found at the blacksmiths. (MELT IN FIREPLACE TO REVEAL CODE CIPHER)
+        CIPHER SHEET An old, crinkled sheet of parchment, treated with some type of oil to make it heat resistant. It explains the steps to deciphering a complex code. (ALLOWS DECIPHERING OF ENCODED BOOK)
+        FORGE A simple stone forge, covered in dirt.
+        BELLOWS A perfect set of leather bellows, were they not all ripped and torn.
+        COAL This large mound is made of low quality coal, and some peat is also visible. Whoever uses these will be breathing fumes, and not getting a good fire.
+        NAILS A bucket of nails. Badly made, some bent, others rusted. Useless.
+        HORSESHOES These horseshoes are very large, or very large. No two are alike, so in other words, the blacksmith who used this must have been a complete failure.
+        CHAINS The only passable things made here are the chains. They are, unfortunately, all chained together, and so heavy nobody could lift them.
+    011
+        YARGLE One of the most harmless monsters ever to exist. But it still has claws on its four limbs, and sharp teeth in its wide mouth. And, of course, it is very fast, hyperactive, and best of all, immortal.[It is eying your food.] [GIVES SCEPTER IF GIVEN FOOD, REVEALS KEY IF FRIGHTENED]
+        IRON KEY An iron key, shoddily made, and very large. KEY 014-010
+        BRIGHT SCEPTER This crystal scepter was given to you bay the Yargle. It shines light out of one end, illuminating the room with a soft glow. It has a band around it at the bottom. (CAN SHINE THROUGH FOG IF BAND TURNED)
+        BAND This crystal band is attached to the scepter. [TURN, SCEPTER LIGHT FROM 5 TO 50]
+        STAIRS This stairs are made of an angular white stone. They are cold to the touch.
+    012
+        BARRELS 12 These barrels are very large, and made of some heavy, knotted type of wood. The iron bands keeping them together are rusty, as the vast majority of the metal you have seen in the castle. Of the dozen barrels, only one is empty.
+            EMPTY BARREL This, the only empty barrel in the entire wine cellar, is covered in cobwebs. [There is something in it] [You have broken the barrel open.] [A key rests inside.] [SHAKE BARREL] [OPEN WITH CROWBAR]
+            FULL BARRELS 11
+                FULL BARREL
+        WINE This wine must be many centuries old, thus rendering it undrinkable.
+        FINAL KEY You know that this is the last key that you will need to escape that castle. The reason is as obvious as the writing on the side. KEY 007-032 READ One the side of the key is, "Final Key - To Escape". [FOUND IN EMPTY BARREL]
+        STAIRS This set of stairs creaks loudly with every step.
+        TANKARD An old tankard, with a spider web inside. [It is filled with wine.] [It is lying in the corner of the room.]
+    013
+        SPARKLING KEY This key is made so that is sparkles in the light. A lot. KEY 004-003
+        BOARDS These wooden boards are plain, thin, rectangles of wood. [They are leaning against the wall.]
+    014
+        WEAPONRY RACK The wooden weaponry is worn, but still functional. It is bolted into the wall at the rooms corner.
+        BOW A good bow, just the right size to be usable. [It is unmarred, and would be a great weapon, were there some arrows...] [Fortunately, you have some arrows for it] WEAPON AERIAL
+        SWORD A plain sword, not too good, and not too bad. It is sharp, though. WEAPON NON-MAGIC
+        DAGGER This dagger is so wonderful that is useless, thanks to rust. WEAPON LOSE
+        MACE This mace is so heavy that anyone using it would be tired in a few seconds. WEAPON LOSE
+    015
+        TOILETS 3 These toilets are just a row of holes in a stone bench. Fortunately, they have not been used recently.
+            TOILET The cold stone of the toilet is anything but welcoming.
+        WINDOW This window is just a rectangular opening in the wall. The bars which should have been there have been removed (There is a row of holes along the sides and top).
+        PENDULUM A long, heavy pendulum hanging from the ceiling. It must build up great speed at the base of its swing.  KILLER SPEED NORMAL SLOW
+        TRAPDOOR This trapdoor is painted to look like the ceiling. The paint has mostly worn away, so finding it was easy.
+    016
+        PICTURES This group of about 20 pictures displays various landscapes. Included are mountain, valleys, plains, rivers, and so on. A night scene is particularly captivating.
+            NIGHT SCENE This picture of a spring night must have been made by a master. You see a line of text at the bottom. READ The owl has words of wisdom. (UNLOCKS WORDS OF WISDOM ON OWL)
+        SCULPTURE This sculpture of a snowy owl is amazingly lifelike, even though it is many times larger than real life. The eyes seem to follow you around. [Faint writing is seen all over the owl, but only a few are readable.] READ [Some enemies must be defeated by magic and strength.][Bats are not greedy, only mischievous.][The higher you go, the better things are, but the lower you go, the better the exits get.][Conversation is the key to success.][If one wants to be good at something, research is wonderful.][If you search you find....but sometimes not what you'd expect.][Success means not giving up.][Owls hoot.][Truncating a sphere will take forever.][Not everyone is you enemy.][Every dangerous creature is can be defeated.][You are not the only one who likes cookies.][Fear of the dark is useful in places you have never been before.][Tired targets are easy targets.][Friendship is a way to light.][When success is near, mistakes come.][Bananas are the perfect snack.][Learn from mistakes.]
+        PANEL [The panel here on the wall is loose. KNOCK You knock on the panel. Sounds like something is hollow.] [This panel covered a secret compartment.]
+        SECRET COMPARTMENT This secret compartment is smaller than it should be.
+        SUB-COMPARTMENT The second secret compartment is smaller than the first, but its contents [were][are][will be] just as useful.
+        SCRAP OF PARCHMENT A plain scrap of parchment, with erratic diagrams and writing all over it. READ [IN RANDOM ORDER] 'Somebody will read this.' 'The north star is never in conjunction with a south star. Why??' 'Note to self: Just because some liquids are yellow and smell bad does NOT mean gold will come.' 'Finding gold sucks. Observing stars gives better results, and takes less time.' 'Poisoning myself is dumb. And I do it anyway. ''Cookies are great food.' 'Orange potions are always safe to drink, but blue stuff corrodes. Very quickly. My new shoes already have a hole, after two days.' I just remembered why I am writing this. And I forgot again.' 'I, being so erratic, forgot where I one the shelf that I placed my wonderful strength potion.' 'Must find curse for blacksmith.' 'Find Magician's Code Sheet. He will give two gigantic slugs. If I find it.'
+        WAND OF REPLENISHMENT The use of this is self evident. It says, 'Wand Of Replenishment and Restoration for Food, Fire, and Osmium Parakeets.' READ <<P2
+    017
+        PORTRAITS These twenty or so portraits are of the rulers of this castle. The names are weird, including 3[Archibald the Ugly][Lucifer VII][George CVI][John deLou II][Freddy][Nostralagio I][Ignatius Dormund the Kestrel] [In one picture, the key a person is holding look as if it were real. On closer inspection, you realize it is.] The last picture is newer, and of a different style. It is totally black.
+        SILVER KEY This key is made out of silver. KEY 019-022
+        WINDOW A boring rectangular window cut into the wall. It is barred.
+    018
+        GRATE [This thick metal grate covers the entrance to a dark pit.][This grate used to cover the dungeon entrance.]
+        HOLE The hole where a grate once was is large, rectangular, and leads down into the dungeon. [A key half is hidden in a small hollow on the side of the hole.]
+        COT This small guard's cot is rolled up in a corner. You cannot imagine sleeping on this.
+        BRONZE KEY The small bronze key here is scratched from clumsy use.
+        TABLE A simple table attached to the wall. [A pair of dice lies on it] [.][, along with a coin] [A coin rests on it]
+        DICE This pair of dice is crudely made, not to mention worn. ROLL The dice roll [4][1] and [1][4], making 5.
+        KEY HALF This is obviously half of a key.
+        COPPER COIN This copper coin is dirty.
+    019
+        KITCHEN UTENSILS These kitchen utensils are old, but a few are still functional. You see some pots, plates, and bowls, not to mention spoons, knives, forks, and a big soup ladle. The most well kept thing here is a tray.
+            POTS 7 This is a group of small iron pots.
+                POT This well aged pot has some gunk at the bottom.
+            PLATES 20 These wooden plates are starting to decay.
+                PLATE This moldly wooden plate does not even deserve the name.
+            BOWLS 20 The bowls here, like the pots, have gunk at the bottom.
+                BOWL This wooden bowl has been very badly made.
+            SPOONS 5 A set of silver spoons, rare, only for the most important people.
+                SPOON This tarnished spoon is bend somewhat, but otherwise, in good shape.
+            KNIVES 30 The most common things in the kitchen [are][were] the knives.
+                KNIFE A dull knife. Whatever.
+            FORKS 15 This pile of forks looks like it is in bad shape; some have been snapped, most likely in the frustration of having to use such blunt utensils.
+                FORK [A dull, scratched fork.] [This blunt fork is missing half the prongs.]
+            LADLE Just a soup ladle.
+            TRAY This baking tray has fine writing on it. READ Where there is table, there is cookie dough.
+        TABLE A long, low, old table. There are many various kitchen utensils on it. LOOK UNDER You look under the table. Behold, a box of cookie dough!
+        BOX OF COOKIE DOUGH This box of cookie dough must be magic--the coconut chocolate cookie dough is still in perfect condition! TAKE You scoop out some cookie dough. The box glows, and is now full again. EAT Raw cookie dough is not safe to eat.
+        OVEN A brick oven, built into the wall. It is heated by the fireplace.
+        FIREPLACE The fireplace here is named incorrectly--there is no fire.
+        BREAD 10 Many loaves of bread are on top of the oven. These may not be moldy, but the definately are as hard as rock!
+            BREAD This stale piece of bread is anything but edible.
+        BASIN OF WATER This stone basin of water contains water. Green water.
+        WATER The water here is a perfect shade of green. You suspect that it glows in the dark. PUTTING IN POT/BOWL The water turns blue, and corrodes through the pot/bowl. [DUMP NAILS IN 010, take bucket, put water in bucket, have light 1, add cookie dough, light power = 5]
+    020
+        RAILING The wooden railing goes around the inside of the balcony. It is very low.
+        SHADOW This is a dark shadow moving along the edge of the balcony. There is nothing visible creating the shadow. It comes ever closer....
+        CROW This sizeable crow, flying above the garden, holds something green in its mouth.
+    021
+        STONES These mounds of stones are what once was the roof. [Once of the stones stands out; it is perfectly round.]
+        ROUND STONE This unusually round stone is made of some hard, rough stone type. [POUR BLUE POTION OVER THE STONE, REMOVES DIRT TO GET ORB]
+        ORB OF SPEED A bright yellow orb, with strange characters along the side. READ None of the characters makes any sense. TAKE As you pick up the orb, you feel as if you had just poured a load of sugar into your bloodstream; you feel alert and very active. [SPEED SLOW->MEDIUM MEDIUM->FAST]
+    022
+        DIAMOND The only thing of worth left in the treasury. It is large and uncut. TAKE/TOUCH The second you touch the diamond, it compresses slightly, and then explodes violently. The blast kills you immediately. YOU ARE DEAD
+        CIRCLE This circular indent in the wall is barely perceptible. Small prongs stick out of the wall, implying that this held some flat, circular object. PUT SHARDS IN CIRCLE (SEE TREASURE SUBQUEST)
+    023
+        HERBS These bags are labeled with the names of various herbs, and many you have not heard of before. They are all over the room.
+        CUPBOARD [This cupboard, while probably containing only herbs, is locked.] [This cupboard is closed, and is covered in bags of herbs.] [Inside this wooden cupboard, you see not bags of herbs, but jars of herbs.]
+        JARS The labels on these herb jars are now as good as illegible.
+        GRAPPLING HOOK This iron three-prong grappling hook has a hole with which to attach a rope.
+    024
+        STAIRS These angular stone stairs have an inscription on them. READ The inscription reads, 'Bright lights dispel fog.'
+        WINDOWS 3 The three narrow windows, placed every 5 steps, let in a bit of light, and some view of the surrounding forest.
+        INSCRIPTION This inscription is carved into the stone staircase. It reads, 'Bright lights dispel fog.'
+    025
+        VIALS 3 These three vials of some substance must be important; they [have][had] a place of their own on the shelf.
+            BLUE POTION This bubbling vial of blue potion smells like apples. ACID KILLS
+            PURPLE POTION The vial of purple potion has a remarkably smooth surface. TOUCH The vial is very cold. FREEZING KILLS
+            ORANGE POTION DRINK You pour the entire vial of potion into your mouth. Nothing happens. [3 TURNS LATER] Suddenly, you feel stronger and more alive than ever before, your strength more then doubled.
+        LEAD BARS 10 This large stack of lead bars is neatly arranged, but the bars themselves are crudely made.
+            LEAD BAR The sizable lead bar has a trace of gold paint on it.
+        DIAGRAMS These diagrams cover the walls. They are filled with arcane symbols and unusual pictures. READ You cannot even understand the pictures and sketches, let alone the text.
+        TABLE A large, long wooden table, with no chairs surrounding it. Many containers of some sort rest on top of it.
+        CONTAINERS No two of these assorted containers are alike.
+        SHELF This narrow floor-to-ceiling shelf is wide, yet [almost] empty. [A [trio][duo][of]vial[s] rests on the top shelf.]
+    026
+        FOG The thick fog fills the room, obscuring [almost] everything. [Fortunately, you have a ______]
+        LEVER (APPEARS ONLY ON CIRCLE COMPLETION)
+        COPPER KEY This plain copper key has text on it. READ Property of Lucifer XII KEY HERB STORE CUPBOARD
+    027
+        WOODEN STAIRS These stairs do not look as if they could support much weight.
+        WINDOW The typical staircase window--a narrow rectangle cut through the wall.
+        SHARD This shard looks like it was part of some circle. Its hue changes from red to yellow.
+    028
+        DAGGER This dagger could harm nobody; its blade is bent and chipped. KILL LOSE
+        LEVER This large, heavy wooden lever is embedded in the floor. There is writing on it. READ 'Pendulum' [PULL U PUSH D, PULL,PUSH,PULL BREAK]
+        KEY HALF This is obviously half of a key.
+    029
+        BATS This huge swarm of bats swirls around on the ceiling. You notice that they seem unusually large.
+        SHARD  This shard looks like it was part of some circle. Its hue changes from blue to yellow.
+    030
+        CHEST This large wooden chest has no lock. [It has been closed.] [It is open.]
+        SUIT OF ARMOR This suit of armor is made of a shiny, stiff metal. It is slightly larger than you. WEAR You put on the suit of armor. It may protect you, but you are a lot slower now.
+        WINDOW A wide window in the wall, just barely below the roof. It is barred.
+    031
+        YORGLE This ferocious beast is double your size, and has many long claws. [Its eyes glow in the darkness of the cave.] MONSTER
+        BUGS These tiny white bugs crawl across the floor to a pool of water in the cave side.
+        POOL OF WATER The water in here is perfectly transparent. There is more than you would expect in a cave.
+            WATER This water looks drinkable.
+    032
+        DIRT This is everywhere in the tunnel. [It and large stones are what keep this exit stable.] [It is blocking both exits.]
+    033
+        EMERALD This sparkling emerald is still in good shape despite having been carried around by a crow.
+        ROPE This length of rope is your way in and out of the well. It should support your weight; You used it to go down.
+    034
+        MAGIC SWORD This purple sword's edge look like it could split a hair. The sword itself is perfectly made; it is well balanced and unmarred. You can easily tell that it is magic. KILLS ALL
+
+****QUESTS****
+Self Improvements:
+    Speed Increase Orb:
+        Go To 021
+        Examine Stones
+        Take Stone
+        Go to 019
+        Wash Stone In Water ("You wash the round stone in a basin. After a minute, dirt comes off the stone, revealing a bright green orb.")
+        Touch Orb
+    Strength Potion + Food Supply:
+        Go to 016
+        Examine North Wall
+        Open Secret Compartment
+        Take Paper
+        Read Paper (LEARN ABOUT ORANGE POTION)
+        Examine Secret Compartment
+        Open Sub-Compartment
+        Take Wand of Replenishment (TO USE, Ex. RENEW BREAD WITH WAND)
+        Go To 025
+        Take Orange Potion
+        Drink Orange Potion (MAXI MUN STRENGTH INCREASES 10)
+
+Main Quest: Leaving
+    Need All Self Improvements
+    3 Points
+    Survive Collapse + Leave:
+        Need:
+            Str > 15
+            Shovel (004)
+        Remove Dirt With Shovel
+        West
+    Enter Underground Tunnel:
+        Need:
+            Both Key Halves
+            Crowbar (hidden in Seed Bags in 004)
+        Go to 014
+        Join Key Halves
+        Unlock West Door
+        Go Down/West to 013
+        Examine Barrels
+        Break Open Empty Barrel
+        Take Final Key
+        Go to 007
+        Examine Bush
+        Unlock Door
+        Open Door
+        Enter Tunnel
+    Get Key Half 1:
+        Need:
+            Speed = Fast (No Armor, and Speed +)
+        Go to 015
+        Go Up
+        Pull Lever
+        Push Lever
+        Pull Lever ('You pull the lever a third time. Snap! The handle breaks off, and you find half a key in the fragments.')
+    Get Key Half 2:
+        Need:
+            Strength >= 15
+            (Speed = Normal&Armor) Or (Speed = Fast&No Armor)
+            Sword
+            Book in 002 Deciphered and Read
+            Crowbar (hidden in Seed Bags in 004)
+        Go to 007
+        Examine Weeds
+        Enter 031
+        Kill Yorgle With Sword
+        Go to 005
+        Remove Grate With Crowbar
+        Go to 018
+        Examine Hole
+        Take Key Half
+    Get Armor:
+        Need:
+            Self
+        Go to 027
+        Open Chest
+        Take Armor
+        Wear Armor
+        Go Down ('As you go down the staircase, the weight of the suit of armor collapses the stairs, causing you to land unceremoniously on your behind.')
+    Read Book:
+        Need:
+            Orb
+        Go to 011
+        Scare Yargle
+        Take Iron Key
+        Go to 014
+        Unlock South Door
+        Go to 010
+        Take Gold Bar
+        Go to 006
+        Melt Gold Bar
+        Take Cipher Sheet
+        Go to 002
+        Decipher Book
+        Read Book
+    Get Orb and Sword:
+        Need:
+            Self
+        Go to 013
+        Look Behind Boards
+        Take Sparkling Key
+        Go to 003
+        Unlock West Door
+        Go to 002
+        Take Orb
+        Go to 014 (Orb dispels ghosts)
+        Take Sword
+
+
+Treasure Quests: Ruby, Emerald, Sapphire
+    5 Points
+    Get Emerald:
+        Need:
+            Circle Complete
+            Ruby Quest Finished
+        Go to 003
+        Take Arrows
+        Go to 004
+        Take Rope
+        Go to 007
+        Attach Rope to Well
+        Go to 014
+        Take Bow
+        Go to 020
+        Shoot Crow
+        Go to 007
+        Enter Well
+        Take Emerald
+    Get Ruby:
+        Need:
+            Circle Complete
+            Scepter
+        Go to 026
+        Take Key
+        Go to 003
+        Examine Floor
+        Unlock Keyhole With Copper Key
+        Open Compartment
+        Take Staff
+        Examine Staff
+        Break Staff ("You snap of the head of the staff, and a ruby rolls out.")
+        Take Ruby
+    Get Sapphire:
+        Need:
+            Circle Complete
+            Scepter
+        Go to 026
+        Pull Lever
+        Go to 009
+        Take Sapphire
+    Get Scepter:
+        Need:
+            Edible Food
+        Go to 012
+        Give Yargle Food ('The Yargle happily accepts the food. It vanishes within seconds. It runs away somewhere, and after a minute returns with a scepter in its mouth. It drops the scepter in front of you and jumps up to your shoulder, even though it is a tall as your head.' DROP SCEPTER into 012, Yargle follows you everywhere, excepting killer rooms.)
+    Complete Circle:
+        Need:
+            Complete Armor SubQuest for Main Quest
+        Go to 029
+        Take Shard
+        Go to 027
+        Examine Ruined Staircase
+        Take Shard
+        Go to 001
+        Look Behind Punishment List
+        Take Shard :NOTE Joining Shards: "You have neither the training nor the experience of how join these narrow pieces of colored glass."
+        Go to 017
+        Examine Portraits
+        Take Key
+        Go to 019
+        Unlock North Door
+        Go to 022
+        Put Shards in Circle ("As you place the shards in the circle, they glow brightly for a second, and you hear a rumble from below." BIG STONE NOW IN Silent Room, LEVER and COPPER KEY now in Foggy Room)
+
+
+Hard Quest: Killing Shadow
+    2 Points, plus Prerequisites
+    Must Complete Circle (Treasure Quests),  Self Improvements
+    Goal - Kill the Shadow
+        Shadow is killable if:
+            1 On Balcony
+            2 Have Magic Sword
+            3 Have Scepter
+            4 Strength = 20
+            5 Speed = Fast (Speed Plus)
+        Step 1: Shine Scepter on Shadow ('You turn the scepter so its bright beam of light faces the shadow. You see the pale outlines of a tall, dark creature holding two swords as long as your arm...')
+        Step 2: Attack with Magic Sword (STR=20,S=Fast You leap toward the Shadow, catching it by surprise, and stab it in the chest. It stumbles, and dissolves into a cloud of smoke, which is blown away by the wind. You realize that you have destroyed a great evil... ELSE You attack the Shadow, but it manages to block your attack, and promptly slices your head off. YOU ARE DEAD)
+    SubGoal - Get Magic Sword
+        Enter Foggy Room 026
+        Take Copper Key
+        Go to Herb Store 021
+        Unlock Cupboard
+        Look behind Jars
+        Take Hook
+        Go to Garden Store
+        Take a Rope
+        Combine Rope and Hook
+        Go to Balcony 020
+        Throw Hook to Tower ('You grab the end of the rope in one hand, and hurl the grappling hook toward the southwest tower. STR > 15 It catches hold on a crack in the roof, giving you a way upwards.' ELSE The hook does not fly far enough)
+        Go to Roof 034
+        Take Magic Sword
+
+****COMMANDS****
+    NEVER USE >'USE'<
+    These + Synonyms:
+
+    Get (Obj)
+    Drop (Obj)
+    Put (Obj) (Relative Position) (Obj)
+    Throw (Obj) (At) (Obj)
+    Attack (Obj) (Using) (Obj)
+    Run (Dir)
+    Jump (Up/Down)
+    N-S-E-W-U-D
+    Help - for a specific command. no list of them.
+    Examine (Obj)
+    Renew (Obj) - works only with Wand Of Replenishment
+    Drink (Obj)
+    Eat (Obj)
+    Give (Obj) to (Obj)
+    Light (Obj) (With) (Obj)
+    Dim/Turn Off/Unlight (Obj)
+    Attach (Obj) (To) (Obj)
+    Climb (Up/Down/Obj)
+    Read (Obj)
+    Decode (Obj) (Using) (Obj)
+    Encode (Obj) (Using) (Obj)
+    Remove (Obj) (With) (Obj)
+    Enter (Obj)
+    Exit (Obj)
+    Break (Obj)
+    Scare (Obj)
+
+    Enlighten Self(You drop everything, assuming a yogic position, and stay there. Time passes. You are enlightened.) Str. Max. Yargle(You teach the Yargle about the path to enlightenment. Then you finally realize that is enlightened.) Other(You try to enlighten the OBJ. It refuses.)
+
+****POINT SYSTEM****
+1 pt each
+
+Completing the CIRCLE
+Taking EMERALD
+Taking SAPPHIRE
+Taking RUBY
+Destroying the Yorgle
+Befriending the Yargle
+
+2 pts
+Escape (Go west out of Underground Tunnel)
+Killing the Shadow
+
+Scale:
+    10 pts. Lord
+    8-9 pts. Knight
+    6-7 pts. Mercenary
+    4-5 pts. Merchent
+    2-3 pts. Craftsperson
+    1 pts. Serf
+    0 pts. Pond Scum
+
+***IDEAS***
+    KILL YORGLE WITH POISON
+    THROW OBJ INTO BATHROOM ACTIVATE PENDULUM
+    CUT CHAINS WITH SWORD, MELT IN FIREPLACE, AND JOIN INTO LONG CHAIN, USE FOR WELL, ONE ROPE FRAYED?
+    CHECK ACIDS BY POURING ON GROUND
+    HIDDEN MESSAGE IN WINDOW 015 HOLES BARS HOLDER SAYS CROWS HERE ARE GREEDY?
+    START OUT WITH NO COOKIES, BAKE SOME IN KITCHEN, YARGLE ONLY EATS COOKIES.
